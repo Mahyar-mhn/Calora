@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { ArrowLeft } from "lucide-react"
 import Image from "next/image"
 
 export default function ProfileSetupForm() {
@@ -44,6 +45,17 @@ export default function ProfileSetupForm() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6 pb-8">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            className="gap-2"
+            style={{ color: "#004030" }}
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
           

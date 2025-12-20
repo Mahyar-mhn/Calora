@@ -13,6 +13,7 @@ import {
   Cookie,
   Activity,
   History,
+  ArrowLeft,
   Crown,
   Check,
   Sparkles,
@@ -196,6 +197,26 @@ export default function SubscriptionView() {
 
       {/* Main Content */}
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            className="bg-transparent transition-all hover:shadow-md"
+            style={{
+              borderColor: "#4A9782",
+              color: "#004030",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#E7F2EF"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent"
+            }}
+            onClick={() => handleNavigation("/profile")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Profile
+          </Button>
+        </div>
         <div className="space-y-6">
           {/* Current Subscription Status */}
           <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
@@ -437,25 +458,6 @@ export default function SubscriptionView() {
             </Card>
           </div>
 
-          {/* Back to Profile Button */}
-          <Button
-            variant="outline"
-            className="w-full bg-transparent transition-all hover:shadow-md"
-            style={{
-              borderColor: "#4A9782",
-              color: "#004030",
-              backgroundColor: "transparent",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#E7F2EF"
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "transparent"
-            }}
-            onClick={() => handleNavigation("/profile")}
-          >
-            Back to Profile
-          </Button>
         </div>
       </main>
 

@@ -164,12 +164,21 @@ export default function GoalManagementView() {
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Button
-            variant="ghost"
-            className="gap-2"
-            style={{ color: "#004030" }}
+            variant="outline"
+            className="bg-transparent transition-all hover:shadow-md"
+            style={{
+              borderColor: "#4A9782",
+              color: "#004030",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#E7F2EF"
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent"
+            }}
             onClick={() => handleNavigation("/profile")}
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Profile
           </Button>
         </div>
@@ -183,102 +192,102 @@ export default function GoalManagementView() {
           </CardHeader>
           <CardContent>
             <form className="space-y-6">
-              {/* Age */}
-              <div className="space-y-2">
-                <Label htmlFor="age" style={{ color: "#004030" }} className="font-medium">
-                  Age
-                </Label>
-                <Input
-                  id="age"
-                  type="number"
-                  placeholder="Enter your age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  min="1"
-                  max="120"
-                  className="h-11 border-2"
-                  style={{
-                    borderColor: "#A1C2BD",
-                    backgroundColor: "#FFFFFF",
-                    color: "#19183B",
-                  }}
-                />
-              </div>
-
-              {/* Gender */}
-              <div className="space-y-2">
-                <Label htmlFor="gender" style={{ color: "#004030" }} className="font-medium">
-                  Gender
-                </Label>
-                <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger
-                    id="gender"
-                    className="h-11 border-2"
+              {/* Age and Gender Row */}
+              <div className="gap-2 flex flex-row justify-between items-start">
+                <div className="flex flex-col justify-center items-start gap-2 w-full">
+                  <Label htmlFor="age" style={{ color: "#004030" }} className="font-medium">
+                    Age
+                  </Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    placeholder="Enter your age"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    min="1"
+                    max="120"
+                    className="py-5 border-2 focus-visible:ring-offset-0"
                     style={{
                       borderColor: "#A1C2BD",
                       backgroundColor: "#FFFFFF",
                       color: "#19183B",
                     }}
-                  >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent style={{ backgroundColor: "#FFF9E5", borderColor: "#A1C2BD" }}>
-                    <SelectItem value="male" style={{ color: "#19183B" }}>
-                      Male
-                    </SelectItem>
-                    <SelectItem value="female" style={{ color: "#19183B" }}>
-                      Female
-                    </SelectItem>
-                    <SelectItem value="other" style={{ color: "#19183B" }}>
-                      Other
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                  />
+                </div>
+                <div className="flex flex-col gap-2 justify-center items-start w-full">
+                  <Label htmlFor="gender" style={{ color: "#004030" }} className="w-full font-medium">
+                    Gender
+                  </Label>
+                  <Select value={gender} onValueChange={setGender}>
+                    <SelectTrigger
+                      id="gender"
+                      className="py-5 border-2 w-full focus:ring-offset-0"
+                      style={{
+                        borderColor: "#A1C2BD",
+                        backgroundColor: "#FFFFFF",
+                        color: gender ? "#19183B" : "#708993",
+                      }}
+                    >
+                      <SelectValue placeholder="Select your gender" />
+                    </SelectTrigger>
+                    <SelectContent style={{ backgroundColor: "#FFF9E5", borderColor: "#A1C2BD" }}>
+                      <SelectItem value="male" style={{ color: "#19183B" }}>
+                        Male
+                      </SelectItem>
+                      <SelectItem value="female" style={{ color: "#19183B" }}>
+                        Female
+                      </SelectItem>
+                      <SelectItem value="other" style={{ color: "#19183B" }}>
+                        Other
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              {/* Height */}
-              <div className="space-y-2">
-                <Label htmlFor="height" style={{ color: "#004030" }} className="font-medium">
-                  Height (cm)
-                </Label>
-                <Input
-                  id="height"
-                  type="number"
-                  placeholder="Enter your height"
-                  value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                  min="50"
-                  max="300"
-                  className="h-11 border-2"
-                  style={{
-                    borderColor: "#A1C2BD",
-                    backgroundColor: "#FFFFFF",
-                    color: "#19183B",
-                  }}
-                />
-              </div>
-
-              {/* Weight */}
-              <div className="space-y-2">
-                <Label htmlFor="weight" style={{ color: "#004030" }} className="font-medium">
-                  Weight (kg)
-                </Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  placeholder="Enter your weight"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  min="20"
-                  max="500"
-                  step="0.1"
-                  className="h-11 border-2"
-                  style={{
-                    borderColor: "#A1C2BD",
-                    backgroundColor: "#FFFFFF",
-                    color: "#19183B",
-                  }}
-                />
+              {/* Height and Weight Row */}
+              <div className="gap-2 flex flex-row justify-between items-start">
+                <div className="flex flex-col justify-center items-start gap-2 w-full">
+                  <Label htmlFor="height" style={{ color: "#004030" }} className="font-medium">
+                    Height (cm)
+                  </Label>
+                  <Input
+                    id="height"
+                    type="number"
+                    placeholder="Enter your height"
+                    value={height}
+                    onChange={(e) => setHeight(e.target.value)}
+                    min="50"
+                    max="300"
+                    className="py-5 border-2 focus-visible:ring-offset-0"
+                    style={{
+                      borderColor: "#A1C2BD",
+                      backgroundColor: "#FFFFFF",
+                      color: "#19183B",
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col gap-2 justify-center items-start w-full">
+                  <Label htmlFor="weight" style={{ color: "#004030" }} className="font-medium">
+                    Weight (kg)
+                  </Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    placeholder="Enter your weight"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    min="20"
+                    max="500"
+                    step="0.1"
+                    className="py-5 border-2 focus-visible:ring-offset-0"
+                    style={{
+                      borderColor: "#A1C2BD",
+                      backgroundColor: "#FFFFFF",
+                      color: "#19183B",
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Activity Level */}
@@ -289,14 +298,14 @@ export default function GoalManagementView() {
                 <Select value={activityLevel} onValueChange={setActivityLevel}>
                   <SelectTrigger
                     id="activityLevel"
-                    className="h-11 border-2"
+                    className="py-5 border-2 focus:ring-offset-0"
                     style={{
                       borderColor: "#A1C2BD",
                       backgroundColor: "#FFFFFF",
-                      color: "#19183B",
+                      color: activityLevel ? "#19183B" : "#708993",
                     }}
                   >
-                    <SelectValue />
+                    <SelectValue placeholder="Select your activity level" />
                   </SelectTrigger>
                   <SelectContent style={{ backgroundColor: "#FFF9E5", borderColor: "#A1C2BD" }}>
                     <SelectItem value="sedentary" style={{ color: "#19183B" }}>

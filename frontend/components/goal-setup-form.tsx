@@ -6,6 +6,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ArrowLeft } from "lucide-react"
 import Image from "next/image"
 
 type GoalType = "lose" | "maintain" | "gain"
@@ -55,6 +56,17 @@ export default function GoalSetupForm() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6 pb-8">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            className="gap-2"
+            style={{ color: "#004030" }}
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+        </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-3">
             <Label style={{ color: "#004030" }} className="font-medium text-base">
