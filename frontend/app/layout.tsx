@@ -8,25 +8,17 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Carola - Intelligent Calorie & Health Management",
+  title: "Calora - Intelligent Calorie & Health Management",
   description: "Privacy-first health tracking platform for nutrition and activity monitoring",
-  generator: "v0.app",
+  generator: "Calora",
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
+        url: "/images/logo.png",
+        type: "image/png",
       },
     ],
-    apple: "/apple-icon.png",
+    apple: "/images/logo.png",
   },
 }
 

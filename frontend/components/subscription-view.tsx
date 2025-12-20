@@ -84,7 +84,7 @@ export default function SubscriptionView() {
                 className="cursor-pointer transition-opacity hover:opacity-80"
                 aria-label="Go to Dashboard"
               >
-                <Image src="/images/logo.png" alt="Calora Logo" width={40} height={40} className="h-10 w-10" />
+                <Image src="/placeholder-logo.png" alt="Calora Logo" width={40} height={40} className="h-10 w-10" />
               </button>
               <h1 className="text-2xl font-bold" style={{ color: "#004030" }}>
                 Subscription & Premium
