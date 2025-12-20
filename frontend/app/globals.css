@@ -1,26 +1,436 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Updated color palette for Carola brand */
+  /* Background colors */
+  --carola-bg-dark: #19183b;
+  --carola-bg-medium: #708993;
+  --carola-bg-light: #a1c2bd;
+  --carola-bg-lightest: #e7f2ef;
+
+  /* Chart colors */
+  --carola-chart-light: #fde7b3;
+  --carola-chart-gold: #ffc50f;
+  --carola-chart-green: #63a361;
+  --carola-chart-olive: #5b532c;
+
+  /* Form colors */
+  --carola-form-dark: #004030;
+  --carola-form-medium: #4a9782;
+  --carola-form-light: #dcd0a8;
+  --carola-form-lightest: #fff9e5;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  /* Dark theme Background color palette */
+  --dark-bg-primary: #1B3C53;
+  --dark-bg-secondary: #234C6A;
+  --dark-bg-tertiary: #456882;
+  --dark-bg-light: #D2C1B6;
+  
+  /* Dark theme Chart color palette */
+  --dark-chart-1: #2C3930;
+  --dark-chart-2: #3F4F44;
+  --dark-chart-3: #A27B5C;
+  --dark-chart-4: #DCD7C9;
+  
+  /* Dark theme Form color palette */
+  --dark-form-primary: #432323;
+  --dark-form-secondary: #2F5755;
+  --dark-form-accent: #5A9690;
+  --dark-form-light: #E0D9D9;
+  
+  --background: #1B3C53;
+  --foreground: #D2C1B6;
+  --card: #234C6A;
+  --card-foreground: #D2C1B6;
+  --popover: #234C6A;
+  --popover-foreground: #D2C1B6;
+  --primary: #5A9690;
+  --primary-foreground: #E0D9D9;
+  --secondary: #456882;
+  --secondary-foreground: #D2C1B6;
+  --muted: #2F5755;
+  --muted-foreground: #DCD7C9;
+  --accent: #5A9690;
+  --accent-foreground: #E0D9D9;
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: #456882;
+  --input: #234C6A;
+  --ring: #5A9690;
+  --chart-1: #2C3930;
+  --chart-2: #3F4F44;
+  --chart-3: #A27B5C;
+  --chart-4: #DCD7C9;
+  --chart-5: #2C3930;
+  --sidebar: #234C6A;
+  --sidebar-foreground: #D2C1B6;
+  --sidebar-primary: #5A9690;
+  --sidebar-primary-foreground: #E0D9D9;
+  --sidebar-accent: #456882;
+  --sidebar-accent-foreground: #D2C1B6;
+  --sidebar-border: #456882;
+  --sidebar-ring: #5A9690;
 }
 
 @theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Ensure all elements transition smoothly */
+  * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+  
+  /* Exclude certain elements from transition */
+  svg,
+  path,
+  circle,
+  rect,
+  line,
+  polyline,
+  polygon {
+    transition: none;
+  }
+  /* Added global button hover transition styles */
+  button {
+    @apply transition-all duration-200;
+  }
+  
+  /* Theme-aware background colors */
+  body.light {
+    background-color: #E7F2EF;
+  }
+  
+  body.dark {
+    background-color: #1B3C53 !important;
+    color: #D2C1B6 !important;
+  }
+  
+  /* Dark theme - Background palette overrides */
+  .dark [style*="background: #E7F2EF"],
+  .dark [style*="background-color: #E7F2EF"],
+  .dark [style*="background: #FFF9E5"],
+  .dark [style*="background-color: #FFF9E5"] {
+    background-color: #234C6A !important;
+  }
+  
+  .dark [style*="background: #FFFFFF"],
+  .dark [style*="background-color: #FFFFFF"] {
+    background-color: #234C6A !important;
+  }
+  
+  /* Dark theme - Text colors */
+  .dark [style*="color: #004030"],
+  .dark h1[style*="color: #004030"],
+  .dark h2[style*="color: #004030"],
+  .dark h3[style*="color: #004030"],
+  .dark h4[style*="color: #004030"],
+  .dark label[style*="color: #004030"],
+  .dark [style*="color: #19183B"] {
+    color: #D2C1B6 !important;
+  }
+  
+  .dark [style*="color: #708993"],
+  .dark p[style*="color: #708993"],
+  .dark span[style*="color: #708993"] {
+    color: #DCD7C9 !important;
+  }
+  
+  /* Dark theme - Border colors */
+  .dark [style*="borderColor: #DCD0A8"],
+  .dark [style*="border-color: #DCD0A8"],
+  .dark [style*="borderColor: #A1C2BD"],
+  .dark [style*="border-color: #A1C2BD"] {
+    border-color: #456882 !important;
+  }
+  
+  .dark [style*="borderColor: #4A9782"],
+  .dark [style*="border-color: #4A9782"] {
+    border-color: #5A9690 !important;
+  }
+  
+  /* Dark theme - Button colors (Form palette) */
+  .dark [style*="background: #4A9782"],
+  .dark [style*="background-color: #4A9782"],
+  .dark button[style*="background: #4A9782"],
+  .dark button[style*="background-color: #4A9782"] {
+    background-color: #5A9690 !important;
+    color: #E0D9D9 !important;
+  }
+  
+  .dark [style*="color: #FFF9E5"],
+  .dark button[style*="color: #FFF9E5"] {
+    color: #E0D9D9 !important;
+  }
+  
+  /* Dark theme - Input backgrounds (Form palette) */
+  .dark input[style*="background: #FFFFFF"],
+  .dark input[style*="background-color: #FFFFFF"],
+  .dark select[style*="background: #FFFFFF"],
+  .dark select[style*="background-color: #FFFFFF"],
+  .dark textarea[style*="background: #FFFFFF"],
+  .dark textarea[style*="background-color: #FFFFFF"] {
+    background-color: #234C6A !important;
+    color: #D2C1B6 !important;
+    border-color: #456882 !important;
+  }
+  
+  .dark input::placeholder,
+  .dark textarea::placeholder,
+  .dark select::placeholder {
+    color: #DCD7C9 !important;
+  }
+  
+  /* Dark theme - Headers */
+  .dark header[style*="background: #FFF9E5"],
+  .dark header[style*="background-color: #FFF9E5"] {
+    background-color: #234C6A !important;
+    border-color: #456882 !important;
+  }
+  
+  /* Dark theme - Navigation menus */
+  .dark nav[style*="background: #FFF9E5"],
+  .dark nav[style*="background-color: #FFF9E5"] {
+    background-color: #234C6A !important;
+  }
+  
+  /* Dark theme - Modals and dialogs */
+  .dark div[style*="background: #FFF9E5"],
+  .dark div[style*="background-color: #FFF9E5"],
+  .dark [role="dialog"][style*="background: #FFF9E5"],
+  .dark [role="dialog"][style*="background-color: #FFF9E5"] {
+    background-color: #234C6A !important;
+  }
+  
+  /* Dark theme - Select dropdowns (Form palette) */
+  .dark [role="listbox"],
+  .dark [data-slot="select-content"],
+  .dark [data-slot="select-content"][style*="background"] {
+    background-color: #234C6A !important;
+    border-color: #456882 !important;
+  }
+  
+  .dark [role="option"],
+  .dark [data-slot="select-item"] {
+    color: #D2C1B6 !important;
+  }
+  
+  .dark [role="option"]:hover,
+  .dark [data-slot="select-item"]:hover,
+  .dark [data-slot="select-item"][data-highlighted] {
+    background-color: #2F5755 !important;
+    color: #E0D9D9 !important;
+  }
+  
+  /* Dark theme - Cards */
+  .dark [class*="Card"],
+  .dark [class*="card"],
+  .dark [class*="Card"][style*="background: #FFF9E5"],
+  .dark [class*="Card"][style*="background-color: #FFF9E5"],
+  .dark article[style*="background: #FFF9E5"],
+  .dark article[style*="background-color: #FFF9E5"] {
+    background-color: #234C6A !important;
+    border-color: #456882 !important;
+  }
+  
+  /* Dark theme - All divs with light backgrounds */
+  .dark div[style*="background: #E7F2EF"],
+  .dark div[style*="background-color: #E7F2EF"] {
+    background-color: #456882 !important;
+  }
+  
+  /* Dark theme - Chart colors (Chart palette: #2C3930, #3F4F44, #A27B5C, #DCD7C9) */
+  .dark [style*="fill: #63A361"],
+  .dark [style*="fill: #FFC50F"],
+  .dark [style*="fill: #5B532C"],
+  .dark [style*="fill: #4A9782"],
+  .dark path[style*="fill: #63A361"],
+  .dark path[style*="fill: #FFC50F"],
+  .dark path[style*="fill: #5B532C"],
+  .dark path[style*="fill: #4A9782"],
+  .dark rect[style*="fill: #63A361"],
+  .dark rect[style*="fill: #FFC50F"],
+  .dark rect[style*="fill: #5B532C"],
+  .dark rect[style*="fill: #4A9782"] {
+    fill: #A27B5C !important;
+  }
+  
+  .dark [style*="stroke: #63A361"],
+  .dark [style*="stroke: #FFC50F"],
+  .dark [style*="stroke: #5B532C"],
+  .dark [style*="stroke: #4A9782"],
+  .dark path[style*="stroke: #63A361"],
+  .dark path[style*="stroke: #FFC50F"],
+  .dark path[style*="stroke: #5B532C"],
+  .dark path[style*="stroke: #4A9782"],
+  .dark line[style*="stroke: #63A361"],
+  .dark line[style*="stroke: #FFC50F"],
+  .dark line[style*="stroke: #5B532C"],
+  .dark line[style*="stroke: #4A9782"] {
+    stroke: #A27B5C !important;
+  }
+  
+  /* Chart specific overrides for Recharts - use CSS variables */
+  .dark .recharts-line,
+  .dark .recharts-area,
+  .dark .recharts-bar {
+    --chart-color-1: #A27B5C;
+    --chart-color-2: #3F4F44;
+    --chart-color-3: #2C3930;
+    --chart-color-4: #DCD7C9;
+  }
+  
+  /* Chart gradients */
+  .dark [style*="stopColor: #FFC50F"],
+  .dark [style*="stop-color: #FFC50F"],
+  .dark stop[style*="stopColor: #FFC50F"],
+  .dark stop[style*="stop-color: #FFC50F"] {
+    stop-color: #A27B5C !important;
+  }
+  
+  .dark [style*="stopColor: #63A361"],
+  .dark [style*="stop-color: #63A361"],
+  .dark stop[style*="stopColor: #63A361"],
+  .dark stop[style*="stop-color: #63A361"] {
+    stop-color: #3F4F44 !important;
+  }
+  
+  .dark [style*="stopColor: #5B532C"],
+  .dark [style*="stop-color: #5B532C"],
+  .dark stop[style*="stopColor: #5B532C"],
+  .dark stop[style*="stop-color: #5B532C"] {
+    stop-color: #2C3930 !important;
+  }
+  
+  /* Dark theme - Progress bars and secondary backgrounds */
+  .dark [style*="background: #E7F2EF"],
+  .dark [style*="background-color: #E7F2EF"],
+  .dark [class*="progress"] {
+    background-color: #2F5755 !important;
+  }
+  
+  /* Dark theme - Links */
+  .dark a[style*="color: #4A9782"] {
+    color: #5A9690 !important;
+  }
+  
+  /* Dark theme - Icons */
+  .dark svg[style*="color: #004030"],
+  .dark svg[style*="color: #4A9782"] {
+    color: #5A9690 !important;
+  }
+  
+  .dark svg[style*="color: #708993"] {
+    color: #DCD7C9 !important;
+  }
+  
+  /* Dark theme - All main containers */
+  .dark main {
+    background-color: #1B3C53 !important;
+  }
+  
+  /* Dark theme - Section backgrounds */
+  .dark section[style*="background: #E7F2EF"],
+  .dark section[style*="background-color: #E7F2EF"] {
+    background-color: #456882 !important;
+  }
+  
+  /* Dark theme - Hover states */
+  .dark button:hover[style*="background: #4A9782"],
+  .dark button:hover[style*="background-color: #4A9782"] {
+    background-color: #2F5755 !important;
+  }
+  
+  /* Dark theme - Focus states */
+  .dark input:focus,
+  .dark select:focus,
+  .dark textarea:focus {
+    border-color: #5A9690 !important;
+    outline-color: #5A9690 !important;
+  }
 }

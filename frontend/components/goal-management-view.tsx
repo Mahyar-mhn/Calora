@@ -1,0 +1,373 @@
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Menu, User, Home, Utensils, Cookie, Activity, History, ArrowLeft } from "lucide-react"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+
+export default function GoalManagementView() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const router = useRouter()
+
+  // User physical data state
+  const [age, setAge] = useState("28")
+  const [gender, setGender] = useState("male")
+  const [height, setHeight] = useState("175")
+  const [weight, setWeight] = useState("75")
+  const [activityLevel, setActivityLevel] = useState("moderately-active")
+
+  const handleNavigation = (path: string) => {
+    router.push(path)
+    setIsMenuOpen(false)
+  }
+
+  const handleSave = () => {
+    console.log("Saving goal management data:", { age, gender, height, weight, activityLevel })
+    alert("Your health profile has been updated successfully!")
+  }
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
+      {/* Header */}
+      <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
+        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-lg bg-transparent"
+                style={{
+                  borderColor: "#4A9782",
+                  color: "#004030",
+                }}
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+              <button
+                onClick={() => router.push("/dashboard")}
+                className="cursor-pointer transition-opacity hover:opacity-80"
+                aria-label="Go to Dashboard"
+              >
+                <Image src="/images/logo.png" alt="Calora Logo" width={40} height={40} className="h-10 w-10" />
+              </button>
+              <h1 className="text-2xl font-bold" style={{ color: "#004030" }}>
+                Goal Management
+              </h1>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full bg-transparent"
+              style={{
+                borderColor: "#4A9782",
+                color: "#004030",
+              }}
+              onClick={() => handleNavigation("/profile")}
+            >
+              <User className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* Navigation menu dropdown */}
+      {isMenuOpen && (
+        <div className="relative z-50">
+          <div
+            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
+          >
+            <nav className="p-2">
+              <button
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
+                style={{ color: "#004030" }}
+                onClick={() => handleNavigation("/dashboard")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#E7F2EF"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <Home className="h-5 w-5" />
+                <span className="font-medium">Dashboard</span>
+              </button>
+              <button
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
+                style={{ color: "#004030" }}
+                onClick={() => handleNavigation("/meal-food")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#E7F2EF"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <Utensils className="h-5 w-5" />
+                <span className="font-medium">Meal & Food</span>
+              </button>
+              <button
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
+                style={{ color: "#004030" }}
+                onClick={() => handleNavigation("/food-modal")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#E7F2EF"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <Cookie className="h-5 w-5" />
+                <span className="font-medium">Food Modal</span>
+              </button>
+              <button
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
+                style={{ color: "#004030" }}
+                onClick={() => handleNavigation("/activity-tracking")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#E7F2EF"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <Activity className="h-5 w-5" />
+                <span className="font-medium">Activity Tracking</span>
+              </button>
+              <button
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
+                style={{ color: "#004030" }}
+                onClick={() => handleNavigation("/history")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#E7F2EF"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <History className="h-5 w-5" />
+                <span className="font-medium">History</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            className="gap-2"
+            style={{ color: "#004030" }}
+            onClick={() => handleNavigation("/profile")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Profile
+          </Button>
+        </div>
+
+        <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
+          <CardHeader>
+            <CardTitle style={{ color: "#004030" }}>Goal Management Settings</CardTitle>
+            <CardDescription style={{ color: "#708993" }}>
+              Update your physical inputs that drive BMR/TDEE calculations
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form className="space-y-6">
+              {/* Age */}
+              <div className="space-y-2">
+                <Label htmlFor="age" style={{ color: "#004030" }} className="font-medium">
+                  Age
+                </Label>
+                <Input
+                  id="age"
+                  type="number"
+                  placeholder="Enter your age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  min="1"
+                  max="120"
+                  className="h-11 border-2"
+                  style={{
+                    borderColor: "#A1C2BD",
+                    backgroundColor: "#FFFFFF",
+                    color: "#19183B",
+                  }}
+                />
+              </div>
+
+              {/* Gender */}
+              <div className="space-y-2">
+                <Label htmlFor="gender" style={{ color: "#004030" }} className="font-medium">
+                  Gender
+                </Label>
+                <Select value={gender} onValueChange={setGender}>
+                  <SelectTrigger
+                    id="gender"
+                    className="h-11 border-2"
+                    style={{
+                      borderColor: "#A1C2BD",
+                      backgroundColor: "#FFFFFF",
+                      color: "#19183B",
+                    }}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent style={{ backgroundColor: "#FFF9E5", borderColor: "#A1C2BD" }}>
+                    <SelectItem value="male" style={{ color: "#19183B" }}>
+                      Male
+                    </SelectItem>
+                    <SelectItem value="female" style={{ color: "#19183B" }}>
+                      Female
+                    </SelectItem>
+                    <SelectItem value="other" style={{ color: "#19183B" }}>
+                      Other
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Height */}
+              <div className="space-y-2">
+                <Label htmlFor="height" style={{ color: "#004030" }} className="font-medium">
+                  Height (cm)
+                </Label>
+                <Input
+                  id="height"
+                  type="number"
+                  placeholder="Enter your height"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  min="50"
+                  max="300"
+                  className="h-11 border-2"
+                  style={{
+                    borderColor: "#A1C2BD",
+                    backgroundColor: "#FFFFFF",
+                    color: "#19183B",
+                  }}
+                />
+              </div>
+
+              {/* Weight */}
+              <div className="space-y-2">
+                <Label htmlFor="weight" style={{ color: "#004030" }} className="font-medium">
+                  Weight (kg)
+                </Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  placeholder="Enter your weight"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  min="20"
+                  max="500"
+                  step="0.1"
+                  className="h-11 border-2"
+                  style={{
+                    borderColor: "#A1C2BD",
+                    backgroundColor: "#FFFFFF",
+                    color: "#19183B",
+                  }}
+                />
+              </div>
+
+              {/* Activity Level */}
+              <div className="space-y-2">
+                <Label htmlFor="activityLevel" style={{ color: "#004030" }} className="font-medium">
+                  Activity Level
+                </Label>
+                <Select value={activityLevel} onValueChange={setActivityLevel}>
+                  <SelectTrigger
+                    id="activityLevel"
+                    className="h-11 border-2"
+                    style={{
+                      borderColor: "#A1C2BD",
+                      backgroundColor: "#FFFFFF",
+                      color: "#19183B",
+                    }}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent style={{ backgroundColor: "#FFF9E5", borderColor: "#A1C2BD" }}>
+                    <SelectItem value="sedentary" style={{ color: "#19183B" }}>
+                      Sedentary - Little to no exercise
+                    </SelectItem>
+                    <SelectItem value="lightly-active" style={{ color: "#19183B" }}>
+                      Lightly Active - Exercise 1-3 days/week
+                    </SelectItem>
+                    <SelectItem value="moderately-active" style={{ color: "#19183B" }}>
+                      Moderately Active - Exercise 3-5 days/week
+                    </SelectItem>
+                    <SelectItem value="very-active" style={{ color: "#19183B" }}>
+                      Very Active - Exercise 6-7 days/week
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Calculated Results */}
+              <div className="rounded-lg p-4 space-y-3" style={{ backgroundColor: "#E7F2EF" }}>
+                <h3 className="font-semibold" style={{ color: "#004030" }}>
+                  Calculated Results
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm" style={{ color: "#708993" }}>
+                      BMR (Basal Metabolic Rate)
+                    </p>
+                    <p className="text-2xl font-bold" style={{ color: "#4A9782" }}>
+                      1,680
+                    </p>
+                    <p className="text-xs" style={{ color: "#708993" }}>
+                      calories/day
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm" style={{ color: "#708993" }}>
+                      TDEE (Total Daily Energy)
+                    </p>
+                    <p className="text-2xl font-bold" style={{ color: "#4A9782" }}>
+                      2,352
+                    </p>
+                    <p className="text-xs" style={{ color: "#708993" }}>
+                      calories/day
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <Button
+                type="button"
+                className="w-full h-12 text-base font-semibold transition-all hover:shadow-lg"
+                style={{
+                  backgroundColor: "#4A9782",
+                  color: "#FFF9E5",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#3d8270"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#4A9782"
+                }}
+                onClick={handleSave}
+              >
+                Save Changes
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  )
+}
