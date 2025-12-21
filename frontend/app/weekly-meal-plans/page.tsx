@@ -137,9 +137,8 @@ export default function WeeklyMealPlansPage() {
       {/* Navigation menu dropdown */}
       {isMenuOpen && (
         <div className="relative z-50">
-          <div className="fixed inset-0 bg-black/20" onClick={() => setIsMenuOpen(false)} />
           <div
-            className="absolute left-4 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
