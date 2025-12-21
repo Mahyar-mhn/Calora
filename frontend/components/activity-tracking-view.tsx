@@ -33,6 +33,13 @@ import {
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
+type Activity = {
+  type: string
+  duration: number
+  calories: number | null
+  date: string
+}
+
 const workoutCategories = [
   {
     name: "Cardio / Endurance",
@@ -149,11 +156,12 @@ export default function ActivityTrackingView() {
   const [calories, setCalories] = useState("")
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false)
-  const [recentActivities, setRecentActivities] = useState([
-    { type: "Running", duration: 30, calories: 300, date: "Today, 8:00 AM" },
-    { type: "Weight Training", duration: 45, calories: 200, date: "Yesterday, 6:00 PM" },
-    { type: "Cycling", duration: 60, calories: 450, date: "2 days ago" },
-  ])
+  const [recentActivities, setRecentActivities] = useState<Activity[]>([
+  { type: "Running", duration: 30, calories: 300, date: "Today, 8:00 AM" },
+  { type: "Weight Training", duration: 45, calories: 200, date: "Yesterday, 6:00 PM" },
+  { type: "Cycling", duration: 60, calories: 450, date: "2 days ago" },
+])
+
   const router = useRouter()
 
   const handleNavigation = (path: string) => {

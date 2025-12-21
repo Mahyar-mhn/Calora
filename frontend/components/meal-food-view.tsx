@@ -935,7 +935,18 @@ export default function MealFoodView() {
         </div>
       )}
 
-      <FoodModal isOpen={isFoodModalOpen} onClose={() => setIsFoodModalOpen(false)} food={selectedFood} />
+      <FoodModal
+  isOpen={isFoodModalOpen}
+  onClose={() => setIsFoodModalOpen(false)}
+  foodName={selectedFood?.name ?? ""}
+  calories={selectedFood?.calories ?? 0}
+  protein={selectedFood?.protein ?? 0}
+  carbs={selectedFood?.carbs ?? 0}
+  fats={selectedFood?.fats ?? 0}
+  servingSize={"100g"}
+/>
+
+
     </div>
   )
 }
