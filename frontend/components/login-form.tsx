@@ -137,6 +137,10 @@ export default function LoginForm() {
             type="button"
             variant="outline"
             className="h-11 border-2 font-medium hover:shadow-md transition-all bg-transparent"
+            onClick={() => {
+              alert("Google sign-in initiated! This would redirect to Google OAuth.")
+              // In a real app, this would redirect to Google OAuth
+            }}
             style={{
               borderColor: "#A1C2BD",
               background: "#FFFFFF",
@@ -167,6 +171,10 @@ export default function LoginForm() {
             type="button"
             variant="outline"
             className="h-11 border-2 font-medium hover:shadow-md transition-all bg-transparent"
+            onClick={() => {
+              alert("Facebook sign-in initiated! This would redirect to Facebook OAuth.")
+              // In a real app, this would redirect to Facebook OAuth
+            }}
             style={{
               borderColor: "#A1C2BD",
               background: "#FFFFFF",

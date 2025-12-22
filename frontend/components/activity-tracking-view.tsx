@@ -149,11 +149,30 @@ export default function ActivityTrackingView() {
   const [calories, setCalories] = useState("")
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false)
+  const [deviceConnections, setDeviceConnections] = useState([
+    { name: "Apple Health", connected: true },
+    { name: "Google Fit", connected: true },
+    { name: "Fitbit", connected: false },
+    { name: "Garmin", connected: false },
+    { name: "Strava", connected: false },
+  ])
   const [recentActivities, setRecentActivities] = useState([
     { type: "Running", duration: 30, calories: 300, date: "Today, 8:00 AM" },
     { type: "Weight Training", duration: 45, calories: 200, date: "Yesterday, 6:00 PM" },
     { type: "Cycling", duration: 60, calories: 450, date: "2 days ago" },
   ])
+
+  const handleDeviceConnection = (deviceName: string) => {
+    setDeviceConnections(prev => prev.map(device =>
+      device.name === deviceName
+        ? { ...device, connected: !device.connected }
+        : device
+    ))
+
+    const device = deviceConnections.find(d => d.name === deviceName)
+    const action = device?.connected ? "disconnected" : "connected"
+    alert(`${deviceName} has been ${action} successfully!`)
+  }
   const router = useRouter()
 
   const handleNavigation = (path: string) => {
@@ -197,10 +216,11 @@ export default function ActivityTrackingView() {
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-lg bg-transparent"
+                className="rounded-lg bg-transparent transition-transform duration-300 ease-in-out"
                 style={{
                   borderColor: "#4A9782",
                   color: "#004030",
+                  transform: isMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
                 }}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
@@ -234,12 +254,13 @@ export default function ActivityTrackingView() {
       </header>
 
       {/* Navigation menu dropdown */}
-      {isMenuOpen && (
-        <div className="relative z-50">
-          <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
-            style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
-          >
+      <div className={`relative z-50 transition-all duration-300 ${isMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+        <div
+          className={`absolute left-2 top-2 w-64 rounded-lg border shadow-lg transition-all duration-300 ${
+            isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
+          }`}
+          style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
+        >
             <nav className="p-2">
               <button
                 className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-opacity-50"
@@ -312,9 +333,8 @@ export default function ActivityTrackingView() {
                 <span className="font-medium">History</span>
               </button>
             </nav>
-          </div>
         </div>
-      )}
+      </div>
 
       {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -664,13 +684,7 @@ export default function ActivityTrackingView() {
             </p>
 
             <div className="space-y-3">
-              {[
-                { name: "Apple Health", connected: true },
-                { name: "Google Fit", connected: true },
-                { name: "Fitbit", connected: false },
-                { name: "Garmin", connected: false },
-                { name: "Strava", connected: false },
-              ].map((device, index) => (
+              {deviceConnections.map((device, index) => (
                 <div
                   key={index}
                   className="flex items-center justify-between rounded-lg border p-4"
@@ -682,6 +696,7 @@ export default function ActivityTrackingView() {
                   <Button
                     size="sm"
                     className="transition-all"
+                    onClick={() => handleDeviceConnection(device.name)}
                     style={{
                       backgroundColor: device.connected ? "#63A361" : "#4A9782",
                       color: "#FFF9E5",

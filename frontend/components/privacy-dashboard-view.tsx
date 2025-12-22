@@ -55,10 +55,11 @@ export default function PrivacyDashboardView() {
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-lg bg-transparent transition-colors hover:bg-[#E7F2EF]"
+                className="rounded-lg bg-transparent transition-all hover:bg-[#E7F2EF] transition-transform duration-300 ease-in-out"
                 style={{
                   borderColor: "#4A9782",
                   color: "#004030",
+                  transform: isMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
                 }}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
@@ -92,12 +93,13 @@ export default function PrivacyDashboardView() {
       </header>
 
       {/* Navigation menu dropdown */}
-      {isMenuOpen && (
-        <div className="relative z-50">
-          <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
-            style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
-          >
+      <div className={`relative z-50 transition-all duration-300 ${isMenuOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
+        <div
+          className={`absolute left-2 top-2 w-64 rounded-lg border shadow-lg transition-all duration-300 ${
+            isMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
+          }`}
+          style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
+        >
             <nav className="p-2">
               <button
                 className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-[#E7F2EF]"
@@ -140,9 +142,8 @@ export default function PrivacyDashboardView() {
                 <span className="font-medium">History</span>
               </button>
             </nav>
-          </div>
         </div>
-      )}
+      </div>
 
       {/* Main Content */}
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
