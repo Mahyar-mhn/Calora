@@ -20,7 +20,7 @@ export default function SignUpForm() {
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (password !== confirmPassword) {
@@ -28,8 +28,29 @@ export default function SignUpForm() {
       return
     }
 
-    console.log("Sign up attempt:", { email, password })
-    window.location.href = "/profile-setup"
+    try {
+      const res = await fetch("http://localhost:8080/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, name: "New User" }), // Name is hardcoded for now or we can add a field
+      })
+
+      if (res.ok) {
+        // Auto-login or redirect to login? Original flow was profile-setup.
+        // Let's assume we redirect to profile-setup as originally intended.
+        const user = await res.json()
+        localStorage.setItem("calora_user", JSON.stringify(user)) // Simple session management
+        window.location.href = "/profile-setup"
+      } else {
+        const errorData = await res.json()
+        console.error("Signup failed:", errorData)
+        // Ideally show error to user, but avoiding UI changes as requested, just logging for now
+        alert("Signup failed: " + (errorData.message || "Unknown error"))
+      }
+    } catch (error) {
+      console.error("Signup error:", error)
+      alert("Signup error: " + error)
+    }
   }
 
   return (

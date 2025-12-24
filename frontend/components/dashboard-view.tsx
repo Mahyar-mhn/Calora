@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -97,23 +97,44 @@ const recentActivities = [
 
 export default function DashboardView() {
   // Sample data - in production this would come from user profile and daily tracking
-  const dailyCalorieTarget = 2200
-  const caloriesConsumed = 1450
-  const caloriesBurned = 380
-  const caloriesRemaining = dailyCalorieTarget - caloriesConsumed + caloriesBurned
+  const [summary, setSummary] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const userStr = localStorage.getItem("calora_user")
+        if (!userStr) return
+        const user = JSON.parse(userStr)
+
+        const res = await fetch(`http://localhost:8080/dashboard/summary/${user.id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setSummary(data)
+        }
+      } catch (err) {
+        console.error("Failed to fetch dashboard summary", err)
+      }
+    }
+    fetchSummary()
+  }, [])
+
+  const dailyCalorieTarget = summary?.dailyTarget || 2200
+  const caloriesConsumed = summary?.caloriesConsumed || 0
+  const caloriesBurned = summary?.caloriesBurned || 0
+  const caloriesRemaining = summary?.caloriesRemaining || (dailyCalorieTarget - caloriesConsumed + caloriesBurned)
 
   // Macro targets (grams)
   const macroTargets = {
-    protein: 165,
-    carbs: 248,
-    fats: 73,
+    protein: summary?.proteinTarget || 165,
+    carbs: summary?.carbsTarget || 248,
+    fats: summary?.fatsTarget || 73,
   }
 
   // Current macro intake (grams)
   const macroConsumed = {
-    protein: 98,
-    carbs: 142,
-    fats: 45,
+    protein: summary?.proteinConsumed || 0,
+    carbs: summary?.carbsConsumed || 0,
+    fats: summary?.fatsConsumed || 0,
   }
 
   // State for menu visibility and popups

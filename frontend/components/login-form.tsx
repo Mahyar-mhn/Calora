@@ -17,10 +17,27 @@ export default function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Login attempt:", { email, password })
-    router.push("/dashboard")
+
+    try {
+      const res = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (res.ok) {
+        const user = await res.json()
+        localStorage.setItem("calora_user", JSON.stringify(user))
+        router.push("/dashboard")
+      } else {
+        alert("Login failed: Invalid credentials")
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      alert("Login error: " + error)
+    }
   }
   const handleForgotPassword = () => {
     router.push("/forgot-password")
