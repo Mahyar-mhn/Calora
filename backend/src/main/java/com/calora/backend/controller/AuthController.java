@@ -18,8 +18,11 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody User user) {
-        if (userRepository.findAll().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
+        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
+        }
+        if (user.getRole() == null) {
+            user.setRole(com.calora.backend.model.Role.USER);
         }
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(savedUser);
@@ -30,9 +33,8 @@ public class AuthController {
         String email = credentials.get("email");
         String password = credentials.get("password");
 
-        Optional<User> user = userRepository.findAll().stream()
-                .filter(u -> u.getEmail().equals(email) && u.getPassword().equals(password))
-                .findFirst();
+        Optional<User> user = userRepository.findByEmail(email)
+                .filter(u -> u.getPassword().equals(password));
 
         if (user.isPresent()) {
             return ResponseEntity.ok(user.get());

@@ -157,10 +157,10 @@ export default function ActivityTrackingView() {
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false)
   const [recentActivities, setRecentActivities] = useState<Activity[]>([
-  { type: "Running", duration: 30, calories: 300, date: "Today, 8:00 AM" },
-  { type: "Weight Training", duration: 45, calories: 200, date: "Yesterday, 6:00 PM" },
-  { type: "Cycling", duration: 60, calories: 450, date: "2 days ago" },
-])
+    { type: "Running", duration: 30, calories: 300, date: "Today, 8:00 AM" },
+    { type: "Weight Training", duration: 45, calories: 200, date: "Yesterday, 6:00 PM" },
+    { type: "Cycling", duration: 60, calories: 450, date: "2 days ago" },
+  ])
 
   const router = useRouter()
 
@@ -174,22 +174,54 @@ export default function ActivityTrackingView() {
     setIsWorkoutDropdownOpen(false)
   }
 
-  const handleLogActivity = () => {
+  const handleLogActivity = async () => {
     if (workoutType && duration) {
-      const newActivity = {
-        type: workoutType,
-        duration: Number.parseInt(duration),
-        calories: calories ? Number.parseInt(calories) : null,
-        date: new Date().toLocaleString(),
+      try {
+        const userStr = localStorage.getItem("calora_user")
+        if (!userStr) {
+          alert("Please login to log activity")
+          return
+        }
+        const user = JSON.parse(userStr)
+
+        const activityData = {
+          type: workoutType,
+          duration: Number.parseInt(duration),
+          caloriesBurned: calories ? Number.parseInt(calories) : Number.parseInt(duration) * 5, // Simple auto-calc fallback
+          date: new Date(),
+          user: { id: user.id } // Send user ID association
+        }
+
+        const res = await fetch("http://localhost:8080/activities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(activityData),
+        })
+
+        if (res.ok) {
+          const savedActivity = await res.json()
+          // Update local state for UI feedback (optional, but good for UX)
+          const newActivity = {
+            type: savedActivity.type,
+            duration: savedActivity.duration,
+            calories: savedActivity.caloriesBurned,
+            date: new Date(savedActivity.date).toLocaleString(), // Format date for display
+          }
+          setRecentActivities([newActivity, ...recentActivities])
+
+          alert(`Activity logged successfully!`)
+          // Reset form
+          setWorkoutType("")
+          setDuration("")
+          setCalories("")
+        } else {
+          console.error("Failed to log activity", await res.text())
+          alert("Failed to log activity. Please try again.")
+        }
+      } catch (err) {
+        console.error("Error logging activity", err)
+        alert("Error logging activity")
       }
-      setRecentActivities([newActivity, ...recentActivities])
-      alert(
-        `Activity logged!\nWorkout: ${workoutType}\nDuration: ${duration} minutes\nCalories Burned: ${calories || "Auto-calculated"}`,
-      )
-      // Reset form
-      setWorkoutType("")
-      setDuration("")
-      setCalories("")
     } else {
       alert("Please fill in workout type and duration")
     }

@@ -37,32 +37,57 @@ export default function FoodModal({
 
   const multiplier = Number.parseFloat(quantity) || 1
 
-  const handleAddToLog = () => {
-    const logEntry = {
-      food: foodName,
-      category,
-      mealType,
-      quantity: Number.parseFloat(quantity),
-      unit,
-      calories: Math.round(calories * multiplier),
-      protein: Math.round(protein * multiplier),
-      carbs: Math.round(carbs * multiplier),
-      fats: Number.parseFloat((fats * multiplier).toFixed(1)),
-      timestamp: new Date().toISOString(),
+  const handleAddToLog = async () => {
+    try {
+      const userStr = localStorage.getItem("calora_user")
+      if (!userStr) {
+        alert("Please login to log food")
+        return
+      }
+      const user = JSON.parse(userStr)
+
+      const totalCalories = Math.round(calories * multiplier)
+      const totalProtein = Math.round(protein * multiplier)
+      const totalCarbs = Math.round(carbs * multiplier)
+      const totalFats = Number.parseFloat((fats * multiplier).toFixed(1))
+
+      const mealData = {
+        name: foodName,
+        calories: totalCalories,
+        protein: totalProtein,
+        carbs: totalCarbs,
+        fats: totalFats,
+        date: new Date(),
+        user: { id: user.id }
+      }
+
+      const res = await fetch("http://localhost:8080/meals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mealData),
+      })
+
+      if (res.ok) {
+        console.log("Meal logged successfully")
+        // Show success feedback
+        alert(`Successfully added ${quantity} ${unit} of ${foodName} to ${mealType}!`)
+
+        // Close modal after adding
+        onClose()
+
+        // Reset form
+        setMealType("breakfast")
+        setQuantity("1")
+        setUnit("serving")
+      } else {
+        console.error("Failed to log meal", await res.text())
+        alert("Failed to save meal. Please try again.")
+      }
+
+    } catch (err) {
+      console.error("Error logging meal", err)
+      alert("Error logging meal")
     }
-
-    console.log("[v0] Adding food to log:", logEntry)
-
-    // Show success feedback
-    alert(`Successfully added ${quantity} ${unit} of ${foodName} to ${mealType}!`)
-
-    // Close modal after adding
-    onClose()
-
-    // Reset form
-    setMealType("breakfast")
-    setQuantity("1")
-    setUnit("serving")
   }
 
   return (
