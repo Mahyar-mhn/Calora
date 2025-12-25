@@ -71,11 +71,31 @@ public class User {
 
     private String profilePicture;
 
+    private String goal;
+
+    private Integer dailyCalorieTarget;
+
     public String getProfilePicture() {
         return profilePicture;
     }
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public String getGoal() {
+        return goal;
+    }
+
+    public void setGoal(String goal) {
+        this.goal = goal;
+    }
+
+    public Integer getDailyCalorieTarget() {
+        return dailyCalorieTarget;
+    }
+
+    public void setDailyCalorieTarget(Integer dailyCalorieTarget) {
+        this.dailyCalorieTarget = dailyCalorieTarget;
     }
 }

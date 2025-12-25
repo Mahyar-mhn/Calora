@@ -29,10 +29,18 @@ public class UserController {
             @RequestBody User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
-                    user.setName(userDetails.getName());
-                    user.setEmail(userDetails.getEmail());
-                    // we can update other fields like password/role if needed, but for now just
-                    // basic info
+                    if (userDetails.getName() != null) {
+                        user.setName(userDetails.getName());
+                    }
+                    if (userDetails.getEmail() != null) {
+                        user.setEmail(userDetails.getEmail());
+                    }
+                    if (userDetails.getGoal() != null) {
+                        user.setGoal(userDetails.getGoal());
+                    }
+                    if (userDetails.getDailyCalorieTarget() != null) {
+                        user.setDailyCalorieTarget(userDetails.getDailyCalorieTarget());
+                    }
                     User updatedUser = userRepository.save(user);
                     return org.springframework.http.ResponseEntity.ok(updatedUser);
                 })

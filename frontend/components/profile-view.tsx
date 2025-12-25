@@ -66,6 +66,8 @@ export default function ProfileView() {
           ? (user.profilePicture.startsWith("http") ? user.profilePicture : `http://localhost:8080${user.profilePicture}`)
           : "/images/logo.png",
       })
+      if (user.goal) setSelectedGoal(user.goal)
+      if (user.dailyCalorieTarget) setDailyCalorieTarget(user.dailyCalorieTarget)
     }
   }, [])
 
@@ -183,18 +185,50 @@ export default function ProfileView() {
     }
   }
 
-  const handleSaveGoal = () => {
-    let newTarget = 2200
-    if (selectedGoal === "Lose Weight") {
-      newTarget = 1800
-    } else if (selectedGoal === "Maintain Weight") {
-      newTarget = 2200
-    } else if (selectedGoal === "Gain Weight") {
-      newTarget = 2600
+  const handleSaveGoal = async () => {
+    let newTarget = 2000
+    if (selectedGoal === "Maintain Weight") newTarget = 2500
+    if (selectedGoal === "Gain Weight") newTarget = 3000
+
+    if (userData.id) {
+      try {
+        const res = await fetch(`http://localhost:8080/users/${userData.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            goal: selectedGoal,
+            dailyCalorieTarget: newTarget
+          }),
+        })
+
+        if (res.ok) {
+          const updatedUser = await res.json()
+          setDailyCalorieTarget(updatedUser.dailyCalorieTarget || newTarget)
+          setIsEditingGoal(false)
+
+          // Update local storage
+          const currentUserStr = localStorage.getItem("calora_user")
+          const currentUser = currentUserStr ? JSON.parse(currentUserStr) : {}
+          const mergedUser = { ...currentUser, goal: selectedGoal, dailyCalorieTarget: newTarget }
+          localStorage.setItem("calora_user", JSON.stringify(mergedUser))
+
+          // Dispatch event so other components (like dashboard) can update if they listen
+          window.dispatchEvent(new Event("storage"))
+
+          alert(`Goal updated to: ${selectedGoal}\nNew daily calorie target: ${newTarget} kcal`)
+        } else {
+          alert("Failed to save goal")
+        }
+      } catch (error) {
+        console.error("Save goal error", error)
+        alert("Error saving goal")
+      }
+    } else {
+      // Fallback if no user login (mock mode)
+      setDailyCalorieTarget(newTarget)
+      setIsEditingGoal(false)
+      alert(`Goal updated to: ${selectedGoal}\nNew daily calorie target: ${newTarget} kcal`)
     }
-    setDailyCalorieTarget(newTarget)
-    setIsEditingGoal(false)
-    alert(`Goal updated to: ${selectedGoal}\nNew daily calorie target: ${newTarget} kcal`)
   }
 
   // User data state removed from here as it's moved up
