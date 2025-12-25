@@ -19,14 +19,47 @@ export default function ProfileSetupForm() {
   const [weight, setWeight] = useState("")
   const [activityLevel, setActivityLevel] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!gender || !activityLevel) {
       alert("Please select both gender and activity level")
       return
     }
-    console.log("Profile setup:", { age, gender, height, weight, activityLevel })
-    router.push("/goal-setup")
+
+    // Get user from local storage (set during signup)
+    const userStr = localStorage.getItem("calora_user")
+    if (!userStr) {
+      alert("No user found. Please sign up again.")
+      router.push("/signup")
+      return
+    }
+    const user = JSON.parse(userStr)
+
+    try {
+      const res = await fetch(`http://localhost:8080/users/${user.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          age: parseInt(age),
+          gender,
+          height: parseFloat(height),
+          weight: parseFloat(weight),
+          activityLevel
+        })
+      })
+
+      if (res.ok) {
+        const updatedUser = await res.json()
+        // Update local storage
+        localStorage.setItem("calora_user", JSON.stringify(updatedUser))
+        router.push("/goal-setup")
+      } else {
+        alert("Failed to save profile setup")
+      }
+    } catch (error) {
+      console.error("Profile setup error", error)
+      alert("Error saving profile setup")
+    }
   }
 
   return (
@@ -58,61 +91,61 @@ export default function ProfileSetupForm() {
         </div>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-          
+
           </div>
 
           <div className="gap-2 flex flex-row justify-between items-center">
             <div className="flex flex-col justify-center items-start gap-2 w-full">
               <Label htmlFor="age" style={{ color: "#004030" }} className="font-medium">
-              Age
-            </Label>
-            <Input
-              id="age"
-              type="number"
-              placeholder="Enter your age"
-              value={age}
-              onChange={(e) => setAge(e.target.value)}
-              required
-              min="1"
-              max="120"
-              className="py-5 border-2 focus-visible:ring-offset-0"
-              style={{
-                borderColor: "#A1C2BD",
-                background: "#FFFFFF",
-                color: "#19183B",
-              }}
-            />
-            </div>
-            <div className="flex flex-col gap-2  justify-center items-start w-full">
-              <Label htmlFor="gender" style={{ color: "#004030" }} className="w-full font-medium">
-              Gender
-            </Label>
-            <Select value={gender} onValueChange={setGender}>
-              <SelectTrigger
-                id="gender"
-                className="py-5 border-2 w-full focus:ring-offset-0"
+                Age
+              </Label>
+              <Input
+                id="age"
+                type="number"
+                placeholder="Enter your age"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                required
+                min="1"
+                max="120"
+                className="py-5 border-2 focus-visible:ring-offset-0"
                 style={{
                   borderColor: "#A1C2BD",
                   background: "#FFFFFF",
-                  color: gender ? "#19183B" : "#708993",
+                  color: "#19183B",
                 }}
-              >
-                <SelectValue placeholder="Select your gender" />
-              </SelectTrigger>
-              <SelectContent style={{ background: "#FFF9E5", borderColor: "#A1C2BD" }}>
-                <SelectItem value="male" style={{ color: "#19183B" }}>
-                  Male
-                </SelectItem>
-                <SelectItem value="female" style={{ color: "#19183B" }}>
-                  Female
-                </SelectItem>
-                <SelectItem value="other" style={{ color: "#19183B" }}>
-                  Other
-                </SelectItem>
-              </SelectContent>
-            </Select>
+              />
             </div>
-          
+            <div className="flex flex-col gap-2  justify-center items-start w-full">
+              <Label htmlFor="gender" style={{ color: "#004030" }} className="w-full font-medium">
+                Gender
+              </Label>
+              <Select value={gender} onValueChange={setGender}>
+                <SelectTrigger
+                  id="gender"
+                  className="py-5 border-2 w-full focus:ring-offset-0"
+                  style={{
+                    borderColor: "#A1C2BD",
+                    background: "#FFFFFF",
+                    color: gender ? "#19183B" : "#708993",
+                  }}
+                >
+                  <SelectValue placeholder="Select your gender" />
+                </SelectTrigger>
+                <SelectContent style={{ background: "#FFF9E5", borderColor: "#A1C2BD" }}>
+                  <SelectItem value="male" style={{ color: "#19183B" }}>
+                    Male
+                  </SelectItem>
+                  <SelectItem value="female" style={{ color: "#19183B" }}>
+                    Female
+                  </SelectItem>
+                  <SelectItem value="other" style={{ color: "#19183B" }}>
+                    Other
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
           </div>
 
           <div className="space-y-2">

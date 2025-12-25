@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,15 +20,95 @@ export default function GoalManagementView() {
   const [height, setHeight] = useState("175")
   const [weight, setWeight] = useState("75")
   const [activityLevel, setActivityLevel] = useState("moderately-active")
+  const [userId, setUserId] = useState<number | null>(null)
+
+  // Results
+  const [bmr, setBmr] = useState(0)
+  const [tdee, setTdee] = useState(0)
+
+  // Load data
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("calora_user")
+    if (userStr) {
+      const user = JSON.parse(userStr)
+      setUserId(user.id)
+      if (user.age) setAge(user.age.toString())
+      if (user.gender) setGender(user.gender)
+      if (user.height) setHeight(user.height.toString())
+      if (user.weight) setWeight(user.weight.toString())
+      if (user.activityLevel) setActivityLevel(user.activityLevel)
+    }
+  }, [])
+
+  // Calculate BMR and TDEE whenever inputs change
+  useEffect(() => {
+    const a = parseInt(age)
+    const h = parseFloat(height)
+    const w = parseFloat(weight)
+
+    if (!isNaN(a) && !isNaN(h) && !isNaN(w)) {
+      // Mifflin-St Jeor Equation
+      let bmrCalc = 10 * w + 6.25 * h - 5 * a
+      if (gender === "male") bmrCalc += 5
+      else bmrCalc -= 161
+
+      setBmr(Math.round(bmrCalc))
+
+      // TDEE multipliers
+      let multiplier = 1.2 // sedentary
+      if (activityLevel === "lightly-active") multiplier = 1.375
+      if (activityLevel === "moderately-active") multiplier = 1.55
+      if (activityLevel === "very-active") multiplier = 1.725
+
+      setTdee(Math.round(bmrCalc * multiplier))
+    }
+  }, [age, gender, height, weight, activityLevel])
 
   const handleNavigation = (path: string) => {
     router.push(path)
     setIsMenuOpen(false)
   }
 
-  const handleSave = () => {
-    console.log("Saving goal management data:", { age, gender, height, weight, activityLevel })
-    alert("Your health profile has been updated successfully!")
+  const handleSave = async () => {
+    if (!userId) return
+
+    try {
+      const res = await fetch(`http://localhost:8080/users/${userId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          age: parseInt(age),
+          gender,
+          height: parseFloat(height),
+          weight: parseFloat(weight),
+          activityLevel
+        })
+      })
+
+      if (res.ok) {
+        const updatedUser = await res.json()
+        // Update local storage
+        const currentUserStr = localStorage.getItem("calora_user")
+        const currentUser = currentUserStr ? JSON.parse(currentUserStr) : {}
+        const mergedUser = {
+          ...currentUser,
+          age: updatedUser.age,
+          gender: updatedUser.gender,
+          height: updatedUser.height,
+          weight: updatedUser.weight,
+          activityLevel: updatedUser.activityLevel
+        }
+        localStorage.setItem("calora_user", JSON.stringify(mergedUser))
+
+        alert("Your health profile has been updated successfully!")
+      } else {
+        alert("Failed to save changes")
+      }
+    } catch (e) {
+      console.error("Save error", e)
+      alert("Error saving changes")
+    }
   }
 
   return (
@@ -335,7 +415,7 @@ export default function GoalManagementView() {
                       BMR (Basal Metabolic Rate)
                     </p>
                     <p className="text-2xl font-bold" style={{ color: "#4A9782" }}>
-                      1,680
+                      {bmr.toLocaleString()}
                     </p>
                     <p className="text-xs" style={{ color: "#708993" }}>
                       calories/day
@@ -346,7 +426,7 @@ export default function GoalManagementView() {
                       TDEE (Total Daily Energy)
                     </p>
                     <p className="text-2xl font-bold" style={{ color: "#4A9782" }}>
-                      2,352
+                      {tdee.toLocaleString()}
                     </p>
                     <p className="text-xs" style={{ color: "#708993" }}>
                       calories/day

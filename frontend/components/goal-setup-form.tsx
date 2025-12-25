@@ -15,11 +15,60 @@ export default function GoalSetupForm() {
   const router = useRouter()
   const [selectedGoal, setSelectedGoal] = useState<GoalType | "">("")
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedGoal) return
-    console.log("Goal selected:", selectedGoal)
-    router.push("/dashboard")
+
+    // Get user from local storage
+    const userStr = localStorage.getItem("calora_user")
+    if (!userStr) {
+      alert("No user found.")
+      router.push("/signup")
+      return
+    }
+    const user = JSON.parse(userStr)
+
+    // Calculate TDEE
+    let tdee = 2000 // Default fallback
+    if (user.weight && user.height && user.age && user.gender) {
+      let bmr = 10 * user.weight + 6.25 * user.height - 5 * user.age
+      if (user.gender === "male") bmr += 5
+      else bmr -= 161
+
+      let multiplier = 1.2
+      if (user.activityLevel === "lightly-active") multiplier = 1.375
+      if (user.activityLevel === "moderately-active") multiplier = 1.55
+      if (user.activityLevel === "very-active") multiplier = 1.725
+
+      tdee = Math.round(bmr * multiplier)
+    }
+
+    // Determine target based on goal
+    let dailyCalorieTarget = tdee
+    if (selectedGoal === "lose") dailyCalorieTarget = Math.max(1200, tdee - 500) // Safety floor
+    if (selectedGoal === "gain") dailyCalorieTarget = tdee + 500
+
+    try {
+      const res = await fetch(`http://localhost:8080/users/${user.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          goal: selectedGoal === "lose" ? "Lose Weight" : selectedGoal === "maintain" ? "Maintain Weight" : "Gain Weight",
+          dailyCalorieTarget: Math.round(dailyCalorieTarget)
+        })
+      })
+
+      if (res.ok) {
+        const updatedUser = await res.json()
+        localStorage.setItem("calora_user", JSON.stringify(updatedUser))
+        router.push("/dashboard")
+      } else {
+        alert("Failed to save goal")
+      }
+    } catch (error) {
+      console.error("Goal setup error", error)
+      alert("Error saving goal")
+    }
   }
 
   const goals: { value: GoalType; label: string; description: string }[] = [

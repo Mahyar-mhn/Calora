@@ -41,6 +41,17 @@ public class UserController {
                     if (userDetails.getDailyCalorieTarget() != null) {
                         user.setDailyCalorieTarget(userDetails.getDailyCalorieTarget());
                     }
+                    if (userDetails.getAge() != null)
+                        user.setAge(userDetails.getAge());
+                    if (userDetails.getGender() != null)
+                        user.setGender(userDetails.getGender());
+                    if (userDetails.getHeight() != null)
+                        user.setHeight(userDetails.getHeight());
+                    if (userDetails.getWeight() != null)
+                        user.setWeight(userDetails.getWeight());
+                    if (userDetails.getActivityLevel() != null)
+                        user.setActivityLevel(userDetails.getActivityLevel());
+
                     User updatedUser = userRepository.save(user);
                     return org.springframework.http.ResponseEntity.ok(updatedUser);
                 })
