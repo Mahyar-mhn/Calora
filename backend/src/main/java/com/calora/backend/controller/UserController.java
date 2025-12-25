@@ -63,4 +63,19 @@ public class UserController {
                 })
                 .orElse(org.springframework.http.ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/{id}/image")
+    public org.springframework.http.ResponseEntity<?> deleteImage(@PathVariable Long id) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    String oldPath = user.getProfilePicture();
+                    if (oldPath != null && oldPath.startsWith("/uploads/")) {
+                        // Optional: could delete the file from disk here
+                        // For now, just removing the reference is sufficient
+                    }
+                    user.setProfilePicture(null);
+                    return org.springframework.http.ResponseEntity.ok(userRepository.save(user));
+                })
+                .orElse(org.springframework.http.ResponseEntity.notFound().build());
+    }
 }

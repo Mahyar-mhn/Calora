@@ -23,6 +23,7 @@ import {
   Minus,
   TrendingUp,
   LogOut,
+  Trash2,
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -109,6 +110,37 @@ export default function ProfileView() {
       }
     }
     input.click()
+  }
+
+  const handleDeleteProfilePicture = async () => {
+    if (!userData.id) return
+
+    if (!confirm("Are you sure you want to remove your profile picture?")) return
+
+    try {
+      const res = await fetch(`http://localhost:8080/users/${userData.id}/image`, {
+        method: "DELETE",
+      })
+
+      if (res.ok) {
+        const updatedUser = await res.json()
+
+        setUserData(prev => ({ ...prev, profilePicture: "/images/logo.png" }))
+
+        const currentUserStr = localStorage.getItem("calora_user")
+        const currentUser = currentUserStr ? JSON.parse(currentUserStr) : {}
+        const mergedUser = { ...currentUser, profilePicture: null }
+        localStorage.setItem("calora_user", JSON.stringify(mergedUser))
+
+        alert("Profile picture removed.")
+        window.location.reload()
+      } else {
+        alert("Failed to delete image")
+      }
+    } catch (error) {
+      console.error("Delete error", error)
+      alert("Error deleting image")
+    }
   }
 
   const handleSaveChanges = async () => {
@@ -310,17 +342,29 @@ export default function ProfileView() {
                         <User className="h-16 w-16" style={{ color: "#708993" }} />
                       )}
                     </div>
-                    <Button
-                      size="icon"
-                      className="absolute bottom-0 right-0 h-8 w-8 rounded-full transition-all hover:scale-110 hover:shadow-lg"
-                      style={{
-                        backgroundColor: "#4A9782",
-                        color: "#FFF9E5",
-                      }}
-                      onClick={handleProfilePictureUpload}
-                    >
-                      <Camera className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2 absolute bottom-0 right-0">
+                      <Button
+                        size="icon"
+                        className="h-8 w-8 rounded-full transition-all hover:scale-110 hover:shadow-lg"
+                        style={{
+                          backgroundColor: "#4A9782",
+                          color: "#FFF9E5",
+                        }}
+                        onClick={handleProfilePictureUpload}
+                      >
+                        <Camera className="h-4 w-4" />
+                      </Button>
+                      {userData.profilePicture && userData.profilePicture !== "/images/logo.png" && (
+                        <Button
+                          size="icon"
+                          variant="destructive"
+                          className="h-8 w-8 rounded-full transition-all hover:scale-110 hover:shadow-lg"
+                          onClick={handleDeleteProfilePicture}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold" style={{ color: "#004030" }}>
@@ -554,6 +598,7 @@ export default function ProfileView() {
               </div>
             </CardContent>
           </Card>
+
         </div>
       </main>
 
