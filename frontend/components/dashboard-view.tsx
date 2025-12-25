@@ -27,7 +27,16 @@ import {
   LogOut,
   X,
   Clock,
+  Settings,
 } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import {
@@ -98,6 +107,14 @@ const recentActivities = [
 export default function DashboardView() {
   // Sample data - in production this would come from user profile and daily tracking
   const [summary, setSummary] = useState<any>(null)
+  const [user, setUser] = useState<any>(null)
+
+  useEffect(() => {
+    const userData = localStorage.getItem("calora_user")
+    if (userData) {
+      setUser(JSON.parse(userData))
+    }
+  }, [])
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -180,18 +197,51 @@ export default function DashboardView() {
                 Dashboard
               </h1>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-transparent"
-              style={{
-                borderColor: "#4A9782",
-                color: "#004030",
-              }}
-              onClick={() => router.push("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full bg-transparent"
+                  style={{
+                    borderColor: "#4A9782",
+                    color: "#004030",
+                  }}
+                >
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
+                <DropdownMenuLabel style={{ color: "#004030" }}>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
+                    <p className="text-xs leading-none text-muted-foreground" style={{ color: "#708993" }}>
+                      {user?.email || "user@example.com"}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator style={{ backgroundColor: "#DCD0A8" }} />
+                <DropdownMenuItem onClick={() => router.push("/profile")} style={{ color: "#004030" }}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/settings")} style={{ color: "#004030" }}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator style={{ backgroundColor: "#DCD0A8" }} />
+                <DropdownMenuItem
+                  onClick={() => {
+                    localStorage.removeItem("calora_user")
+                    router.push("/login")
+                  }}
+                  style={{ color: "#ef4444" }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>

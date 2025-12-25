@@ -27,6 +27,7 @@ import {
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
+import { useEffect } from "react" // Added useEffect import
 export default function ProfileView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isEditingGoal, setIsEditingGoal] = useState(false)
@@ -70,13 +71,28 @@ export default function ProfileView() {
     alert(`Goal updated to: ${selectedGoal}\nNew daily calorie target: ${newTarget} kcal`)
   }
 
-  // Sample user data
+  // User data state
   const [userData, setUserData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
+    firstName: "",
+    lastName: "",
+    email: "",
     profilePicture: "/images/logo.png",
   })
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("calora_user")
+    if (userStr) {
+      const user = JSON.parse(userStr)
+      // Assuming name is stored as "First Last" or just "First"
+      const nameParts = user.name ? user.name.split(" ") : ["User"]
+      setUserData({
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        email: user.email || "",
+        profilePicture: "/images/logo.png", // Placeholder for now
+      })
+    }
+  }, [])
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
@@ -482,9 +498,8 @@ export default function ProfileView() {
             <div className="space-y-3">
               {/* Lose Weight Option */}
               <button
-                className={`flex w-full items-center gap-4 rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
-                  selectedGoal === "Lose Weight" ? "shadow-md" : ""
-                }`}
+                className={`flex w-full items-center gap-4 rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${selectedGoal === "Lose Weight" ? "shadow-md" : ""
+                  }`}
                 style={{
                   borderColor: selectedGoal === "Lose Weight" ? "#4A9782" : "#DCD0A8",
                   backgroundColor: selectedGoal === "Lose Weight" ? "#E7F2EF" : "#FFFFFF",
@@ -509,9 +524,8 @@ export default function ProfileView() {
 
               {/* Maintain Weight Option */}
               <button
-                className={`flex w-full items-center gap-4 rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
-                  selectedGoal === "Maintain Weight" ? "shadow-md" : ""
-                }`}
+                className={`flex w-full items-center gap-4 rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${selectedGoal === "Maintain Weight" ? "shadow-md" : ""
+                  }`}
                 style={{
                   borderColor: selectedGoal === "Maintain Weight" ? "#4A9782" : "#DCD0A8",
                   backgroundColor: selectedGoal === "Maintain Weight" ? "#E7F2EF" : "#FFFFFF",
@@ -536,9 +550,8 @@ export default function ProfileView() {
 
               {/* Gain Weight Option */}
               <button
-                className={`flex w-full items-center gap-4 rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
-                  selectedGoal === "Gain Weight" ? "shadow-md" : ""
-                }`}
+                className={`flex w-full items-center gap-4 rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${selectedGoal === "Gain Weight" ? "shadow-md" : ""
+                  }`}
                 style={{
                   borderColor: selectedGoal === "Gain Weight" ? "#4A9782" : "#DCD0A8",
                   backgroundColor: selectedGoal === "Gain Weight" ? "#E7F2EF" : "#FFFFFF",
