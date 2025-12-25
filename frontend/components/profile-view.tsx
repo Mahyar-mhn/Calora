@@ -61,7 +61,9 @@ export default function ProfileView() {
         firstName: nameParts[0] || "",
         lastName: nameParts.slice(1).join(" ") || "",
         email: user.email || "",
-        profilePicture: "/images/logo.png",
+        profilePicture: user.profilePicture
+          ? (user.profilePicture.startsWith("http") ? user.profilePicture : `http://localhost:8080${user.profilePicture}`)
+          : "/images/logo.png",
       })
     }
   }, [])
@@ -70,10 +72,40 @@ export default function ProfileView() {
     const input = document.createElement("input")
     input.type = "file"
     input.accept = "image/*"
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) {
-        alert(`Profile picture selected: ${file.name}\nThis would upload the image to the server.`)
+      if (file && userData.id) {
+        try {
+          const formData = new FormData()
+          formData.append("file", file)
+
+          const res = await fetch(`http://localhost:8080/users/${userData.id}/image`, {
+            method: "POST",
+            body: formData
+          })
+
+          if (res.ok) {
+            const updatedUser = await res.json()
+
+            // Update local state
+            setUserData(prev => ({ ...prev, profilePicture: "http://localhost:8080" + updatedUser.profilePicture }))
+
+            // Update local storage
+            const currentUserStr = localStorage.getItem("calora_user")
+            const currentUser = currentUserStr ? JSON.parse(currentUserStr) : {}
+            const mergedUser = { ...currentUser, profilePicture: updatedUser.profilePicture }
+            localStorage.setItem("calora_user", JSON.stringify(mergedUser))
+
+            alert("Profile picture uploaded successfully!")
+            // Refresh to update header
+            window.location.reload()
+          } else {
+            alert("Failed to upload image")
+          }
+        } catch (error) {
+          console.error("Upload error", error)
+          alert("Error uploading image")
+        }
       }
     }
     input.click()
@@ -272,7 +304,11 @@ export default function ProfileView() {
                       className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4"
                       style={{ borderColor: "#4A9782" }}
                     >
-                      <User className="h-16 w-16" style={{ color: "#708993" }} />
+                      {userData.profilePicture && userData.profilePicture !== "/images/logo.png" ? (
+                        <img src={userData.profilePicture} alt="Profile" className="h-full w-full object-cover" />
+                      ) : (
+                        <User className="h-16 w-16" style={{ color: "#708993" }} />
+                      )}
                     </div>
                     <Button
                       size="icon"

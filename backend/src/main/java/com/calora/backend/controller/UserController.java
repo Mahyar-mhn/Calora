@@ -25,7 +25,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public org.springframework.http.ResponseEntity<User> updateUser(@PathVariable Long id,
+    public org.springframework.http.ResponseEntity<?> updateUser(@PathVariable Long id,
             @RequestBody User userDetails) {
         return userRepository.findById(id)
                 .map(user -> {
@@ -35,6 +35,31 @@ public class UserController {
                     // basic info
                     User updatedUser = userRepository.save(user);
                     return org.springframework.http.ResponseEntity.ok(updatedUser);
+                })
+                .orElse(org.springframework.http.ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/image")
+    public org.springframework.http.ResponseEntity<?> uploadImage(@PathVariable Long id,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    try {
+                        String uploadDir = "uploads/";
+                        java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
+                        if (!java.nio.file.Files.exists(uploadPath)) {
+                            java.nio.file.Files.createDirectories(uploadPath);
+                        }
+
+                        String fileName = id + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
+                        java.nio.file.Files.copy(file.getInputStream(), uploadPath.resolve(fileName),
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                        user.setProfilePicture("/uploads/" + fileName);
+                        return org.springframework.http.ResponseEntity.ok(userRepository.save(user));
+                    } catch (java.io.IOException e) {
+                        return org.springframework.http.ResponseEntity.internalServerError().build();
+                    }
                 })
                 .orElse(org.springframework.http.ResponseEntity.notFound().build());
     }

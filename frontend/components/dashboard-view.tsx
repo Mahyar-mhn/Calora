@@ -202,13 +202,21 @@ export default function DashboardView() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="rounded-full bg-transparent"
+                  className="rounded-full bg-transparent overflow-hidden"
                   style={{
                     borderColor: "#4A9782",
                     color: "#004030",
                   }}
                 >
-                  <User className="h-5 w-5" />
+                  {user && user.profilePicture ? (
+                    <img
+                      src={user.profilePicture.startsWith("http") ? user.profilePicture : `http://localhost:8080${user.profilePicture}`}
+                      alt="User"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>

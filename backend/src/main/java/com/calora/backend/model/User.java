@@ -68,4 +68,14 @@ public class User {
     public void setRole(Role role) {
         this.role = role;
     }
+
+    private String profilePicture;
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
 }
