@@ -40,6 +40,32 @@ export default function ProfileView() {
     setIsMenuOpen(false)
   }
 
+  // User data state
+  const [userData, setUserData] = useState({
+    id: null,
+    firstName: "",
+    lastName: "",
+    email: "",
+    profilePicture: "/images/logo.png",
+  })
+
+  // Load user data on mount
+  useEffect(() => {
+    const userStr = localStorage.getItem("calora_user")
+    if (userStr) {
+      const user = JSON.parse(userStr)
+      // Assuming name is stored as "First Last" or just "First"
+      const nameParts = user.name ? user.name.split(" ") : ["User"]
+      setUserData({
+        id: user.id,
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        email: user.email || "",
+        profilePicture: "/images/logo.png",
+      })
+    }
+  }, [])
+
   const handleProfilePictureUpload = () => {
     const input = document.createElement("input")
     input.type = "file"
@@ -53,8 +79,44 @@ export default function ProfileView() {
     input.click()
   }
 
-  const handleSaveChanges = () => {
-    alert(`Profile updated successfully!\n\nName: ${userData.firstName} ${userData.lastName}\nEmail: ${userData.email}`)
+  const handleSaveChanges = async () => {
+    if (!userData.id) {
+      alert("No user logged in")
+      return
+    }
+
+    try {
+      const fullName = `${userData.firstName} ${userData.lastName}`.trim()
+      const res = await fetch(`http://localhost:8080/users/${userData.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fullName,
+          email: userData.email
+          // Add other fields if necessary
+        }),
+      })
+
+      if (res.ok) {
+        const updatedUser = await res.json()
+
+        // Preserve other fields from local storage (like token if exists, etc)
+        const currentUserStr = localStorage.getItem("calora_user")
+        const currentUser = currentUserStr ? JSON.parse(currentUserStr) : {}
+
+        const mergedUser = { ...currentUser, ...updatedUser }
+        localStorage.setItem("calora_user", JSON.stringify(mergedUser))
+
+        alert(`Profile updated successfully!\n\nName: ${updatedUser.name}\nEmail: ${updatedUser.email}`)
+        // Optional: Force a reload or update a context to reflect changes in header immediately
+        window.location.reload()
+      } else {
+        alert("Failed to update profile")
+      }
+    } catch (error) {
+      console.error("Update error:", error)
+      alert("Error updating profile")
+    }
   }
 
   const handleSaveGoal = () => {
@@ -71,28 +133,8 @@ export default function ProfileView() {
     alert(`Goal updated to: ${selectedGoal}\nNew daily calorie target: ${newTarget} kcal`)
   }
 
-  // User data state
-  const [userData, setUserData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    profilePicture: "/images/logo.png",
-  })
+  // User data state removed from here as it's moved up
 
-  useEffect(() => {
-    const userStr = localStorage.getItem("calora_user")
-    if (userStr) {
-      const user = JSON.parse(userStr)
-      // Assuming name is stored as "First Last" or just "First"
-      const nameParts = user.name ? user.name.split(" ") : ["User"]
-      setUserData({
-        firstName: nameParts[0] || "",
-        lastName: nameParts.slice(1).join(" ") || "",
-        email: user.email || "",
-        profilePicture: "/images/logo.png", // Placeholder for now
-      })
-    }
-  }, [])
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>

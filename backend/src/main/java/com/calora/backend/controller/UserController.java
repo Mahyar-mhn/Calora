@@ -23,4 +23,19 @@ public class UserController {
     public User createUser(@RequestBody User user) {
         return userRepository.save(user);
     }
+
+    @PutMapping("/{id}")
+    public org.springframework.http.ResponseEntity<User> updateUser(@PathVariable Long id,
+            @RequestBody User userDetails) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    user.setName(userDetails.getName());
+                    user.setEmail(userDetails.getEmail());
+                    // we can update other fields like password/role if needed, but for now just
+                    // basic info
+                    User updatedUser = userRepository.save(user);
+                    return org.springframework.http.ResponseEntity.ok(updatedUser);
+                })
+                .orElse(org.springframework.http.ResponseEntity.notFound().build());
+    }
 }
