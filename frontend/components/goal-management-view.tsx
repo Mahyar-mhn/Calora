@@ -38,9 +38,20 @@ export default function GoalManagementView() {
       if (storedUser.id) {
         // Fetch fresh data from API
         fetch(`http://localhost:8080/users/${storedUser.id}`)
-          .then((res) => {
+          .then(async (res) => {
             if (res.ok) return res.json();
-            throw new Error("Failed to fetch user");
+
+            // Handle 404 specifically
+            if (res.status === 404) {
+              console.warn("User not found in backend (404). Clearing stale local storage.");
+              localStorage.removeItem("calora_user");
+              // Optional: redirect to login or show message
+              // router.push("/login"); 
+              throw new Error("User not found (404) - Stale local storage cleared");
+            }
+
+            const text = await res.text();
+            throw new Error(`Failed to fetch user: ${res.status} ${text}`);
           })
           .then((user) => {
             console.log("GoalManagement fetched fresh user:", user);
@@ -73,12 +84,14 @@ export default function GoalManagementView() {
           })
           .catch((err) => {
             console.error("Error fetching user data:", err);
-            // Fallback to local storage data on error
-            if (storedUser.age) setAge(storedUser.age.toString())
-            if (storedUser.gender) setGender(storedUser.gender.toLowerCase().trim())
-            if (storedUser.height) setHeight(storedUser.height.toString())
-            if (storedUser.weight) setWeight(storedUser.weight.toString())
-            if (storedUser.activityLevel) setActivityLevel(storedUser.activityLevel.toLowerCase().trim())
+            // Fallback to local storage data on error (unless it was a 404 cleared above)
+            if (storedUser && localStorage.getItem("calora_user")) {
+              if (storedUser.age) setAge(storedUser.age.toString())
+              if (storedUser.gender) setGender(storedUser.gender.toLowerCase().trim())
+              if (storedUser.height) setHeight(storedUser.height.toString())
+              if (storedUser.weight) setWeight(storedUser.weight.toString())
+              if (storedUser.activityLevel) setActivityLevel(storedUser.activityLevel.toLowerCase().trim())
+            }
           });
       }
     } else {

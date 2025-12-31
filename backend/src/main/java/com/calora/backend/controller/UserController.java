@@ -14,14 +14,40 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private com.calora.backend.repository.MealRepository mealRepository;
+
+    @Autowired
+    private com.calora.backend.repository.ActivityRepository activityRepository;
+
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    @DeleteMapping("/{id}")
+    @jakarta.transaction.Transactional
+    public org.springframework.http.ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        return userRepository.findById(id)
+                .map(user -> {
+                    mealRepository.deleteByUserId(id);
+                    activityRepository.deleteByUserId(id);
+                    userRepository.delete(user);
+                    return org.springframework.http.ResponseEntity.ok().build();
+                })
+                .orElse(org.springframework.http.ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public User createUser(@RequestBody User user) {
         return userRepository.save(user);
+    }
+
+    @GetMapping("/{id}")
+    public org.springframework.http.ResponseEntity<User> getUserById(@PathVariable Long id) {
+        return userRepository.findById(id)
+                .map(org.springframework.http.ResponseEntity::ok)
+                .orElse(org.springframework.http.ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")

@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }

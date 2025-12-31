@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface MealRepository extends JpaRepository<Meal, Long> {
     List<Meal> findByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }
