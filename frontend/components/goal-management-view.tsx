@@ -31,13 +31,58 @@ export default function GoalManagementView() {
   useEffect(() => {
     const userStr = localStorage.getItem("calora_user")
     if (userStr) {
-      const user = JSON.parse(userStr)
-      setUserId(user.id)
-      if (user.age) setAge(user.age.toString())
-      if (user.gender) setGender(user.gender)
-      if (user.height) setHeight(user.height.toString())
-      if (user.weight) setWeight(user.weight.toString())
-      if (user.activityLevel) setActivityLevel(user.activityLevel)
+      const storedUser = JSON.parse(userStr)
+      console.log("GoalManagement loaded user from localStorage:", storedUser)
+      setUserId(storedUser.id)
+
+      if (storedUser.id) {
+        // Fetch fresh data from API
+        fetch(`http://localhost:8080/users/${storedUser.id}`)
+          .then((res) => {
+            if (res.ok) return res.json();
+            throw new Error("Failed to fetch user");
+          })
+          .then((user) => {
+            console.log("GoalManagement fetched fresh user:", user);
+            if (user.age) {
+              console.log("Setting age:", user.age)
+              setAge(user.age.toString())
+            }
+            if (user.gender) {
+              console.log("Setting gender:", user.gender)
+              setGender(user.gender.toLowerCase().trim())
+            }
+            if (user.height) {
+              console.log("Setting height:", user.height)
+              setHeight(user.height.toString())
+            }
+            if (user.weight) {
+              console.log("Setting weight:", user.weight)
+              setWeight(user.weight.toString())
+            }
+            if (user.activityLevel) {
+              console.log("Setting activityLevel:", user.activityLevel)
+              setActivityLevel(user.activityLevel.toLowerCase().trim())
+            } else {
+              console.log("activityLevel missing in fetched user object")
+              // Fallback to local storage if API missing field (unlikely)
+              if (storedUser.activityLevel) {
+                setActivityLevel(storedUser.activityLevel.toLowerCase().trim())
+              }
+            }
+          })
+          .catch((err) => {
+            console.error("Error fetching user data:", err);
+            // Fallback to local storage data on error
+            if (storedUser.age) setAge(storedUser.age.toString())
+            if (storedUser.gender) setGender(storedUser.gender.toLowerCase().trim())
+            if (storedUser.height) setHeight(storedUser.height.toString())
+            if (storedUser.weight) setWeight(storedUser.weight.toString())
+            if (storedUser.activityLevel) setActivityLevel(storedUser.activityLevel.toLowerCase().trim())
+          });
+      }
+    } else {
+      console.log("No calora_user in localStorage")
     }
   }, [])
 

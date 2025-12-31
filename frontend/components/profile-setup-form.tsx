@@ -35,17 +35,20 @@ export default function ProfileSetupForm() {
     }
     const user = JSON.parse(userStr)
 
+    const payload = {
+      age: parseInt(age),
+      gender,
+      height: parseFloat(height),
+      weight: parseFloat(weight),
+      activityLevel
+    }
+    console.log("Submitting Profile Setup:", payload)
+
     try {
       const res = await fetch(`http://localhost:8080/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          age: parseInt(age),
-          gender,
-          height: parseFloat(height),
-          weight: parseFloat(weight),
-          activityLevel
-        })
+        body: JSON.stringify(payload)
       })
 
       if (res.ok) {

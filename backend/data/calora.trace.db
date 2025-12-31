@@ -1,0 +1,4 @@
+2025-12-31 21:41:16.893348+03:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "DELETE FROM users\000d\000aWHERE id is [*]4"; expected "NOT, OF, JSON, NULL, DISTINCT, TRUE, FALSE, UNKNOWN"; SQL statement:
+DELETE FROM users
+WHERE id is 4 [42001-232]
