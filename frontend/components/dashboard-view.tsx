@@ -50,62 +50,9 @@ import {
   Legend,
 } from "recharts"
 
-// Sample data for insights charts
-const calorieTrendsData = [
-  { date: "Dec 6", consumed: 1850, target: 2200, burned: 320 },
-  { date: "Dec 7", consumed: 2100, target: 2200, burned: 280 },
-  { date: "Dec 8", consumed: 1950, target: 2200, burned: 350 },
-  { date: "Dec 9", consumed: 2200, target: 2200, burned: 290 },
-  { date: "Dec 10", consumed: 1800, target: 2200, burned: 380 },
-  { date: "Dec 11", consumed: 2050, target: 2200, burned: 310 },
-  { date: "Dec 12", consumed: 1450, target: 2200, burned: 380 },
-]
-
-const weightTrajectoryData = [
-  { week: "Week 1", weight: 85.2, goal: 82.0 },
-  { week: "Week 2", weight: 84.8, goal: 82.0 },
-  { week: "Week 3", weight: 84.3, goal: 82.0 },
-  { week: "Week 4", weight: 83.9, goal: 82.0 },
-  { week: "Week 5", weight: 83.5, goal: 82.0 },
-  { week: "Week 6", weight: 83.1, goal: 82.0 },
-  { week: "Week 7", weight: 82.8, goal: 82.0 },
-  { week: "Week 8", weight: 82.5, goal: 82.0 },
-]
-
-// Sample recent activities data
-const recentActivities = [
-  {
-    id: 1,
-    type: "Running",
-    duration: "30 min",
-    calories: 280,
-    time: "2 hours ago",
-  },
-  {
-    id: 2,
-    type: "Walking",
-    duration: "45 min",
-    calories: 120,
-    time: "4 hours ago",
-  },
-  {
-    id: 3,
-    type: "Cycling",
-    duration: "60 min",
-    calories: 400,
-    time: "Yesterday",
-  },
-  {
-    id: 4,
-    type: "Swimming",
-    duration: "40 min",
-    calories: 320,
-    time: "2 days ago",
-  },
-]
 
 export default function DashboardView() {
-  // Sample data - in production this would come from user profile and daily tracking
+  // Data comes from user profile and daily tracking
   const [summary, setSummary] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
 
@@ -645,28 +592,34 @@ export default function DashboardView() {
                       <p className="text-sm" style={{ color: "#708993" }}>
                         Your activities from today:
                       </p>
-                      {recentActivities.map((activity) => (
-                        <div
-                          key={activity.id}
-                          className="p-4 rounded-lg border"
-                          style={{ backgroundColor: "#E7F2EF", borderColor: "#A1C2BD" }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium" style={{ color: "#004030" }}>
-                                {activity.type}
-                              </h4>
-                              <p className="text-sm" style={{ color: "#708993" }}>
-                                {activity.duration} • {activity.calories} calories
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-1 text-xs" style={{ color: "#708993" }}>
-                              <Clock className="h-3 w-3" />
-                              {activity.time}
+                      {summary?.recentActivities && summary.recentActivities.length > 0 ? (
+                        summary.recentActivities.map((activity: any) => (
+                          <div
+                            key={activity.id}
+                            className="p-4 rounded-lg border"
+                            style={{ backgroundColor: "#E7F2EF", borderColor: "#A1C2BD" }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium" style={{ color: "#004030" }}>
+                                  {activity.type}
+                                </h4>
+                                <p className="text-sm" style={{ color: "#708993" }}>
+                                  {activity.duration} • {activity.calories} calories
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 text-xs" style={{ color: "#708993" }}>
+                                <Clock className="h-3 w-3" />
+                                {activity.time}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))
+                      ) : (
+                        <p className="text-sm italic" style={{ color: "#708993" }}>
+                          No recent activities found.
+                        </p>
+                      )}
                     </div>
                     <Button
                       onClick={() => {
@@ -719,7 +672,7 @@ export default function DashboardView() {
                         </CardHeader>
                         <CardContent>
                           <ResponsiveContainer width="100%" height={250}>
-                            <LineChart data={calorieTrendsData}>
+                            <LineChart data={summary?.calorieTrends || []}>
                               <CartesianGrid strokeDasharray="3 3" stroke="#A1C2BD" />
                               <XAxis dataKey="date" stroke="#708993" />
                               <YAxis stroke="#708993" />
@@ -740,7 +693,7 @@ export default function DashboardView() {
                         </CardContent>
                       </Card>
 
-                      {/* Weight Trajectory Chart */}
+                      {/* Weight Trajectory Chart - Note: Using simplified data for now as backend only has current weight */}
                       <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2" style={{ color: "#004030" }}>
@@ -748,35 +701,14 @@ export default function DashboardView() {
                             Weight Trajectory
                           </CardTitle>
                           <CardDescription style={{ color: "#708993" }}>
-                            Your weight progress over the last 8 weeks
+                            Weight: {summary?.currentWeight || "--"} kg
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <ResponsiveContainer width="100%" height={250}>
-                            <LineChart data={weightTrajectoryData}>
-                              <CartesianGrid strokeDasharray="3 3" stroke="#A1C2BD" />
-                              <XAxis dataKey="week" stroke="#708993" />
-                              <YAxis stroke="#708993" domain={[80, 87]} />
-                              <Tooltip
-                                contentStyle={{
-                                  backgroundColor: "#FFF9E5",
-                                  border: "1px solid #DCD0A8",
-                                  borderRadius: "8px",
-                                  color: "#004030",
-                                }}
-                              />
-                              <Legend />
-                              <Line type="monotone" dataKey="weight" stroke="#FFC50F" strokeWidth={3} name="Current Weight (kg)" />
-                              <Line
-                                type="monotone"
-                                dataKey="goal"
-                                stroke="#63A361"
-                                strokeWidth={2}
-                                strokeDasharray="5 5"
-                                name="Goal Weight (kg)"
-                              />
-                            </LineChart>
-                          </ResponsiveContainer>
+                          <p className="text-sm text-center py-10" style={{ color: "#708993" }}>
+                            Detailed weight history tracking coming soon. <br />
+                            Current Weight: {summary?.currentWeight} kg
+                          </p>
                         </CardContent>
                       </Card>
                     </div>

@@ -1,0 +1,6 @@
+#FileLock
+#Thu Jan 01 22:52:02 IRST 2026
+hostName=10.8.1.37
+id=19b7b0288beeb581f8438f138ed11bed64d967ca914
+method=file
+server=10.8.1.37\:10485
