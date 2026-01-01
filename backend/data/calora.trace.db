@@ -2,3 +2,12 @@
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "DELETE FROM users\000d\000aWHERE id is [*]4"; expected "NOT, OF, JSON, NULL, DISTINCT, TRUE, FALSE, UNKNOWN"; SQL statement:
 DELETE FROM users
 WHERE id is 4 [42001-232]
+2026-01-01 23:00:06.234998+03:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]* from users where id > 3"; expected "identifier"; SQL statement:
+delete * from users where id > 3 [42001-232]
+2026-01-01 23:00:23.294798+03:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]* from users where id in (4,5)"; expected "identifier"; SQL statement:
+delete * from users where id in (4,5) [42001-232]
+2026-01-01 23:00:34.737148+03:30 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]* from users where id > 3"; expected "identifier"; SQL statement:
+delete * from users where id > 3 [42001-232]
