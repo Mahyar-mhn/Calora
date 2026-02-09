@@ -59,23 +59,10 @@ export default function MealFoodView() {
   const [barcodeImage, setBarcodeImage] = useState<string | null>(null)
   const barcodeFileInputRef = useRef<HTMLInputElement>(null)
 
-  const [isRecipeModalOpen, setIsRecipeModalOpen] = useState(false)
-  const [recipeName, setRecipeName] = useState("")
-  const [ingredients, setIngredients] = useState<{ name: string; quantity: string; unit: string }[]>([])
-  const [isAddIngredientOpen, setIsAddIngredientOpen] = useState(false)
-  const [newIngredient, setNewIngredient] = useState({ name: "", quantity: "", unit: "g" })
-  const [totalCalories, setTotalCalories] = useState(0)
-  const [recipeCategory, setRecipeCategory] = useState("🏆 High Protein Density")
-  const [recipeMealType, setRecipeMealType] = useState("🍛 Main Dishes")
-  const [showNutrition, setShowNutrition] = useState(false)
-
   const [isAIPhotoModalOpen, setIsAIPhotoModalOpen] = useState(false)
   const [foodImage, setFoodImage] = useState<string | null>(null)
   const aiPhotoFileInputRef = useRef<HTMLInputElement>(null)
 
-  const [selectedRecipe, setSelectedRecipe] = useState<any>(null)
-  const [recipeQuantity, setRecipeQuantity] = useState("1")
-  const [recipeUnit, setRecipeUnit] = useState("serving")
   const [recentFoods, setRecentFoods] = useState<RecentMeal[]>([])
   const [isLoadingRecents, setIsLoadingRecents] = useState(false)
 
@@ -183,26 +170,6 @@ export default function MealFoodView() {
     setBarcodeImage(null)
   }
 
-  const handleAddIngredient = () => {
-    if (newIngredient.name && newIngredient.quantity) {
-      setIngredients([...ingredients, newIngredient])
-      setNewIngredient({ name: "", quantity: "", unit: "g" })
-      setIsAddIngredientOpen(false)
-    }
-  }
-
-  const handleRemoveIngredient = (index: number) => {
-    setIngredients(ingredients.filter((_, i) => i !== index))
-  }
-
-  const handleCalculateCalories = () => {
-    // Backend will calculate total calories based on ingredients
-    const mockCalories = ingredients.length * 150 // Mock calculation
-    setTotalCalories(mockCalories)
-    setShowNutrition(true)
-    console.log("Calculating calories from backend for ingredients:", ingredients)
-  }
-
   const handleQuickAddMeal = async () => {
     if (!quickMealName || !quickCalories) {
       alert("Please enter meal name and calories")
@@ -300,29 +267,6 @@ export default function MealFoodView() {
       console.error("Error deleting meal", err)
       alert("Error deleting meal")
     }
-  }
-
-  const handleAddRecipeToFoods = () => {
-    console.log("Adding custom recipe to recent foods:", {
-      name: recipeName,
-      category: recipeCategory,
-      mealType: recipeMealType,
-      ingredients,
-      calories: totalCalories,
-    })
-    alert(`${recipeName} has been added to your Recent Foods!`)
-    closeRecipeModal()
-  }
-
-  const closeRecipeModal = () => {
-    setIsRecipeModalOpen(false)
-    setRecipeName("")
-    setIngredients([])
-    setTotalCalories(0)
-    setIsAddIngredientOpen(false)
-    setShowNutrition(false)
-    setRecipeCategory("🏆 High Protein Density")
-    setRecipeMealType("🍛 Main Dishes")
   }
 
   const handleAIPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -700,29 +644,6 @@ export default function MealFoodView() {
             </Card>
 
             <Card
-              className="cursor-pointer transition-all hover:shadow-lg"
-              style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
-              onClick={() => setIsRecipeModalOpen(true)}
-            >
-              <CardContent className="flex flex-col items-center justify-center gap-4 p-6">
-                <div
-                  className="flex h-20 w-20 items-center justify-center rounded-full"
-                  style={{ backgroundColor: "#E7F2EF" }}
-                >
-                  <Plus className="h-10 w-10" style={{ color: "#4A9782" }} />
-                </div>
-                <div className="text-center">
-                  <h3 className="font-semibold" style={{ color: "#004030" }}>
-                    Custom Recipe
-                  </h3>
-                  <p className="mt-1 text-sm" style={{ color: "#708993" }}>
-                    Create your own recipe
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card
               className="cursor-pointer transition-all hover:shadow-lg md:col-span-2"
               style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
               onClick={() => setIsAIPhotoModalOpen(true)}
@@ -923,269 +844,6 @@ export default function MealFoodView() {
                   </p>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Custom Recipe Modal */}
-      {isRecipeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/50" onClick={closeRecipeModal} />
-          <div
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg p-6 shadow-xl"
-            style={{ backgroundColor: "#FFF9E5" }}
-          >
-            <button
-              onClick={closeRecipeModal}
-              className="absolute right-4 top-4 rounded-full p-1 transition-colors hover:bg-opacity-50"
-              style={{ color: "#004030" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#E7F2EF"
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent"
-              }}
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <h2 className="mb-6 text-2xl font-bold" style={{ color: "#004030" }}>
-              Create Custom Recipe
-            </h2>
-
-            <div className="space-y-6">
-              <div>
-                <Label htmlFor="recipeName" className="mb-2 block text-sm font-medium" style={{ color: "#004030" }}>
-                  Recipe Name
-                </Label>
-                <Input
-                  id="recipeName"
-                  value={recipeName}
-                  onChange={(e) => setRecipeName(e.target.value)}
-                  placeholder="Enter recipe name"
-                  style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF", color: "#004030" }}
-                />
-              </div>
-
-              <div>
-                <Label className="mb-2 block text-sm font-medium" style={{ color: "#004030" }}>
-                  Category (Auto-suggested)
-                </Label>
-                <select
-                  value={recipeCategory}
-                  onChange={(e) => setRecipeCategory(e.target.value)}
-                  className="h-10 w-full rounded-lg border px-3 py-2 text-sm outline-none"
-                  style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF", color: "#004030" }}
-                >
-                  <option value="🍗 Lean Animal Proteins">🍗 Lean Animal Proteins</option>
-                  <option value="🥩 Fatty Animal Proteins">🥩 Fatty Animal Proteins</option>
-                  <option value="🌱 Plant Proteins">🌱 Plant Proteins</option>
-                  <option value="🍚 Complex Carbohydrates">🍚 Complex Carbohydrates</option>
-                  <option value="🍞 Refined Carbohydrates">🍞 Refined Carbohydrates</option>
-                  <option value="🥑 Healthy Fats">🥑 Healthy Fats</option>
-                  <option value="🍟 High-Fat / Processed">🍟 High-Fat / Processed</option>
-                  <option value="🔥 Low-Calorie Foods">🔥 Low-Calorie Foods</option>
-                  <option value="⚖️ Moderate-Calorie Foods">⚖️ Moderate-Calorie Foods</option>
-                  <option value="💣 High-Calorie Foods">💣 High-Calorie Foods</option>
-                  <option value="🏆 High Protein Density">🏆 High Protein Density</option>
-                  <option value="⚠️ Low Protein Density">⚠️ Low Protein Density</option>
-                </select>
-              </div>
-
-              <div>
-                <Label className="mb-2 block text-sm font-medium" style={{ color: "#004030" }}>
-                  Meal Type
-                </Label>
-                <select
-                  value={recipeMealType}
-                  onChange={(e) => setRecipeMealType(e.target.value)}
-                  className="h-10 w-full rounded-lg border px-3 py-2 text-sm outline-none"
-                  style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF", color: "#004030" }}
-                >
-                  <option value="🍳 Breakfast Foods">🍳 Breakfast Foods</option>
-                  <option value="🍛 Main Dishes">🍛 Main Dishes</option>
-                  <option value="🥗 Side Dishes">🥗 Side Dishes</option>
-                  <option value="🍰 Desserts">🍰 Desserts</option>
-                  <option value="🥤 Snacks & Drinks">🥤 Snacks & Drinks</option>
-                </select>
-              </div>
-
-              <div>
-                <div className="mb-3 flex items-center justify-between">
-                  <Label className="text-sm font-medium" style={{ color: "#004030" }}>
-                    Ingredients
-                  </Label>
-                  <Button
-                    size="sm"
-                    onClick={() => setIsAddIngredientOpen(true)}
-                    className="transition-all hover:shadow-md"
-                    style={{ backgroundColor: "#4A9782", color: "#FFF9E5" }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#3d7f6d"
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "#4A9782"
-                    }}
-                  >
-                    <Plus className="mr-1 h-4 w-4" />
-                    Add Ingredient
-                  </Button>
-                </div>
-
-                {ingredients.length > 0 && (
-                  <div className="space-y-2">
-                    {ingredients.map((ingredient, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between rounded-lg border p-3"
-                        style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF" }}
-                      >
-                        <span style={{ color: "#004030" }}>
-                          {ingredient.name} - {ingredient.quantity} {ingredient.unit}
-                        </span>
-                        <button
-                          onClick={() => handleRemoveIngredient(index)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {ingredients.length > 0 && !showNutrition && (
-                <Button
-                  onClick={handleCalculateCalories}
-                  className="w-full transition-all hover:shadow-md"
-                  style={{ backgroundColor: "#004030", color: "#FFF9E5" }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#002820"
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#004030"
-                  }}
-                >
-                  Calculate Nutrition
-                </Button>
-              )}
-
-              {showNutrition && totalCalories > 0 && (
-                <div className="space-y-4">
-                  <div className="rounded-lg border p-4" style={{ backgroundColor: "#E7F2EF", borderColor: "#A1C2BD" }}>
-                    <h4 className="mb-2 text-lg font-semibold" style={{ color: "#004030" }}>
-                      Total Calories
-                    </h4>
-                    <p className="text-3xl font-bold" style={{ color: "#4A9782" }}>
-                      {totalCalories} kcal
-                    </p>
-                  </div>
-
-                  <Button
-                    onClick={handleAddRecipeToFoods}
-                    className="w-full transition-all hover:shadow-md"
-                    style={{ backgroundColor: "#4A9782", color: "#FFF9E5" }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = "#3d7f6d"
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = "#4A9782"
-                    }}
-                  >
-                    Add Recipe to Food Library
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isAddIngredientOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setIsAddIngredientOpen(false)} />
-          <div className="relative w-full max-w-md rounded-lg p-6 shadow-xl" style={{ backgroundColor: "#FFF9E5" }}>
-            <h3 className="mb-4 text-xl font-bold" style={{ color: "#004030" }}>
-              Add Ingredient
-            </h3>
-
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="ingredientName" className="mb-2 block text-sm font-medium" style={{ color: "#004030" }}>
-                  Ingredient Name
-                </Label>
-                <Input
-                  id="ingredientName"
-                  value={newIngredient.name}
-                  onChange={(e) => setNewIngredient({ ...newIngredient, name: e.target.value })}
-                  placeholder="e.g., Chicken breast"
-                  style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF", color: "#004030" }}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="quantity" className="mb-2 block text-sm font-medium" style={{ color: "#004030" }}>
-                    Quantity
-                  </Label>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    value={newIngredient.quantity}
-                    onChange={(e) => setNewIngredient({ ...newIngredient, quantity: e.target.value })}
-                    placeholder="100"
-                    style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF", color: "#004030" }}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="unit" className="mb-2 block text-sm font-medium" style={{ color: "#004030" }}>
-                    Unit
-                  </Label>
-                  <select
-                    id="unit"
-                    value={newIngredient.unit}
-                    onChange={(e) => setNewIngredient({ ...newIngredient, unit: e.target.value })}
-                    className="h-10 w-full rounded-lg border px-3 py-2 text-sm outline-none"
-                    style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF", color: "#004030" }}
-                  >
-                    <option value="g">gram (g)</option>
-                    <option value="kg">kilogram (kg)</option>
-                    <option value="oz">ounce (oz)</option>
-                    <option value="lb">pound (lb)</option>
-                    <option value="cup">cup</option>
-                    <option value="tbsp">tablespoon</option>
-                    <option value="tsp">teaspoon</option>
-                    <option value="piece">piece</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => setIsAddIngredientOpen(false)}
-                  variant="outline"
-                  className="flex-1 transition-colors"
-                  style={{ borderColor: "#A1C2BD", color: "#004030" }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddIngredient}
-                  className="flex-1 transition-all hover:shadow-md"
-                  style={{ backgroundColor: "#4A9782", color: "#FFF9E5" }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#3d7f6d"
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#4A9782"
-                  }}
-                >
-                  Add
-                </Button>
-              </div>
             </div>
           </div>
         </div>
