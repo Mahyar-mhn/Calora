@@ -4,9 +4,10 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Menu, User, Home, Utensils, Cookie, Activity, History, ArrowLeft } from "lucide-react"
+import { Menu, Home, Utensils, Cookie, Activity, History, ArrowLeft } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import ProfileAvatarButton from "./profile-avatar-button"
 
 export default function NotificationsSettingsView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -57,18 +58,7 @@ export default function NotificationsSettingsView() {
                 Notifications
               </h1>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-transparent"
-              style={{
-                borderColor: "#4A9782",
-                color: "#004030",
-              }}
-              onClick={() => handleNavigation("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+            <ProfileAvatarButton onClick={() => handleNavigation("/profile")} />
           </div>
         </div>
       </header>

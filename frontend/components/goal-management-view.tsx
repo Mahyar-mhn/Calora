@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Menu, User, Home, Utensils, Cookie, Activity, History, ArrowLeft } from "lucide-react"
+import { Menu, Home, Utensils, Cookie, Activity, History, ArrowLeft } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import ProfileAvatarButton from "./profile-avatar-button"
 
 export default function GoalManagementView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -199,18 +200,7 @@ export default function GoalManagementView() {
                 Goal Management
               </h1>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-transparent"
-              style={{
-                borderColor: "#4A9782",
-                color: "#004030",
-              }}
-              onClick={() => handleNavigation("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+            <ProfileAvatarButton onClick={() => handleNavigation("/profile")} />
           </div>
         </div>
       </header>

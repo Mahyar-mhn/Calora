@@ -4,11 +4,12 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Menu, User, Plus, Search, Home, Utensils, Cookie, Activity, History, Calendar, Star } from "lucide-react"
+import { Menu, Plus, Search, Home, Utensils, Cookie, Activity, History, Calendar, Star } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import FoodModal from "@/components/food-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
+import ProfileAvatarButton from "@/components/profile-avatar-button"
 
 export default function FoodModalPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -307,18 +308,7 @@ export default function FoodModalPage() {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <Button
-                variant="outline"
-                size="icon"
-                className="rounded-full bg-transparent"
-                style={{
-                  borderColor: "#4A9782",
-                  color: "#004030",
-                }}
-                onClick={() => router.push("/profile")}
-              >
-                <User className="h-5 w-5" />
-              </Button>
+              <ProfileAvatarButton onClick={() => router.push("/profile")} />
             </div>
           </div>
         </div>

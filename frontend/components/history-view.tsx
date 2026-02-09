@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
-  User,
   Menu,
   Home,
   Utensils,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import ProfileAvatarButton from "./profile-avatar-button"
 import {
   LineChart,
   Line,
@@ -191,18 +191,7 @@ export default function HistoryView() {
                 History & Analytics
               </h1>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-transparent"
-              style={{
-                borderColor: "#4A9782",
-                color: "#004030",
-              }}
-              onClick={() => handleNavigation("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+            <ProfileAvatarButton onClick={() => handleNavigation("/profile")} />
           </div>
         </div>
       </header>

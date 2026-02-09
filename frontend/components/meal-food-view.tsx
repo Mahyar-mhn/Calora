@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
-  User,
   Menu,
   Home,
   Utensils,
@@ -26,6 +25,7 @@ import {
 import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import FoodModal from "./food-modal"
+import ProfileAvatarButton from "./profile-avatar-button"
 
 type RecentMeal = {
   id?: number
@@ -322,18 +322,7 @@ export default function MealFoodView() {
                 Meal & Food
               </h1>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-transparent"
-              style={{
-                borderColor: "#4A9782",
-                color: "#004030",
-              }}
-              onClick={() => router.push("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+            <ProfileAvatarButton onClick={() => router.push("/profile")} />
           </div>
         </div>
       </header>

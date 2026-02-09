@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import {
-  User,
   Menu,
   Home,
   Utensils,
@@ -26,6 +25,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import ProfileAvatarButton from "./profile-avatar-button"
 import {
   LineChart,
   Line,
@@ -144,18 +144,7 @@ export default function AdvancedAnalyticsView() {
                 </span>
               </div>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-transparent"
-              style={{
-                borderColor: "#4A9782",
-                color: "#004030",
-              }}
-              onClick={() => router.push("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+            <ProfileAvatarButton onClick={() => router.push("/profile")} />
           </div>
         </div>
       </header>

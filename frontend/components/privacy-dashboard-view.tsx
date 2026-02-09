@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import {
   Menu,
-  User,
   Home,
   Utensils,
   Cookie,
@@ -20,6 +19,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import ProfileAvatarButton from "./profile-avatar-button"
 
 export default function PrivacyDashboardView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -75,18 +75,10 @@ export default function PrivacyDashboardView() {
                 Privacy Dashboard
               </h1>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-transparent transition-colors hover:bg-[#E7F2EF]"
-              style={{
-                borderColor: "#4A9782",
-                color: "#004030",
-              }}
+            <ProfileAvatarButton
               onClick={() => handleNavigation("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+              className="transition-colors hover:bg-[#E7F2EF]"
+            />
           </div>
         </div>
       </header>

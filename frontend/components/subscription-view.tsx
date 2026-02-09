@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Menu,
-  User,
   Home,
   Utensils,
   Cookie,
@@ -25,6 +24,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import ProfileAvatarButton from "./profile-avatar-button"
 
 export default function SubscriptionView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -90,24 +90,16 @@ export default function SubscriptionView() {
                 Subscription & Premium
               </h1>
             </div>
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-full bg-transparent transition-all hover:shadow-md"
-              style={{
-                borderColor: "#4A9782",
-                color: "#004030",
-              }}
+            <ProfileAvatarButton
+              onClick={() => handleNavigation("/profile")}
+              className="transition-all hover:shadow-md"
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "#E7F2EF"
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = "transparent"
               }}
-              onClick={() => handleNavigation("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
+            />
           </div>
         </div>
       </header>
