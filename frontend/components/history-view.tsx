@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -32,7 +32,7 @@ import {
 } from "recharts"
 
 // Sample data for calorie trends (last 7 days)
-const calorieTrendsData = [
+const defaultCalorieTrendsData = [
   { date: "Mon", consumed: 2100, target: 2200, burned: 350 },
   { date: "Tue", consumed: 2300, target: 2200, burned: 420 },
   { date: "Wed", consumed: 2050, target: 2200, burned: 380 },
@@ -43,7 +43,7 @@ const calorieTrendsData = [
 ]
 
 // Sample data for macro adherence (last 7 days)
-const macroAdherenceData = [
+const defaultMacroAdherenceData = [
   { date: "Mon", protein: 165, carbs: 220, fats: 70 },
   { date: "Tue", protein: 158, carbs: 248, fats: 75 },
   { date: "Wed", protein: 172, carbs: 235, fats: 68 },
@@ -67,12 +67,99 @@ const weightTrajectoryData = [
 
 export default function HistoryView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [calorieTrendsData, setCalorieTrendsData] = useState(defaultCalorieTrendsData)
+  const [macroAdherenceData, setMacroAdherenceData] = useState(defaultMacroAdherenceData)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleNavigation = (path: string) => {
     router.push(path)
     setIsMenuOpen(false)
   }
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      const userStr = localStorage.getItem("calora_user")
+      if (!userStr) return
+
+      const user = JSON.parse(userStr)
+      const endDate = new Date()
+      const startDate = new Date()
+      startDate.setDate(endDate.getDate() - 6)
+
+      const from = startDate.toISOString().slice(0, 10)
+      const to = endDate.toISOString().slice(0, 10)
+      const dailyTarget = user.dailyCalorieTarget ?? 2200
+
+      setIsLoading(true)
+      try {
+        const [mealsRes, activitiesRes] = await Promise.all([
+          fetch(`http://localhost:8080/meals/user/${user.id}/range?from=${from}&to=${to}`),
+          fetch(`http://localhost:8080/activities/user/${user.id}/range?from=${from}&to=${to}`),
+        ])
+
+        const meals = mealsRes.ok ? await mealsRes.json() : []
+        const activities = activitiesRes.ok ? await activitiesRes.json() : []
+
+        const mealTotalsByDate = new Map<string, { calories: number; protein: number; carbs: number; fats: number }>()
+        for (const meal of meals) {
+          if (!meal?.date) continue
+          const dateKey = String(meal.date).split("T")[0]
+          const current = mealTotalsByDate.get(dateKey) ?? { calories: 0, protein: 0, carbs: 0, fats: 0 }
+          current.calories += meal.calories ?? 0
+          current.protein += meal.protein ?? 0
+          current.carbs += meal.carbs ?? 0
+          current.fats += meal.fats ?? 0
+          mealTotalsByDate.set(dateKey, current)
+        }
+
+        const activityTotalsByDate = new Map<string, { burned: number }>()
+        for (const activity of activities) {
+          if (!activity?.date) continue
+          const dateKey = String(activity.date).split("T")[0]
+          const current = activityTotalsByDate.get(dateKey) ?? { burned: 0 }
+          current.burned += activity.caloriesBurned ?? 0
+          activityTotalsByDate.set(dateKey, current)
+        }
+
+        const trends: Array<{ date: string; consumed: number; target: number; burned: number }> = []
+        const macros: Array<{ date: string; protein: number; carbs: number; fats: number }> = []
+
+        for (let i = 6; i >= 0; i--) {
+          const day = new Date()
+          day.setDate(endDate.getDate() - i)
+
+          const dateKey = `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}`
+          const label = day.toLocaleDateString("en-US", { weekday: "short" })
+
+          const mealTotals = mealTotalsByDate.get(dateKey) ?? { calories: 0, protein: 0, carbs: 0, fats: 0 }
+          const activityTotals = activityTotalsByDate.get(dateKey) ?? { burned: 0 }
+
+          trends.push({
+            date: label,
+            consumed: mealTotals.calories,
+            target: dailyTarget,
+            burned: activityTotals.burned,
+          })
+          macros.push({
+            date: label,
+            protein: mealTotals.protein,
+            carbs: mealTotals.carbs,
+            fats: mealTotals.fats,
+          })
+        }
+
+        setCalorieTrendsData(trends)
+        setMacroAdherenceData(macros)
+      } catch (err) {
+        console.error("Failed to load history data", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchHistory()
+  }, [])
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
@@ -210,8 +297,13 @@ export default function HistoryView() {
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5" style={{ color: "#4A9782" }} />
             <span className="font-medium" style={{ color: "#004030" }}>
-              Last 30 Days
+              Last 7 Days
             </span>
+            {isLoading && (
+              <span className="text-xs" style={{ color: "#708993" }}>
+                Loading...
+              </span>
+            )}
           </div>
           <Button
             className="flex items-center gap-2"

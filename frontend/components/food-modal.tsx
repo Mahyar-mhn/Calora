@@ -35,7 +35,8 @@ export default function FoodModal({
 
   if (!isOpen) return null
 
-  const multiplier = Number.parseFloat(quantity) || 1
+  const quantityValue = Number.parseFloat(quantity) || 1
+  const multiplier = quantityValue
 
   const handleAddToLog = async () => {
     try {
@@ -57,7 +58,11 @@ export default function FoodModal({
         protein: totalProtein,
         carbs: totalCarbs,
         fats: totalFats,
-        date: new Date(),
+        mealType,
+        quantity: quantityValue,
+        unit,
+        source: "food-modal",
+        date: new Date().toISOString().slice(0, 19),
         user: { id: user.id }
       }
 

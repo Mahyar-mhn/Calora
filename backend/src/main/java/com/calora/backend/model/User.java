@@ -1,6 +1,7 @@
 package com.calora.backend.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "users")
@@ -15,6 +16,7 @@ public class User {
 
     private String name;
 
+    @JsonIgnore
     private String password;
 
     public User() {

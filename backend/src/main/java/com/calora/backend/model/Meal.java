@@ -17,6 +17,10 @@ public class Meal {
     private Integer carbs;
     private Integer fats;
     private LocalDateTime date;
+    private String mealType;
+    private Double quantity;
+    private String unit;
+    private String source;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -55,6 +59,18 @@ public class Meal {
 
     public LocalDateTime getDate() { return date; }
     public void setDate(LocalDateTime date) { this.date = date; }
+
+    public String getMealType() { return mealType; }
+    public void setMealType(String mealType) { this.mealType = mealType; }
+
+    public Double getQuantity() { return quantity; }
+    public void setQuantity(Double quantity) { this.quantity = quantity; }
+
+    public String getUnit() { return unit; }
+    public void setUnit(String unit) { this.unit = unit; }
+
+    public String getSource() { return source; }
+    public void setSource(String source) { this.source = source; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

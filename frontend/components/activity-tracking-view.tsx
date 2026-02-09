@@ -188,7 +188,7 @@ export default function ActivityTrackingView() {
           type: workoutType,
           duration: Number.parseInt(duration),
           caloriesBurned: calories ? Number.parseInt(calories) : Number.parseInt(duration) * 5, // Simple auto-calc fallback
-          date: new Date(),
+          date: new Date().toISOString().slice(0, 19),
           user: { id: user.id } // Send user ID association
         }
 
