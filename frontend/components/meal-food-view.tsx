@@ -274,6 +274,34 @@ export default function MealFoodView() {
     }
   }
 
+  const handleDeleteRecentMeal = async (meal: RecentMeal, index: number) => {
+    if (!meal.id) {
+      setRecentFoods(recentFoods.filter((_, i) => i !== index))
+      return
+    }
+
+    try {
+      const userStr = localStorage.getItem("calora_user")
+      const user = userStr ? JSON.parse(userStr) : null
+      const userId = user?.id
+
+      const url = userId
+        ? `http://localhost:8080/meals/${meal.id}?userId=${userId}`
+        : `http://localhost:8080/meals/${meal.id}`
+
+      const res = await fetch(url, { method: "DELETE" })
+      if (res.ok) {
+        setRecentFoods(recentFoods.filter((_, i) => i !== index))
+      } else {
+        console.error("Failed to delete meal", await res.text())
+        alert("Failed to delete meal. Please try again.")
+      }
+    } catch (err) {
+      console.error("Error deleting meal", err)
+      alert("Error deleting meal")
+    }
+  }
+
   const handleAddRecipeToFoods = () => {
     console.log("Adding custom recipe to recent foods:", {
       name: recipeName,
@@ -791,9 +819,7 @@ export default function MealFoodView() {
                             borderColor: "#DCD0A8",
                             color: "#004030",
                           }}
-                          onClick={() => {
-                            setRecentFoods(recentFoods.filter((_, i) => i !== index))
-                          }}
+                          onClick={() => handleDeleteRecentMeal(food, index)}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = "#ff4444"
                             e.currentTarget.style.borderColor = "#ff4444"

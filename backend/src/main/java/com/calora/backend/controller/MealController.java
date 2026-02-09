@@ -74,4 +74,20 @@ public class MealController {
         Meal saved = mealRepository.save(meal);
         return ResponseEntity.ok(saved);
     }
+
+    @DeleteMapping("/{mealId}")
+    public ResponseEntity<?> deleteMeal(@PathVariable Long mealId, @RequestParam(required = false) Long userId) {
+        Optional<Meal> mealOpt = mealRepository.findById(mealId);
+        if (mealOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Meal not found");
+        }
+
+        Meal meal = mealOpt.get();
+        if (userId != null && (meal.getUser() == null || !userId.equals(meal.getUser().getId()))) {
+            return ResponseEntity.status(403).body("Not allowed to delete this meal");
+        }
+
+        mealRepository.deleteById(mealId);
+        return ResponseEntity.ok().build();
+    }
 }
