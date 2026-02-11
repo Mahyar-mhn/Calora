@@ -69,6 +69,17 @@ export default function HistoryView() {
     setIsMenuOpen(false)
   }
 
+  const handlePremiumNavigation = (path: string) => {
+    const userStr = localStorage.getItem("calora_user")
+    const currentUser = userStr ? JSON.parse(userStr) : null
+    if (!currentUser?.isPremium) {
+      router.push("/subscription")
+      setIsMenuOpen(false)
+      return
+    }
+    handleNavigation(path)
+  }
+
   useEffect(() => {
     const fetchHistory = async () => {
       const userStr = localStorage.getItem("calora_user")
@@ -305,7 +316,7 @@ export default function HistoryView() {
               backgroundColor: "#4A9782",
               color: "#FFF9E5",
             }}
-            onClick={() => handleNavigation("/advanced-analytics")}
+            onClick={() => handlePremiumNavigation("/advanced-analytics")}
           >
             <Crown className="h-4 w-4" />
             Advanced Analytics
@@ -474,7 +485,7 @@ export default function HistoryView() {
                     backgroundColor: "#FFC50F",
                     color: "#004030",
                   }}
-                  onClick={() => handleNavigation("/advanced-analytics")}
+                  onClick={() => handlePremiumNavigation("/advanced-analytics")}
                 >
                   <Crown className="mr-2 h-4 w-4" />
                   Upgrade to Premium

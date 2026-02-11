@@ -82,6 +82,17 @@ export default function MealFoodView() {
     setIsMenuOpen(false)
   }
 
+  const handlePremiumNavigation = () => {
+    const userStr = localStorage.getItem("calora_user")
+    const currentUser = userStr ? JSON.parse(userStr) : null
+    if (!currentUser?.isPremium) {
+      router.push("/subscription")
+      setIsMenuOpen(false)
+      return
+    }
+    setIsAIPhotoModalOpen(true)
+  }
+
   useEffect(() => {
     const tab = searchParams.get("tab")
     if (tab === "custom") {
@@ -595,7 +606,7 @@ export default function MealFoodView() {
             <Card
               className="cursor-pointer transition-all hover:shadow-lg md:col-span-2"
               style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
-              onClick={() => setIsAIPhotoModalOpen(true)}
+              onClick={handlePremiumNavigation}
             >
               <CardContent className="flex flex-col items-center justify-center gap-4 p-6">
                 <div className="flex items-center gap-3">

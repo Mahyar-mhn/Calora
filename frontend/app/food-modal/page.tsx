@@ -300,6 +300,17 @@ export default function FoodModalPage() {
     setIsMenuOpen(false)
   }
 
+  const handlePremiumNavigation = (path: string) => {
+    const userStr = localStorage.getItem("calora_user")
+    const currentUser = userStr ? JSON.parse(userStr) : null
+    if (!currentUser?.isPremium) {
+      router.push("/subscription")
+      setIsMenuOpen(false)
+      return
+    }
+    handleNavigation(path)
+  }
+
   const filteredFoods = foods.filter((food) => {
     const matchesSearch = food.name.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = categoryFilter === "All" || food.category === categoryFilter
@@ -497,7 +508,7 @@ export default function FoodModalPage() {
               backgroundColor: "#4A9782",
               color: "#FFF9E5",
             }}
-            onClick={() => handleNavigation("/weekly-meal-plans")}
+            onClick={() => handlePremiumNavigation("/weekly-meal-plans")}
           >
             <Calendar className="mr-2 h-5 w-5" />
             View AI Weekly Meal Plans

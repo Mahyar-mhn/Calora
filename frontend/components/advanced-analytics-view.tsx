@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -99,11 +99,26 @@ export default function AdvancedAnalyticsView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [selectedMonths, setSelectedMonths] = useState(6)
   const [isExportOpen, setIsExportOpen] = useState(false)
+  const [isAllowed, setIsAllowed] = useState(false)
   const router = useRouter()
 
   const handleNavigation = (path: string) => {
     router.push(path)
     setIsMenuOpen(false)
+  }
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("calora_user")
+    const currentUser = userStr ? JSON.parse(userStr) : null
+    if (!currentUser?.isPremium) {
+      router.replace("/subscription")
+      return
+    }
+    setIsAllowed(true)
+  }, [router])
+
+  if (!isAllowed) {
+    return null
   }
 
   return (

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Menu, Home, Utensils, Cookie, Activity, History, Calendar, Crown, ChevronRight } from "lucide-react"
@@ -11,11 +11,26 @@ import ProfileAvatarButton from "@/components/profile-avatar-button"
 
 export default function WeeklyMealPlansPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isAllowed, setIsAllowed] = useState(false)
   const router = useRouter()
 
   const handleNavigation = (path: string) => {
     router.push(path)
     setIsMenuOpen(false)
+  }
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("calora_user")
+    const currentUser = userStr ? JSON.parse(userStr) : null
+    if (!currentUser?.isPremium) {
+      router.replace("/subscription")
+      return
+    }
+    setIsAllowed(true)
+  }, [router])
+
+  if (!isAllowed) {
+    return null
   }
 
   const mealPlan = [
