@@ -62,6 +62,7 @@ export default function DashboardView() {
   const [user, setUser] = useState<any>(null)
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
   const [isRecentLoading, setIsRecentLoading] = useState(false)
+  const [aiInsights, setAiInsights] = useState<string[]>([])
 
   useEffect(() => {
     const userData = localStorage.getItem("calora_user")
@@ -90,6 +91,23 @@ export default function DashboardView() {
       fetchRecentActivities(user.id)
     }
   }, [user?.id])
+
+  useEffect(() => {
+    const insightPool = [
+      "You're consistent with logging. Try to keep that streak going this week.",
+      "Protein looks a bit low. Add a protein-rich snack to balance your day.",
+      "Great job staying active. A short walk after meals can help digestion.",
+      "Hydration tip: aim for a glass of water with every meal.",
+      "Try to spread calories evenly across meals to avoid late-day spikes.",
+      "Add more colorful veggies to boost micronutrients.",
+      "If energy is low, consider a complex-carb snack mid-afternoon.",
+      "Consistency beats intensity. Keep activity steady and sustainable.",
+      "Mindful eating can reduce overeating—pause between bites.",
+      "Sleep impacts appetite. Prioritize a consistent bedtime this week.",
+    ]
+    const shuffled = [...insightPool].sort(() => Math.random() - 0.5)
+    setAiInsights(shuffled.slice(0, 2))
+  }, [])
 
   const dailyCalorieTarget = summary?.dailyTarget || 2200
   const caloriesConsumed = summary?.caloriesConsumed || 0
@@ -829,22 +847,19 @@ export default function DashboardView() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="rounded-lg p-4" style={{ backgroundColor: "#E7F2EF" }}>
-                  <p className="text-sm font-medium" style={{ color: "#004030" }}>
-                    Great progress today!
+                {aiInsights.length > 0 ? (
+                  aiInsights.map((insight, index) => (
+                    <div key={`${insight}-${index}`} className="rounded-lg p-4" style={{ backgroundColor: "#E7F2EF" }}>
+                      <p className="text-sm" style={{ color: "#708993" }}>
+                        {insight}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm" style={{ color: "#708993" }}>
+                    No insights available yet.
                   </p>
-                  <p className="mt-2 text-sm" style={{ color: "#708993" }}>
-                    You're 59% towards your calorie goal. Consider adding a protein-rich snack to reach your targets.
-                  </p>
-                </div>
-                <div className="rounded-lg p-4" style={{ backgroundColor: "#E7F2EF" }}>
-                  <p className="text-sm font-medium" style={{ color: "#004030" }}>
-                    Hydration Reminder
-                  </p>
-                  <p className="mt-2 text-sm" style={{ color: "#708993" }}>
-                    Don't forget to drink water throughout the day!
-                  </p>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
