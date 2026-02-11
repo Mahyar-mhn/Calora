@@ -25,8 +25,6 @@ import {
   Activity,
   History,
   LogOut,
-  X,
-  Clock,
   Settings,
 } from "lucide-react"
 import {
@@ -50,11 +48,20 @@ import {
   Legend,
 } from "recharts"
 
+type RecentActivity = {
+  id?: number
+  type: string
+  duration: number
+  calories: number
+  date: string
+}
 
 export default function DashboardView() {
   // Data comes from user profile and daily tracking
   const [summary, setSummary] = useState<any>(null)
   const [user, setUser] = useState<any>(null)
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
+  const [isRecentLoading, setIsRecentLoading] = useState(false)
 
   useEffect(() => {
     const userData = localStorage.getItem("calora_user")
@@ -63,24 +70,26 @@ export default function DashboardView() {
     }
   }, [])
 
-  useEffect(() => {
-    const fetchSummary = async () => {
-      try {
-        const userStr = localStorage.getItem("calora_user")
-        if (!userStr) return
-        const user = JSON.parse(userStr)
-
-        const res = await fetch(`http://localhost:8080/dashboard/summary/${user.id}`)
-        if (res.ok) {
-          const data = await res.json()
-          setSummary(data)
-        }
-      } catch (err) {
-        console.error("Failed to fetch dashboard summary", err)
+  const fetchSummary = async (userId: number) => {
+    try {
+      const res = await fetch(`http://localhost:8080/dashboard/summary/${userId}`)
+      if (res.ok) {
+        const data = await res.json()
+        setSummary(data)
+      } else {
+        console.error("Failed to fetch dashboard summary", await res.text())
       }
+    } catch (err) {
+      console.error("Failed to fetch dashboard summary", err)
     }
-    fetchSummary()
-  }, [])
+  }
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchSummary(user.id)
+      fetchRecentActivities(user.id)
+    }
+  }, [user?.id])
 
   const dailyCalorieTarget = summary?.dailyTarget || 2200
   const caloriesConsumed = summary?.caloriesConsumed || 0
@@ -111,6 +120,37 @@ export default function DashboardView() {
   const handleNavigation = (path: string) => {
     router.push(path)
     setIsMenuOpen(false)
+  }
+
+  const fetchRecentActivities = async (userId: number) => {
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setDate(endDate.getDate() - 29)
+
+    const from = startDate.toISOString().slice(0, 10)
+    const to = endDate.toISOString().slice(0, 10)
+
+    setIsRecentLoading(true)
+    try {
+      const res = await fetch(`http://localhost:8080/activities/user/${userId}/range?from=${from}&to=${to}`)
+      if (!res.ok) {
+        console.error("Failed to load activities", await res.text())
+        return
+      }
+      const data = await res.json()
+      const mapped: RecentActivity[] = (data ?? []).map((activity: any) => ({
+        id: activity.id,
+        type: activity.type ?? "Activity",
+        duration: activity.duration ?? 0,
+        calories: activity.caloriesBurned ?? 0,
+        date: activity.date ? new Date(activity.date).toLocaleString() : "",
+      }))
+      setRecentActivities(mapped)
+    } catch (err) {
+      console.error("Failed to load activities", err)
+    } finally {
+      setIsRecentLoading(false)
+    }
   }
 
   return (
@@ -586,38 +626,52 @@ export default function DashboardView() {
                     style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
                   >
                     <DialogHeader>
-                      <DialogTitle style={{ color: "#004030" }}>Recent Activity</DialogTitle>
+                      <DialogTitle style={{ color: "#004030" }}>Recent Activities</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 max-h-96 overflow-y-auto">
                       <p className="text-sm" style={{ color: "#708993" }}>
-                        Your activities from today:
+                        Recent activities:
                       </p>
-                      {summary?.recentActivities && summary.recentActivities.length > 0 ? (
-                        summary.recentActivities.map((activity: any) => (
+                      {isRecentLoading ? (
+                        <p className="text-sm" style={{ color: "#708993" }}>
+                          Loading activities...
+                        </p>
+                      ) : recentActivities.length > 0 ? (
+                        recentActivities.map((activity, index) => (
                           <div
-                            key={activity.id}
-                            className="p-4 rounded-lg border"
-                            style={{ backgroundColor: "#E7F2EF", borderColor: "#A1C2BD" }}
+                            key={activity.id ?? index}
+                            className="flex items-center justify-between rounded-lg border p-4"
+                            style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF" }}
                           >
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div
+                                className="flex h-10 w-10 items-center justify-center rounded-full"
+                                style={{ backgroundColor: "#E7F2EF" }}
+                              >
+                                <Activity className="h-5 w-5" style={{ color: "#4A9782" }} />
+                              </div>
                               <div>
                                 <h4 className="font-medium" style={{ color: "#004030" }}>
                                   {activity.type}
                                 </h4>
                                 <p className="text-sm" style={{ color: "#708993" }}>
-                                  {activity.duration} • {activity.calories} calories
+                                  {activity.date}
                                 </p>
                               </div>
-                              <div className="flex items-center gap-1 text-xs" style={{ color: "#708993" }}>
-                                <Clock className="h-3 w-3" />
-                                {activity.time}
-                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold" style={{ color: "#004030" }}>
+                                {activity.calories} cal
+                              </p>
+                              <p className="text-sm" style={{ color: "#708993" }}>
+                                {activity.duration} min
+                              </p>
                             </div>
                           </div>
                         ))
                       ) : (
                         <p className="text-sm italic" style={{ color: "#708993" }}>
-                          No recent activities found.
+                          No activities yet. Log your first workout.
                         </p>
                       )}
                     </div>
@@ -632,7 +686,7 @@ export default function DashboardView() {
                         color: "#FFF9E5",
                       }}
                     >
-                      Log New Activity
+                      Go to Activity Tracking
                     </Button>
                   </DialogContent>
                 </Dialog>

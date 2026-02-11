@@ -65,4 +65,20 @@ public class ActivityController {
         Activity saved = activityRepository.save(activity);
         return ResponseEntity.ok(saved);
     }
+
+    @DeleteMapping("/{activityId}")
+    public ResponseEntity<?> deleteActivity(@PathVariable Long activityId, @RequestParam(required = false) Long userId) {
+        Optional<Activity> activityOpt = activityRepository.findById(activityId);
+        if (activityOpt.isEmpty()) {
+            return ResponseEntity.status(404).body("Activity not found");
+        }
+
+        Activity activity = activityOpt.get();
+        if (userId != null && (activity.getUser() == null || !userId.equals(activity.getUser().getId()))) {
+            return ResponseEntity.status(403).body("Not allowed to delete this activity");
+        }
+
+        activityRepository.deleteById(activityId);
+        return ResponseEntity.ok().build();
+    }
 }

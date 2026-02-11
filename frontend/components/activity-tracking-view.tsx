@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,6 +34,7 @@ import { useRouter } from "next/navigation"
 import ProfileAvatarButton from "./profile-avatar-button"
 
 type Activity = {
+  id?: number
   type: string
   duration: number
   calories: number | null
@@ -156,11 +157,8 @@ export default function ActivityTrackingView() {
   const [calories, setCalories] = useState("")
   const [isCategoryOpen, setIsCategoryOpen] = useState(false)
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false)
-  const [recentActivities, setRecentActivities] = useState<Activity[]>([
-    { type: "Running", duration: 30, calories: 300, date: "Today, 8:00 AM" },
-    { type: "Weight Training", duration: 45, calories: 200, date: "Yesterday, 6:00 PM" },
-    { type: "Cycling", duration: 60, calories: 450, date: "2 days ago" },
-  ])
+  const [recentActivities, setRecentActivities] = useState<Activity[]>([])
+  const [isLoadingActivities, setIsLoadingActivities] = useState(false)
 
   const router = useRouter()
 
@@ -174,56 +172,134 @@ export default function ActivityTrackingView() {
     setIsWorkoutDropdownOpen(false)
   }
 
-  const handleLogActivity = async () => {
-    if (workoutType && duration) {
+  useEffect(() => {
+    const loadActivities = async () => {
+      const userStr = localStorage.getItem("calora_user")
+      if (!userStr) return
+      const user = JSON.parse(userStr)
+
+      const endDate = new Date()
+      const startDate = new Date()
+      startDate.setDate(endDate.getDate() - 29)
+
+      const from = startDate.toISOString().slice(0, 10)
+      const to = endDate.toISOString().slice(0, 10)
+
+      setIsLoadingActivities(true)
       try {
-        const userStr = localStorage.getItem("calora_user")
-        if (!userStr) {
-          alert("Please login to log activity")
+        const res = await fetch(`http://localhost:8080/activities/user/${user.id}/range?from=${from}&to=${to}`)
+        if (!res.ok) {
+          console.error("Failed to load activities", await res.text())
           return
         }
-        const user = JSON.parse(userStr)
-
-        const activityData = {
-          type: workoutType,
-          duration: Number.parseInt(duration),
-          caloriesBurned: calories ? Number.parseInt(calories) : Number.parseInt(duration) * 5, // Simple auto-calc fallback
-          date: new Date().toISOString().slice(0, 19),
-          user: { id: user.id } // Send user ID association
-        }
-
-        const res = await fetch("http://localhost:8080/activities", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(activityData),
-        })
-
-        if (res.ok) {
-          const savedActivity = await res.json()
-          // Update local state for UI feedback (optional, but good for UX)
-          const newActivity = {
-            type: savedActivity.type,
-            duration: savedActivity.duration,
-            calories: savedActivity.caloriesBurned,
-            date: new Date(savedActivity.date).toLocaleString(), // Format date for display
-          }
-          setRecentActivities([newActivity, ...recentActivities])
-
-          alert(`Activity logged successfully!`)
-          // Reset form
-          setWorkoutType("")
-          setDuration("")
-          setCalories("")
-        } else {
-          console.error("Failed to log activity", await res.text())
-          alert("Failed to log activity. Please try again.")
-        }
+        const data = await res.json()
+        const mapped: Activity[] = (data ?? []).map((activity: any) => ({
+          id: activity.id,
+          type: activity.type ?? "Activity",
+          duration: activity.duration ?? 0,
+          calories: activity.caloriesBurned ?? 0,
+          date: activity.date ? new Date(activity.date).toLocaleString() : "",
+        }))
+        setRecentActivities(mapped)
       } catch (err) {
-        console.error("Error logging activity", err)
-        alert("Error logging activity")
+        console.error("Failed to load activities", err)
+      } finally {
+        setIsLoadingActivities(false)
       }
-    } else {
+    }
+
+    loadActivities()
+  }, [])
+
+  const handleLogActivity = async () => {
+    if (!workoutType || !duration) {
       alert("Please fill in workout type and duration")
+      return
+    }
+
+    const durationValue = Number.parseInt(duration)
+    if (Number.isNaN(durationValue) || durationValue <= 0) {
+      alert("Duration must be greater than 0")
+      return
+    }
+
+    if (calories && (Number.isNaN(Number.parseInt(calories)) || Number.parseInt(calories) <= 0)) {
+      alert("Calories must be greater than 0")
+      return
+    }
+
+    try {
+      const userStr = localStorage.getItem("calora_user")
+      if (!userStr) {
+        alert("Please login to log activity")
+        return
+      }
+      const user = JSON.parse(userStr)
+
+      const activityData = {
+        type: workoutType,
+        duration: durationValue,
+        caloriesBurned: calories ? Number.parseInt(calories) : durationValue * 5, // Simple auto-calc fallback
+        date: new Date().toISOString().slice(0, 19),
+        user: { id: user.id } // Send user ID association
+      }
+
+      const res = await fetch("http://localhost:8080/activities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(activityData),
+      })
+
+      if (res.ok) {
+        const savedActivity = await res.json()
+        const newActivity = {
+          id: savedActivity.id,
+          type: savedActivity.type,
+          duration: savedActivity.duration,
+          calories: savedActivity.caloriesBurned,
+          date: new Date(savedActivity.date).toLocaleString(),
+        }
+        setRecentActivities([newActivity, ...recentActivities])
+
+        alert(`Activity logged successfully!`)
+        // Reset form
+        setWorkoutType("")
+        setDuration("")
+        setCalories("")
+      } else {
+        console.error("Failed to log activity", await res.text())
+        alert("Failed to log activity. Please try again.")
+      }
+    } catch (err) {
+      console.error("Error logging activity", err)
+      alert("Error logging activity")
+    }
+  }
+
+  const handleDeleteActivity = async (activity: Activity, index: number) => {
+    if (!activity.id) {
+      setRecentActivities(recentActivities.filter((_, i) => i !== index))
+      return
+    }
+
+    try {
+      const userStr = localStorage.getItem("calora_user")
+      const user = userStr ? JSON.parse(userStr) : null
+      const userId = user?.id
+      const url = userId
+        ? `http://localhost:8080/activities/${activity.id}?userId=${userId}`
+        : `http://localhost:8080/activities/${activity.id}`
+
+      const res = await fetch(url, { method: "DELETE" })
+      if (res.ok) {
+        setRecentActivities(recentActivities.filter((_, i) => i !== index))
+      } else {
+        console.error("Failed to delete activity", await res.text())
+        alert("Failed to delete activity. Please try again.")
+      }
+    } catch (err) {
+      console.error("Error deleting activity", err)
+      alert("Error deleting activity")
     }
   }
 
@@ -596,64 +672,72 @@ export default function ActivityTrackingView() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recentActivities.map((activity, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between rounded-lg border p-4"
-                    style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF" }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="flex h-12 w-12 items-center justify-center rounded-full"
-                        style={{ backgroundColor: "#E7F2EF" }}
-                      >
-                        <Activity className="h-6 w-6" style={{ color: "#4A9782" }} />
+                {isLoadingActivities ? (
+                  <p className="text-sm" style={{ color: "#708993" }}>
+                    Loading activities...
+                  </p>
+                ) : recentActivities.length > 0 ? (
+                  recentActivities.map((activity, index) => (
+                    <div
+                      key={activity.id ?? index}
+                      className="flex items-center justify-between rounded-lg border p-4"
+                      style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF" }}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div
+                          className="flex h-12 w-12 items-center justify-center rounded-full"
+                          style={{ backgroundColor: "#E7F2EF" }}
+                        >
+                          <Activity className="h-6 w-6" style={{ color: "#4A9782" }} />
+                        </div>
+                        <div>
+                          <h4 className="font-medium" style={{ color: "#004030" }}>
+                            {activity.type}
+                          </h4>
+                          <p className="text-sm" style={{ color: "#708993" }}>
+                            {activity.date}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-medium" style={{ color: "#004030" }}>
-                          {activity.type}
-                        </h4>
-                        <p className="text-sm" style={{ color: "#708993" }}>
-                          {activity.date}
-                        </p>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="font-semibold" style={{ color: "#004030" }}>
+                            {activity.calories} cal
+                          </p>
+                          <p className="text-sm" style={{ color: "#708993" }}>
+                            {activity.duration} min
+                          </p>
+                        </div>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8 rounded-full transition-all bg-transparent"
+                          style={{
+                            borderColor: "#DCD0A8",
+                            color: "#004030",
+                          }}
+                          onClick={() => handleDeleteActivity(activity, index)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#ff4444"
+                            e.currentTarget.style.borderColor = "#ff4444"
+                            e.currentTarget.style.color = "#FFFFFF"
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "transparent"
+                            e.currentTarget.style.borderColor = "#DCD0A8"
+                            e.currentTarget.style.color = "#004030"
+                          }}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-semibold" style={{ color: "#004030" }}>
-                          {activity.calories} cal
-                        </p>
-                        <p className="text-sm" style={{ color: "#708993" }}>
-                          {activity.duration} min
-                        </p>
-                      </div>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8 rounded-full transition-all bg-transparent"
-                        style={{
-                          borderColor: "#DCD0A8",
-                          color: "#004030",
-                        }}
-                        onClick={() => {
-                          setRecentActivities(recentActivities.filter((_, i) => i !== index))
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = "#ff4444"
-                          e.currentTarget.style.borderColor = "#ff4444"
-                          e.currentTarget.style.color = "#FFFFFF"
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = "transparent"
-                          e.currentTarget.style.borderColor = "#DCD0A8"
-                          e.currentTarget.style.color = "#004030"
-                        }}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm italic" style={{ color: "#708993" }}>
+                    No activities yet. Log your first workout.
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
