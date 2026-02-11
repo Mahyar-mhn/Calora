@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,13 +30,16 @@ export default function SubscriptionView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: string } | null>(null)
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+  const [isLoadingStatus, setIsLoadingStatus] = useState(false)
+  const [budgetAmount, setBudgetAmount] = useState("")
   const router = useRouter()
 
-  // Sample subscription status
-  const [subscriptionStatus] = useState({
+  const [subscriptionStatus, setSubscriptionStatus] = useState({
     isPremium: false,
     plan: "Free",
-    expiresAt: null,
+    expiresAt: null as string | null,
+    budget: 0,
   })
 
   const handleNavigation = (path: string) => {
@@ -49,10 +52,122 @@ export default function SubscriptionView() {
     setIsPaymentModalOpen(true)
   }
 
-  const handleConfirmPayment = () => {
-    alert(`Payment confirmed for ${selectedPlan?.name} plan at ${selectedPlan?.price}!`)
-    setIsPaymentModalOpen(false)
+  const handleConfirmPayment = async () => {
+    if (!selectedPlan) return
+    const userStr = localStorage.getItem("calora_user")
+    if (!userStr) {
+      alert("Please login to subscribe.")
+      return
+    }
+    const user = JSON.parse(userStr)
+    if (!user?.id) {
+      alert("Please login to subscribe.")
+      return
+    }
+
+    setIsProcessingPayment(true)
+    try {
+      const res = await fetch("http://localhost:8080/subscriptions/purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, plan: selectedPlan.name }),
+      })
+      if (!res.ok) {
+        const text = await res.text()
+        alert(text || "Failed to complete subscription.")
+        return
+      }
+      const updatedUser = await res.json()
+      localStorage.setItem("calora_user", JSON.stringify(updatedUser))
+      setSubscriptionStatus({
+        isPremium: !!updatedUser.isPremium,
+        plan: updatedUser.isPremium ? "Premium" : "Free",
+        expiresAt: updatedUser.premiumExpiresAt ?? null,
+        budget: updatedUser.budget ?? 0,
+      })
+      alert(`Subscription activated: ${selectedPlan.name}`)
+      setIsPaymentModalOpen(false)
+    } catch (err) {
+      console.error("Failed to complete subscription", err)
+      alert("Failed to complete subscription.")
+    } finally {
+      setIsProcessingPayment(false)
+    }
   }
+
+  const handleAddBudget = async () => {
+    const amount = Number.parseInt(budgetAmount)
+    if (Number.isNaN(amount) || amount <= 0) {
+      alert("Enter a valid amount to add.")
+      return
+    }
+    const userStr = localStorage.getItem("calora_user")
+    if (!userStr) {
+      alert("Please login to add budget.")
+      return
+    }
+    const user = JSON.parse(userStr)
+    if (!user?.id) {
+      alert("Please login to add budget.")
+      return
+    }
+
+    try {
+      const res = await fetch("http://localhost:8080/subscriptions/add-budget", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user.id, amount }),
+      })
+      if (!res.ok) {
+        const text = await res.text()
+        alert(text || "Failed to add budget.")
+        return
+      }
+      const updatedUser = await res.json()
+      localStorage.setItem("calora_user", JSON.stringify(updatedUser))
+      setSubscriptionStatus({
+        isPremium: !!updatedUser.isPremium,
+        plan: updatedUser.isPremium ? "Premium" : "Free",
+        expiresAt: updatedUser.premiumExpiresAt ?? null,
+        budget: updatedUser.budget ?? 0,
+      })
+      setBudgetAmount("")
+      alert("Budget added successfully.")
+    } catch (err) {
+      console.error("Failed to add budget", err)
+      alert("Failed to add budget.")
+    }
+  }
+
+  useEffect(() => {
+    const loadStatus = async () => {
+      const userStr = localStorage.getItem("calora_user")
+      if (!userStr) return
+      const user = JSON.parse(userStr)
+      if (!user?.id) return
+
+      setIsLoadingStatus(true)
+      try {
+        const res = await fetch(`http://localhost:8080/users/${user.id}`)
+        if (res.ok) {
+          const updatedUser = await res.json()
+          localStorage.setItem("calora_user", JSON.stringify(updatedUser))
+          setSubscriptionStatus({
+            isPremium: !!updatedUser.isPremium,
+            plan: updatedUser.isPremium ? "Premium" : "Free",
+            expiresAt: updatedUser.premiumExpiresAt ?? null,
+            budget: updatedUser.budget ?? 0,
+          })
+        }
+      } catch (err) {
+        console.error("Failed to load subscription status", err)
+      } finally {
+        setIsLoadingStatus(false)
+      }
+    }
+
+    loadStatus()
+  }, [])
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
@@ -215,6 +330,11 @@ export default function SubscriptionView() {
             <CardHeader>
               <CardTitle style={{ color: "#004030" }}>Current Subscription</CardTitle>
               <CardDescription style={{ color: "#708993" }}>Your account status and benefits</CardDescription>
+              {isLoadingStatus && (
+                <p className="text-xs" style={{ color: "#708993" }}>
+                  Loading subscription status...
+                </p>
+              )}
             </CardHeader>
             <CardContent>
               <div
@@ -234,6 +354,9 @@ export default function SubscriptionView() {
                     </p>
                     <p className="text-sm" style={{ color: "#708993" }}>
                       {subscriptionStatus.isPremium ? `Expires: ${subscriptionStatus.expiresAt}` : "Basic features"}
+                    </p>
+                    <p className="text-sm" style={{ color: "#708993" }}>
+                      Budget: ${subscriptionStatus.budget}
                     </p>
                   </div>
                 </div>
@@ -341,6 +464,46 @@ export default function SubscriptionView() {
                   </div>
                   <Check className="h-5 w-5 flex-shrink-0" style={{ color: "#63A361" }} />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Add Budget */}
+          <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
+            <CardHeader>
+              <CardTitle style={{ color: "#004030" }}>Add Budget</CardTitle>
+              <CardDescription style={{ color: "#708993" }}>
+                Add money to your account to purchase premium plans
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+                <div className="space-y-2">
+                  <Label htmlFor="budget-amount" style={{ color: "#004030" }}>
+                    Amount
+                  </Label>
+                  <Input
+                    id="budget-amount"
+                    type="number"
+                    min="1"
+                    placeholder="Enter amount"
+                    value={budgetAmount}
+                    onChange={(e) => setBudgetAmount(e.target.value)}
+                    className="h-11 border-2"
+                    style={{
+                      borderColor: "#A1C2BD",
+                      backgroundColor: "#FFFFFF",
+                      color: "#19183B",
+                    }}
+                  />
+                </div>
+                <Button
+                  className="h-11 font-semibold"
+                  style={{ backgroundColor: "#4A9782", color: "#FFF9E5" }}
+                  onClick={handleAddBudget}
+                >
+                  Add Budget
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -495,83 +658,15 @@ export default function SubscriptionView() {
                   {selectedPlan?.price}
                 </span>
               </div>
+              <p className="mt-2 text-sm" style={{ color: "#708993" }}>
+                Available budget: ${subscriptionStatus.budget}
+              </p>
             </div>
 
-            {/* Payment Form */}
-            <form className="space-y-4">
-              {/* Card Number */}
-              <div className="space-y-2">
-                <Label htmlFor="card-number" style={{ color: "#004030" }}>
-                  Card Number
-                </Label>
-                <Input
-                  id="card-number"
-                  type="text"
-                  placeholder="1234 5678 9012 3456"
-                  className="h-11 border-2"
-                  style={{
-                    borderColor: "#A1C2BD",
-                    backgroundColor: "#FFFFFF",
-                    color: "#19183B",
-                  }}
-                />
-              </div>
-
-              {/* Expiry and CVC */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expiry" style={{ color: "#004030" }}>
-                    Expiry Date
-                  </Label>
-                  <Input
-                    id="expiry"
-                    type="text"
-                    placeholder="MM/YY"
-                    className="h-11 border-2"
-                    style={{
-                      borderColor: "#A1C2BD",
-                      backgroundColor: "#FFFFFF",
-                      color: "#19183B",
-                    }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cvc" style={{ color: "#004030" }}>
-                    CVC
-                  </Label>
-                  <Input
-                    id="cvc"
-                    type="text"
-                    placeholder="123"
-                    className="h-11 border-2"
-                    style={{
-                      borderColor: "#A1C2BD",
-                      backgroundColor: "#FFFFFF",
-                      color: "#19183B",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Cardholder Name */}
-              <div className="space-y-2">
-                <Label htmlFor="cardholder" style={{ color: "#004030" }}>
-                  Cardholder Name
-                </Label>
-                <Input
-                  id="cardholder"
-                  type="text"
-                  placeholder="John Doe"
-                  className="h-11 border-2"
-                  style={{
-                    borderColor: "#A1C2BD",
-                    backgroundColor: "#FFFFFF",
-                    color: "#19183B",
-                  }}
-                />
-              </div>
-
-              {/* Confirm Payment Button */}
+            <div className="space-y-4">
+              <p className="text-sm" style={{ color: "#708993" }}>
+                This plan will be purchased using your account budget.
+              </p>
               <Button
                 type="button"
                 className="w-full h-12 text-base font-semibold transition-all hover:shadow-lg"
@@ -579,6 +674,7 @@ export default function SubscriptionView() {
                   backgroundColor: selectedPlan?.name === "Yearly" ? "#FFC50F" : "#4A9782",
                   color: selectedPlan?.name === "Yearly" ? "#004030" : "#FFF9E5",
                 }}
+                disabled={isProcessingPayment}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.backgroundColor = selectedPlan?.name === "Yearly" ? "#f0b800" : "#3d8270"
                 }}
@@ -587,9 +683,9 @@ export default function SubscriptionView() {
                 }}
                 onClick={handleConfirmPayment}
               >
-                Confirm Payment
+                {isProcessingPayment ? "Processing..." : "Confirm Purchase"}
               </Button>
-            </form>
+            </div>
           </div>
         </div>
       )}

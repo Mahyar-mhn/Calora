@@ -77,6 +77,12 @@ public class User {
 
     private Integer dailyCalorieTarget;
 
+    private Integer budget;
+
+    private Boolean isPremium;
+
+    private java.time.LocalDate premiumExpiresAt;
+
     public String getProfilePicture() {
         return profilePicture;
     }
@@ -99,6 +105,30 @@ public class User {
 
     public void setDailyCalorieTarget(Integer dailyCalorieTarget) {
         this.dailyCalorieTarget = dailyCalorieTarget;
+    }
+
+    public Integer getBudget() {
+        return budget;
+    }
+
+    public void setBudget(Integer budget) {
+        this.budget = budget;
+    }
+
+    public Boolean getIsPremium() {
+        return isPremium;
+    }
+
+    public void setIsPremium(Boolean isPremium) {
+        this.isPremium = isPremium;
+    }
+
+    public java.time.LocalDate getPremiumExpiresAt() {
+        return premiumExpiresAt;
+    }
+
+    public void setPremiumExpiresAt(java.time.LocalDate premiumExpiresAt) {
+        this.premiumExpiresAt = premiumExpiresAt;
     }
 
     private Integer age;

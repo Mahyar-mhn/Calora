@@ -46,7 +46,26 @@ public class UserController {
     @GetMapping("/{id}")
     public org.springframework.http.ResponseEntity<User> getUserById(@PathVariable Long id) {
         return userRepository.findById(id)
-                .map(org.springframework.http.ResponseEntity::ok)
+                .map(user -> {
+                    boolean updated = false;
+                    if (user.getBudget() == null) {
+                        user.setBudget(100);
+                        updated = true;
+                    }
+                    if (user.getIsPremium() == null) {
+                        user.setIsPremium(false);
+                        updated = true;
+                    }
+                    if (user.getPremiumExpiresAt() != null
+                            && user.getPremiumExpiresAt().isBefore(java.time.LocalDate.now())) {
+                        user.setIsPremium(false);
+                        updated = true;
+                    }
+                    if (updated) {
+                        user = userRepository.save(user);
+                    }
+                    return org.springframework.http.ResponseEntity.ok(user);
+                })
                 .orElse(org.springframework.http.ResponseEntity.notFound().build());
     }
 
