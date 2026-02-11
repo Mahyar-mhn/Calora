@@ -110,6 +110,15 @@ export default function DashboardView() {
     fats: summary?.fatsConsumed || 0,
   }
 
+  const currentWeight = typeof summary?.currentWeight === "number" ? summary.currentWeight : null
+  const weightTrajectoryData =
+    currentWeight !== null && Array.isArray(summary?.calorieTrends)
+      ? summary.calorieTrends.map((trend: any) => ({
+          date: trend.date,
+          weight: currentWeight,
+        }))
+      : []
+
   // State for menu visibility and popups
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAddMealOpen, setIsAddMealOpen] = useState(false)
@@ -747,7 +756,7 @@ export default function DashboardView() {
                         </CardContent>
                       </Card>
 
-                      {/* Weight Trajectory Chart - Note: Using simplified data for now as backend only has current weight */}
+                      {/* Weight Trajectory Chart */}
                       <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2" style={{ color: "#004030" }}>
@@ -755,14 +764,39 @@ export default function DashboardView() {
                             Weight Trajectory
                           </CardTitle>
                           <CardDescription style={{ color: "#708993" }}>
-                            Weight: {summary?.currentWeight || "--"} kg
+                            Current weight trend over the last 7 days
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-sm text-center py-10" style={{ color: "#708993" }}>
-                            Detailed weight history tracking coming soon. <br />
-                            Current Weight: {summary?.currentWeight} kg
-                          </p>
+                          {currentWeight !== null && weightTrajectoryData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={250}>
+                              <LineChart data={weightTrajectoryData}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="#A1C2BD" />
+                                <XAxis dataKey="date" stroke="#708993" />
+                                <YAxis
+                                  stroke="#708993"
+                                  domain={[
+                                    Math.max(0, Math.floor(currentWeight - 5)),
+                                    Math.ceil(currentWeight + 5),
+                                  ]}
+                                />
+                                <Tooltip
+                                  contentStyle={{
+                                    backgroundColor: "#FFF9E5",
+                                    border: "1px solid #DCD0A8",
+                                    borderRadius: "8px",
+                                    color: "#004030",
+                                  }}
+                                />
+                                <Legend />
+                                <Line type="monotone" dataKey="weight" stroke="#FFC50F" strokeWidth={3} name="Weight (kg)" />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          ) : (
+                            <p className="text-sm text-center py-10" style={{ color: "#708993" }}>
+                              Add your weight in your profile to see this chart.
+                            </p>
+                          )}
                         </CardContent>
                       </Card>
                     </div>

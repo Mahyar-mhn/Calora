@@ -53,22 +53,14 @@ const defaultMacroAdherenceData = [
   { date: "Sun", protein: 162, carbs: 242, fats: 71 },
 ]
 
-// Sample data for weight trajectory (last 8 weeks)
-const weightTrajectoryData = [
-  { week: "Week 1", weight: 85.5, goal: 82 },
-  { week: "Week 2", weight: 85.2, goal: 82 },
-  { week: "Week 3", weight: 84.8, goal: 82 },
-  { week: "Week 4", weight: 84.5, goal: 82 },
-  { week: "Week 5", weight: 84.0, goal: 82 },
-  { week: "Week 6", weight: 83.8, goal: 82 },
-  { week: "Week 7", weight: 83.3, goal: 82 },
-  { week: "Week 8", weight: 83.0, goal: 82 },
-]
+type WeightPoint = { date: string; weight: number }
 
 export default function HistoryView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [calorieTrendsData, setCalorieTrendsData] = useState(defaultCalorieTrendsData)
   const [macroAdherenceData, setMacroAdherenceData] = useState(defaultMacroAdherenceData)
+  const [weightTrajectoryData, setWeightTrajectoryData] = useState<WeightPoint[]>([])
+  const [currentWeight, setCurrentWeight] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -93,13 +85,16 @@ export default function HistoryView() {
 
       setIsLoading(true)
       try {
-        const [mealsRes, activitiesRes] = await Promise.all([
+        const [mealsRes, activitiesRes, userRes] = await Promise.all([
           fetch(`http://localhost:8080/meals/user/${user.id}/range?from=${from}&to=${to}`),
           fetch(`http://localhost:8080/activities/user/${user.id}/range?from=${from}&to=${to}`),
+          fetch(`http://localhost:8080/users/${user.id}`),
         ])
 
         const meals = mealsRes.ok ? await mealsRes.json() : []
         const activities = activitiesRes.ok ? await activitiesRes.json() : []
+        const userProfile = userRes.ok ? await userRes.json() : user
+        const weightValue = typeof userProfile?.weight === "number" ? userProfile.weight : null
 
         const mealTotalsByDate = new Map<string, { calories: number; protein: number; carbs: number; fats: number }>()
         for (const meal of meals) {
@@ -124,6 +119,7 @@ export default function HistoryView() {
 
         const trends: Array<{ date: string; consumed: number; target: number; burned: number }> = []
         const macros: Array<{ date: string; protein: number; carbs: number; fats: number }> = []
+        const weightPoints: WeightPoint[] = []
 
         for (let i = 6; i >= 0; i--) {
           const day = new Date()
@@ -147,10 +143,19 @@ export default function HistoryView() {
             carbs: mealTotals.carbs,
             fats: mealTotals.fats,
           })
+
+          if (weightValue !== null) {
+            weightPoints.push({
+              date: label,
+              weight: weightValue,
+            })
+          }
         }
 
         setCalorieTrendsData(trends)
         setMacroAdherenceData(macros)
+        setCurrentWeight(weightValue)
+        setWeightTrajectoryData(weightPoints)
       } catch (err) {
         console.error("Failed to load history data", err)
       } finally {
@@ -383,34 +388,40 @@ export default function HistoryView() {
                 <TrendingUp className="h-5 w-5" style={{ color: "#4A9782" }} />
                 Weight Trajectory
               </CardTitle>
-              <CardDescription style={{ color: "#708993" }}>Your weight progress over the last 8 weeks</CardDescription>
+              <CardDescription style={{ color: "#708993" }}>
+                Current weight trend over the last 7 days
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={weightTrajectoryData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#A1C2BD" />
-                  <XAxis dataKey="week" stroke="#708993" />
-                  <YAxis stroke="#708993" domain={[80, 87]} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFF9E5",
-                      border: "1px solid #DCD0A8",
-                      borderRadius: "8px",
-                      color: "#004030",
-                    }}
-                  />
-                  <Legend />
-                  <Line type="monotone" dataKey="weight" stroke="#FFC50F" strokeWidth={3} name="Current Weight (kg)" />
-                  <Line
-                    type="monotone"
-                    dataKey="goal"
-                    stroke="#63A361"
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    name="Goal Weight (kg)"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {currentWeight !== null && weightTrajectoryData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={weightTrajectoryData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#A1C2BD" />
+                    <XAxis dataKey="date" stroke="#708993" />
+                    <YAxis
+                      stroke="#708993"
+                      domain={[
+                        Math.max(0, Math.floor(currentWeight - 5)),
+                        Math.ceil(currentWeight + 5),
+                      ]}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#FFF9E5",
+                        border: "1px solid #DCD0A8",
+                        borderRadius: "8px",
+                        color: "#004030",
+                      }}
+                    />
+                    <Legend />
+                    <Line type="monotone" dataKey="weight" stroke="#FFC50F" strokeWidth={3} name="Current Weight (kg)" />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="py-8 text-center text-sm" style={{ color: "#708993" }}>
+                  Add your weight in your profile to see this chart.
+                </p>
+              )}
             </CardContent>
           </Card>
 
