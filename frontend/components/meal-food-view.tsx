@@ -64,9 +64,19 @@ export default function MealFoodView() {
   const [isAIPhotoModalOpen, setIsAIPhotoModalOpen] = useState(false)
   const [foodImage, setFoodImage] = useState<string | null>(null)
   const aiPhotoFileInputRef = useRef<HTMLInputElement>(null)
+  const aiPhotoCameraInputRef = useRef<HTMLInputElement>(null)
+  const aiPhotoVideoRef = useRef<HTMLVideoElement>(null)
+  const aiPhotoCanvasRef = useRef<HTMLCanvasElement>(null)
+  const cameraStreamRef = useRef<MediaStream | null>(null)
+  const [isCameraActive, setIsCameraActive] = useState(false)
+  const [cameraError, setCameraError] = useState<string | null>(null)
 
   const [recentFoods, setRecentFoods] = useState<RecentMeal[]>([])
   const [isLoadingRecents, setIsLoadingRecents] = useState(false)
+  const [foods, setFoods] = useState<SelectedFood[]>([])
+  const [isLoadingFoods, setIsLoadingFoods] = useState(false)
+  const [aiSearchQuery, setAiSearchQuery] = useState("")
+  const [aiSuggestedFoods, setAiSuggestedFoods] = useState<SelectedFood[]>([])
 
   const [quickMealName, setQuickMealName] = useState("")
   const [quickCalories, setQuickCalories] = useState("")
@@ -154,6 +164,51 @@ export default function MealFoodView() {
 
     loadRecentMeals()
   }, [])
+
+  useEffect(() => {
+    const loadFoods = async () => {
+      setIsLoadingFoods(true)
+      try {
+        const res = await fetch("http://localhost:8080/foods")
+        if (!res.ok) {
+          console.error("Failed to load foods", await res.text())
+          return
+        }
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          setFoods(data)
+        }
+      } catch (err) {
+        console.error("Failed to load foods", err)
+      } finally {
+        setIsLoadingFoods(false)
+      }
+    }
+
+    loadFoods()
+  }, [])
+
+  useEffect(() => {
+    if (!foodImage) {
+      setAiSuggestedFoods([])
+      return
+    }
+    const pool = foods.length > 0 ? foods : recentFoods.map((food) => ({
+      name: food.name,
+      calories: food.calories,
+      protein: food.protein,
+      carbs: food.carbs,
+      fats: food.fats,
+      servingSize: food.unit ? `1 ${food.unit}` : undefined,
+      category: food.mealType,
+    }))
+    if (pool.length === 0) {
+      setAiSuggestedFoods([])
+      return
+    }
+    const shuffled = [...pool].sort(() => Math.random() - 0.5)
+    setAiSuggestedFoods(shuffled.slice(0, 5))
+  }, [foodImage, foods, recentFoods])
 
   const handleFoodClick = (food: { name: string; calories: number; protein: number; carbs: number; fats: number }) => {
     setSelectedFood(food)
@@ -296,13 +351,79 @@ export default function MealFoodView() {
   }
 
   const handleAIPhotoCamera = () => {
-    // Open camera for food photo
-    alert("Camera opened for food photo (to be implemented with device camera API)")
+    const startCamera = async () => {
+      setCameraError(null)
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: "environment" } },
+          audio: false,
+        })
+        cameraStreamRef.current = stream
+        setIsCameraActive(true)
+      } catch (err) {
+        console.error("Failed to open camera", err)
+        setCameraError("Unable to access camera. Please allow camera permissions.")
+        if (aiPhotoCameraInputRef.current) {
+          aiPhotoCameraInputRef.current.click()
+          return
+        }
+        aiPhotoFileInputRef.current?.click()
+      }
+    }
+
+    startCamera()
+  }
+
+  useEffect(() => {
+    if (!isCameraActive) return
+    const video = aiPhotoVideoRef.current
+    const stream = cameraStreamRef.current
+    if (!video || !stream) return
+    video.srcObject = stream
+    video.play().catch(() => {})
+  }, [isCameraActive])
+
+  const stopCamera = () => {
+    const video = aiPhotoVideoRef.current
+    const stream = cameraStreamRef.current ?? (video?.srcObject as MediaStream | null)
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop())
+    }
+    if (video) {
+      video.srcObject = null
+    }
+    cameraStreamRef.current = null
+    setIsCameraActive(false)
+  }
+
+  const capturePhotoFromCamera = () => {
+    const video = aiPhotoVideoRef.current
+    const canvas = aiPhotoCanvasRef.current
+    if (!video || !canvas) return
+    const width = video.videoWidth || 640
+    const height = video.videoHeight || 480
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+    ctx.drawImage(video, 0, 0, width, height)
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9)
+    setFoodImage(dataUrl)
+    stopCamera()
   }
 
   const closeAIPhotoModal = () => {
     setIsAIPhotoModalOpen(false)
     setFoodImage(null)
+    setAiSearchQuery("")
+    setCameraError(null)
+    stopCamera()
+  }
+
+  const handleAISuggestionSelect = (food: SelectedFood) => {
+    setSelectedFood(food)
+    setIsFoodModalOpen(true)
+    closeAIPhotoModal()
   }
 
   return (
@@ -812,7 +933,10 @@ export default function MealFoodView() {
       {isAIPhotoModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/50" onClick={closeAIPhotoModal} />
-          <div className="relative w-full max-w-md rounded-lg p-6 shadow-xl" style={{ backgroundColor: "#FFF9E5" }}>
+          <div
+            className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg p-6 shadow-xl"
+            style={{ backgroundColor: "#FFF9E5" }}
+          >
             <button
               onClick={closeAIPhotoModal}
               className="absolute right-4 top-4 rounded-full p-1 transition-colors"
@@ -847,6 +971,15 @@ export default function MealFoodView() {
                 onChange={handleAIPhotoUpload}
                 className="hidden"
               />
+              <input
+                ref={aiPhotoCameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleAIPhotoUpload}
+                className="hidden"
+              />
+              <canvas ref={aiPhotoCanvasRef} className="hidden" />
 
               <Button
                 onClick={() => aiPhotoFileInputRef.current?.click()}
@@ -877,6 +1010,43 @@ export default function MealFoodView() {
                 Take Photo
               </Button>
 
+              {cameraError && (
+                <p className="text-sm" style={{ color: "#ef4444" }}>
+                  {cameraError}
+                </p>
+              )}
+
+              {isCameraActive && !foodImage && (
+                <div className="mt-4 space-y-3">
+                  <div className="overflow-hidden rounded-lg border" style={{ borderColor: "#DCD0A8" }}>
+                    <video
+                      ref={aiPhotoVideoRef}
+                      className="w-full h-64 object-cover"
+                      autoPlay
+                      muted
+                      playsInline
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={capturePhotoFromCamera}
+                      className="flex-1 transition-all hover:shadow-md"
+                      style={{ backgroundColor: "#4A9782", color: "#FFF9E5" }}
+                    >
+                      Capture Photo
+                    </Button>
+                    <Button
+                      onClick={stopCamera}
+                      variant="outline"
+                      className="flex-1"
+                      style={{ borderColor: "#A1C2BD", color: "#004030" }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {foodImage && (
                 <div className="mt-4">
                   <p className="mb-2 text-sm font-medium" style={{ color: "#004030" }}>
@@ -889,8 +1059,105 @@ export default function MealFoodView() {
                     style={{ borderColor: "#DCD0A8" }}
                   />
                   <p className="mt-2 text-sm" style={{ color: "#708993" }}>
-                    AI is analyzing your food...
+                    Pick the best match below to calculate nutrition from your local food list.
                   </p>
+                </div>
+              )}
+
+              {foodImage && (
+                <div className="mt-6 space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="ai-food-search" style={{ color: "#004030" }}>
+                      Search Foods
+                    </Label>
+                    <Input
+                      id="ai-food-search"
+                      value={aiSearchQuery}
+                      onChange={(e) => setAiSearchQuery(e.target.value)}
+                      placeholder="Search by food name..."
+                      style={{
+                        borderColor: "#A1C2BD",
+                        backgroundColor: "#FFFFFF",
+                        color: "#004030",
+                      }}
+                    />
+                    {isLoadingFoods && (
+                      <p className="text-xs" style={{ color: "#708993" }}>
+                        Loading foods...
+                      </p>
+                    )}
+                  </div>
+
+                  {aiSuggestedFoods.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium" style={{ color: "#004030" }}>
+                        Suggested Foods
+                      </p>
+                      <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {aiSuggestedFoods.map((food, index) => (
+                          <button
+                            key={`${food.name}-${index}`}
+                            className="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors"
+                            style={{ borderColor: "#DCD0A8", backgroundColor: "#FFFFFF" }}
+                            onClick={() => handleAISuggestionSelect(food)}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = "#E7F2EF"
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = "#FFFFFF"
+                            }}
+                          >
+                            <div>
+                              <p className="text-sm font-semibold" style={{ color: "#004030" }}>
+                                {food.name}
+                              </p>
+                              <p className="text-xs" style={{ color: "#708993" }}>
+                                {food.calories} cal • {food.protein}g protein • {food.servingSize ?? "100g"}
+                              </p>
+                            </div>
+                            <Plus className="h-4 w-4" style={{ color: "#4A9782" }} />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {aiSearchQuery && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium" style={{ color: "#004030" }}>
+                        Search Results
+                      </p>
+                      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        {foods
+                          .filter((food) => food.name.toLowerCase().includes(aiSearchQuery.toLowerCase()))
+                          .slice(0, 8)
+                          .map((food, index) => (
+                            <button
+                              key={`${food.name}-${index}`}
+                              className="flex w-full items-center justify-between rounded-lg border p-3 text-left transition-colors"
+                              style={{ borderColor: "#DCD0A8", backgroundColor: "#FFFFFF" }}
+                              onClick={() => handleAISuggestionSelect(food)}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = "#E7F2EF"
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = "#FFFFFF"
+                              }}
+                            >
+                              <div>
+                                <p className="text-sm font-semibold" style={{ color: "#004030" }}>
+                                  {food.name}
+                                </p>
+                                <p className="text-xs" style={{ color: "#708993" }}>
+                                  {food.calories} cal • {food.protein}g protein • {food.servingSize ?? "100g"}
+                                </p>
+                              </div>
+                              <Plus className="h-4 w-4" style={{ color: "#4A9782" }} />
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
