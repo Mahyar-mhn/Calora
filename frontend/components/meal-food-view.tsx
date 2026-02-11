@@ -14,7 +14,6 @@ import {
   Cookie,
   Activity,
   History,
-  Search,
   Scan,
   Plus,
   Camera,
@@ -40,20 +39,23 @@ type RecentMeal = {
   date?: string
 }
 
+type SelectedFood = {
+  name: string
+  calories: number
+  protein: number
+  carbs: number
+  fats: number
+  servingSize?: string
+  category?: string
+}
+
 export default function MealFoodView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
   const searchParams = useSearchParams()
   const quickAddRef = useRef<HTMLDivElement>(null)
   const [isFoodModalOpen, setIsFoodModalOpen] = useState(false)
-  const [selectedFood, setSelectedFood] = useState<{
-    name: string
-    calories: number
-    protein: number
-    carbs: number
-    fats: number
-  } | null>(null)
+  const [selectedFood, setSelectedFood] = useState<SelectedFood | null>(null)
 
   const [isBarcodeModalOpen, setIsBarcodeModalOpen] = useState(false)
   const [barcodeImage, setBarcodeImage] = useState<string | null>(null)
@@ -413,48 +415,6 @@ export default function MealFoodView() {
       {/* Main Content */}
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">
-          {/* Search Section */}
-          <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-            <CardHeader>
-              <CardTitle style={{ color: "#004030" }}>Search Foods</CardTitle>
-              <CardDescription style={{ color: "#708993" }}>Find verified foods from our database</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: "#708993" }} />
-                  <Input
-                    type="text"
-                    placeholder="Search for foods..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                    style={{
-                      borderColor: "#A1C2BD",
-                      backgroundColor: "#FFFFFF",
-                      color: "#004030",
-                    }}
-                  />
-                </div>
-                <Button
-                  className="transition-all hover:shadow-md"
-                  style={{
-                    backgroundColor: "#4A9782",
-                    color: "#FFF9E5",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#3d7f6d"
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "#4A9782"
-                  }}
-                >
-                  Search
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Quick Add Meal */}
           <div ref={quickAddRef}>
             <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
@@ -928,15 +888,16 @@ export default function MealFoodView() {
       )}
 
       <FoodModal
-  isOpen={isFoodModalOpen}
-  onClose={() => setIsFoodModalOpen(false)}
-  foodName={selectedFood?.name ?? ""}
-  calories={selectedFood?.calories ?? 0}
-  protein={selectedFood?.protein ?? 0}
-  carbs={selectedFood?.carbs ?? 0}
-  fats={selectedFood?.fats ?? 0}
-  servingSize={"100g"}
-/>
+        isOpen={isFoodModalOpen}
+        onClose={() => setIsFoodModalOpen(false)}
+        foodName={selectedFood?.name ?? ""}
+        calories={selectedFood?.calories ?? 0}
+        protein={selectedFood?.protein ?? 0}
+        carbs={selectedFood?.carbs ?? 0}
+        fats={selectedFood?.fats ?? 0}
+        servingSize={selectedFood?.servingSize ?? "100g"}
+        category={selectedFood?.category}
+      />
 
 
     </div>

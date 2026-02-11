@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,269 +11,360 @@ import FoodModal from "@/components/food-modal"
 import { ThemeToggle } from "@/components/theme-toggle"
 import ProfileAvatarButton from "@/components/profile-avatar-button"
 
+type FoodItem = {
+  name: string
+  calories: number
+  protein: number
+  carbs: number
+  fats: number
+  category: string
+  servingSize?: string
+}
+
+const defaultFamousRecipes: FoodItem[] = [
+  {
+    name: "Grilled Chicken Breast",
+    calories: 165,
+    protein: 31,
+    category: "🍗 High-Protein / Fitness Friendly",
+    carbs: 0,
+    fats: 3.6,
+  },
+  {
+    name: "Turkey Breast (roasted)",
+    calories: 135,
+    protein: 30,
+    category: "🍗 High-Protein / Fitness Friendly",
+    carbs: 0,
+    fats: 1,
+  },
+  {
+    name: "Tuna (canned in water)",
+    calories: 116,
+    protein: 26,
+    category: "🍗 High-Protein / Fitness Friendly",
+    carbs: 0,
+    fats: 0.8,
+  },
+  {
+    name: "Salmon (grilled)",
+    calories: 208,
+    protein: 20,
+    category: "🍗 High-Protein / Fitness Friendly",
+    carbs: 0,
+    fats: 13,
+  },
+  {
+    name: "Egg Whites",
+    calories: 52,
+    protein: 11,
+    category: "🍗 High-Protein / Fitness Friendly",
+    carbs: 0.7,
+    fats: 0.2,
+  },
+  {
+    name: "Greek Yogurt (0% fat)",
+    calories: 59,
+    protein: 10,
+    category: "🍗 High-Protein / Fitness Friendly",
+    carbs: 3.6,
+    fats: 0.4,
+  },
+  {
+    name: "Cottage Cheese (low-fat)",
+    calories: 98,
+    protein: 11,
+    category: "🍗 High-Protein / Fitness Friendly",
+    carbs: 3.4,
+    fats: 2.3,
+  },
+  { name: "Spaghetti Bolognese", calories: 158, protein: 8, category: "🍝 Popular Global Meals", carbs: 20, fats: 5 },
+  { name: "Margherita Pizza", calories: 266, protein: 11, category: "🍝 Popular Global Meals", carbs: 33, fats: 10 },
+  {
+    name: "Beef Burger (plain patty)",
+    calories: 250,
+    protein: 26,
+    category: "🍝 Popular Global Meals",
+    carbs: 0,
+    fats: 17,
+  },
+  { name: "Chicken Shawarma", calories: 194, protein: 23, category: "🍝 Popular Global Meals", carbs: 5, fats: 9 },
+  {
+    name: "Chicken Tikka Masala",
+    calories: 168,
+    protein: 14,
+    category: "🍝 Popular Global Meals",
+    carbs: 8,
+    fats: 9,
+  },
+  { name: "Sushi (salmon roll)", calories: 130, protein: 6, category: "🍝 Popular Global Meals", carbs: 18, fats: 4 },
+  {
+    name: "White Rice (cooked)",
+    calories: 130,
+    protein: 2.7,
+    category: "🍚 Everyday & Comfort Foods",
+    carbs: 28,
+    fats: 0.3,
+  },
+  {
+    name: "Brown Rice (cooked)",
+    calories: 123,
+    protein: 2.6,
+    category: "🍚 Everyday & Comfort Foods",
+    carbs: 26,
+    fats: 1,
+  },
+  { name: "French Fries", calories: 312, protein: 3.4, category: "🍚 Everyday & Comfort Foods", carbs: 41, fats: 15 },
+  { name: "Mashed Potatoes", calories: 88, protein: 2, category: "🍚 Everyday & Comfort Foods", carbs: 18, fats: 1 },
+  {
+    name: "Omelette (plain)",
+    calories: 154,
+    protein: 11,
+    category: "🍚 Everyday & Comfort Foods",
+    carbs: 1,
+    fats: 12,
+  },
+  {
+    name: "Caesar Salad (no croutons)",
+    calories: 120,
+    protein: 6,
+    category: "🥗 Healthy / Diet-Friendly",
+    carbs: 8,
+    fats: 7,
+  },
+  {
+    name: "Lentils (cooked)",
+    calories: 116,
+    protein: 9,
+    category: "🥗 Healthy / Diet-Friendly",
+    carbs: 20,
+    fats: 0.4,
+  },
+  {
+    name: "Chickpeas (cooked)",
+    calories: 164,
+    protein: 9,
+    category: "🥗 Healthy / Diet-Friendly",
+    carbs: 27,
+    fats: 2.6,
+  },
+  { name: "Avocado", calories: 160, protein: 2, category: "🥗 Healthy / Diet-Friendly", carbs: 9, fats: 15 },
+  {
+    name: "Mixed Vegetables (steamed)",
+    calories: 35,
+    protein: 2,
+    category: "🥗 Healthy / Diet-Friendly",
+    carbs: 7,
+    fats: 0.2,
+  },
+  { name: "Dark Chocolate (70%)", calories: 598, protein: 7.8, category: "🍰 Snacks & Treats", carbs: 46, fats: 43 },
+  { name: "Milk Chocolate", calories: 535, protein: 7.6, category: "🍰 Snacks & Treats", carbs: 59, fats: 30 },
+  { name: "Ice Cream (vanilla)", calories: 207, protein: 3.5, category: "🍰 Snacks & Treats", carbs: 24, fats: 11 },
+  { name: "Croissant", calories: 406, protein: 8, category: "🍰 Snacks & Treats", carbs: 46, fats: 21 },
+]
+
+const defaultSampleFoods: FoodItem[] = [
+  {
+    name: "Grilled Chicken Breast",
+    calories: 165,
+    protein: 31,
+    carbs: 0,
+    fats: 3.6,
+    servingSize: "100g",
+    category: "🍗 Lean Animal Proteins",
+  },
+  {
+    name: "Brown Rice",
+    calories: 112,
+    protein: 2.6,
+    carbs: 24,
+    fats: 0.9,
+    servingSize: "100g",
+    category: "🍚 Complex Carbohydrates",
+  },
+  {
+    name: "Steamed Broccoli",
+    calories: 35,
+    protein: 2.4,
+    carbs: 7,
+    fats: 0.4,
+    servingSize: "100g",
+    category: "🔥 Low-Calorie Foods",
+  },
+  {
+    name: "Salmon Fillet",
+    calories: 208,
+    protein: 20,
+    carbs: 0,
+    fats: 13,
+    servingSize: "100g",
+    category: "🥩 Fatty Animal Proteins",
+  },
+  {
+    name: "Greek Yogurt",
+    calories: 59,
+    protein: 10,
+    carbs: 3.6,
+    fats: 0.4,
+    servingSize: "100g",
+    category: "🏆 High Protein Density",
+  },
+  {
+    name: "Banana",
+    calories: 89,
+    protein: 1.1,
+    carbs: 23,
+    fats: 0.3,
+    servingSize: "1 medium",
+    category: "🍞 Refined Carbohydrates",
+  },
+  {
+    name: "Almonds",
+    calories: 579,
+    protein: 21,
+    carbs: 22,
+    fats: 50,
+    servingSize: "100g",
+    category: "🥑 Healthy Fats",
+  },
+  {
+    name: "Sweet Potato",
+    calories: 86,
+    protein: 1.6,
+    carbs: 20,
+    fats: 0.1,
+    servingSize: "100g",
+    category: "🍚 Complex Carbohydrates",
+  },
+]
+
 export default function FoodModalPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("All")
   const [isFamousRecipesOpen, setIsFamousRecipesOpen] = useState(false)
-  const [selectedFamousFood, setSelectedFamousFood] = useState<any>(null)
+  const [selectedFamousFood, setSelectedFamousFood] = useState<FoodItem | null>(null)
   const [famousQuantity, setFamousQuantity] = useState("1")
   const [famousUnit, setFamousUnit] = useState("serving")
   const router = useRouter()
+
+  const [foods, setFoods] = useState<FoodItem[]>(defaultSampleFoods)
+  const [famousRecipes, setFamousRecipes] = useState<FoodItem[]>(defaultFamousRecipes)
+  const [isLoadingFoods, setIsLoadingFoods] = useState(false)
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(false)
+  const [selectedFood, setSelectedFood] = useState<FoodItem>(defaultSampleFoods[0])
+
+  useEffect(() => {
+    const loadFoods = async () => {
+      setIsLoadingFoods(true)
+      try {
+        const res = await fetch("http://localhost:8080/foods")
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data) && data.length > 0) {
+            setFoods(data)
+            setSelectedFood(data[0])
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load foods", err)
+      } finally {
+        setIsLoadingFoods(false)
+      }
+    }
+
+    const loadRecipes = async () => {
+      setIsLoadingRecipes(true)
+      try {
+        const res = await fetch("http://localhost:8080/recipes")
+        if (res.ok) {
+          const data = await res.json()
+          if (Array.isArray(data) && data.length > 0) {
+            setFamousRecipes(data)
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load recipes", err)
+      } finally {
+        setIsLoadingRecipes(false)
+      }
+    }
+
+    loadFoods()
+    loadRecipes()
+  }, [])
 
   const handleNavigation = (path: string) => {
     router.push(path)
     setIsMenuOpen(false)
   }
 
-  const famousRecipes = [
-    {
-      name: "Grilled Chicken Breast",
-      calories: 165,
-      protein: 31,
-      category: "🍗 High-Protein / Fitness Friendly",
-      carbs: 0,
-      fats: 3.6,
-    },
-    {
-      name: "Turkey Breast (roasted)",
-      calories: 135,
-      protein: 30,
-      category: "🍗 High-Protein / Fitness Friendly",
-      carbs: 0,
-      fats: 1,
-    },
-    {
-      name: "Tuna (canned in water)",
-      calories: 116,
-      protein: 26,
-      category: "🍗 High-Protein / Fitness Friendly",
-      carbs: 0,
-      fats: 0.8,
-    },
-    {
-      name: "Salmon (grilled)",
-      calories: 208,
-      protein: 20,
-      category: "🍗 High-Protein / Fitness Friendly",
-      carbs: 0,
-      fats: 13,
-    },
-    {
-      name: "Egg Whites",
-      calories: 52,
-      protein: 11,
-      category: "🍗 High-Protein / Fitness Friendly",
-      carbs: 0.7,
-      fats: 0.2,
-    },
-    {
-      name: "Greek Yogurt (0% fat)",
-      calories: 59,
-      protein: 10,
-      category: "🍗 High-Protein / Fitness Friendly",
-      carbs: 3.6,
-      fats: 0.4,
-    },
-    {
-      name: "Cottage Cheese (low-fat)",
-      calories: 98,
-      protein: 11,
-      category: "🍗 High-Protein / Fitness Friendly",
-      carbs: 3.4,
-      fats: 2.3,
-    },
-    { name: "Spaghetti Bolognese", calories: 158, protein: 8, category: "🍝 Popular Global Meals", carbs: 20, fats: 5 },
-    { name: "Margherita Pizza", calories: 266, protein: 11, category: "🍝 Popular Global Meals", carbs: 33, fats: 10 },
-    {
-      name: "Beef Burger (plain patty)",
-      calories: 250,
-      protein: 26,
-      category: "🍝 Popular Global Meals",
-      carbs: 0,
-      fats: 17,
-    },
-    { name: "Chicken Shawarma", calories: 194, protein: 23, category: "🍝 Popular Global Meals", carbs: 5, fats: 9 },
-    {
-      name: "Chicken Tikka Masala",
-      calories: 168,
-      protein: 14,
-      category: "🍝 Popular Global Meals",
-      carbs: 8,
-      fats: 9,
-    },
-    { name: "Sushi (salmon roll)", calories: 130, protein: 6, category: "🍝 Popular Global Meals", carbs: 18, fats: 4 },
-    {
-      name: "White Rice (cooked)",
-      calories: 130,
-      protein: 2.7,
-      category: "🍚 Everyday & Comfort Foods",
-      carbs: 28,
-      fats: 0.3,
-    },
-    {
-      name: "Brown Rice (cooked)",
-      calories: 123,
-      protein: 2.6,
-      category: "🍚 Everyday & Comfort Foods",
-      carbs: 26,
-      fats: 1,
-    },
-    { name: "French Fries", calories: 312, protein: 3.4, category: "🍚 Everyday & Comfort Foods", carbs: 41, fats: 15 },
-    { name: "Mashed Potatoes", calories: 88, protein: 2, category: "🍚 Everyday & Comfort Foods", carbs: 18, fats: 1 },
-    {
-      name: "Omelette (plain)",
-      calories: 154,
-      protein: 11,
-      category: "🍚 Everyday & Comfort Foods",
-      carbs: 1,
-      fats: 12,
-    },
-    {
-      name: "Caesar Salad (no croutons)",
-      calories: 120,
-      protein: 6,
-      category: "🥗 Healthy / Diet-Friendly",
-      carbs: 8,
-      fats: 7,
-    },
-    {
-      name: "Lentils (cooked)",
-      calories: 116,
-      protein: 9,
-      category: "🥗 Healthy / Diet-Friendly",
-      carbs: 20,
-      fats: 0.4,
-    },
-    {
-      name: "Chickpeas (cooked)",
-      calories: 164,
-      protein: 9,
-      category: "🥗 Healthy / Diet-Friendly",
-      carbs: 27,
-      fats: 2.6,
-    },
-    { name: "Avocado", calories: 160, protein: 2, category: "🥗 Healthy / Diet-Friendly", carbs: 9, fats: 15 },
-    {
-      name: "Mixed Vegetables (steamed)",
-      calories: 35,
-      protein: 2,
-      category: "🥗 Healthy / Diet-Friendly",
-      carbs: 7,
-      fats: 0.2,
-    },
-    { name: "Dark Chocolate (70%)", calories: 598, protein: 7.8, category: "🍰 Snacks & Treats", carbs: 46, fats: 43 },
-    { name: "Milk Chocolate", calories: 535, protein: 7.6, category: "🍰 Snacks & Treats", carbs: 59, fats: 30 },
-    { name: "Ice Cream (vanilla)", calories: 207, protein: 3.5, category: "🍰 Snacks & Treats", carbs: 24, fats: 11 },
-    { name: "Croissant", calories: 406, protein: 8, category: "🍰 Snacks & Treats", carbs: 46, fats: 21 },
-  ]
-
-  const sampleFoods = [
-    {
-      name: "Grilled Chicken Breast",
-      calories: 165,
-      protein: 31,
-      carbs: 0,
-      fats: 3.6,
-      servingSize: "100g",
-      category: "🍗 Lean Animal Proteins",
-    },
-    {
-      name: "Brown Rice",
-      calories: 112,
-      protein: 2.6,
-      carbs: 24,
-      fats: 0.9,
-      servingSize: "100g",
-      category: "🍚 Complex Carbohydrates",
-    },
-    {
-      name: "Steamed Broccoli",
-      calories: 35,
-      protein: 2.4,
-      carbs: 7,
-      fats: 0.4,
-      servingSize: "100g",
-      category: "🔥 Low-Calorie Foods",
-    },
-    {
-      name: "Salmon Fillet",
-      calories: 208,
-      protein: 20,
-      carbs: 0,
-      fats: 13,
-      servingSize: "100g",
-      category: "🥩 Fatty Animal Proteins",
-    },
-    {
-      name: "Greek Yogurt",
-      calories: 59,
-      protein: 10,
-      carbs: 3.6,
-      fats: 0.4,
-      servingSize: "100g",
-      category: "🏆 High Protein Density",
-    },
-    {
-      name: "Banana",
-      calories: 89,
-      protein: 1.1,
-      carbs: 23,
-      fats: 0.3,
-      servingSize: "1 medium",
-      category: "🍞 Refined Carbohydrates",
-    },
-    {
-      name: "Almonds",
-      calories: 579,
-      protein: 21,
-      carbs: 22,
-      fats: 50,
-      servingSize: "100g",
-      category: "🥑 Healthy Fats",
-    },
-    {
-      name: "Sweet Potato",
-      calories: 86,
-      protein: 1.6,
-      carbs: 20,
-      fats: 0.1,
-      servingSize: "100g",
-      category: "🍚 Complex Carbohydrates",
-    },
-  ]
-
-  const [selectedFood, setSelectedFood] = useState(sampleFoods[0])
-
-  const filteredFoods = sampleFoods.filter((food) => {
+  const filteredFoods = foods.filter((food) => {
     const matchesSearch = food.name.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = categoryFilter === "All" || food.category === categoryFilter
     return matchesSearch && matchesCategory
   })
 
-  const handleOpenModal = (food: (typeof sampleFoods)[0]) => {
+  const handleOpenModal = (food: FoodItem) => {
     setSelectedFood(food)
     setIsModalOpen(true)
   }
 
-  const handleSelectFamousRecipe = (food: any) => {
+  const handleSelectFamousRecipe = (food: FoodItem) => {
     setSelectedFamousFood(food)
   }
 
-  const handleAddFamousToLog = () => {
+  const handleAddFamousToLog = async () => {
+    if (!selectedFamousFood) return
+    const userStr = localStorage.getItem("calora_user")
+    if (!userStr) {
+      alert("Please login to log food")
+      return
+    }
+    const user = JSON.parse(userStr)
+
     const multiplier = Number.parseFloat(famousQuantity) || 1
-    console.log("Adding famous recipe to recent foods:", {
-      ...selectedFamousFood,
-      quantity: famousQuantity,
+    const totalCalories = Math.round(selectedFamousFood.calories * multiplier)
+    const totalProtein = Math.round(selectedFamousFood.protein * multiplier)
+    const totalCarbs = Math.round(selectedFamousFood.carbs * multiplier)
+    const totalFats = Number.parseFloat((selectedFamousFood.fats * multiplier).toFixed(1))
+
+    const mealData = {
+      name: selectedFamousFood.name,
+      calories: totalCalories,
+      protein: totalProtein,
+      carbs: totalCarbs,
+      fats: totalFats,
+      mealType: "recipe",
+      quantity: multiplier,
       unit: famousUnit,
-      totalCalories: Math.round(selectedFamousFood.calories * multiplier),
-    })
-    alert(`${selectedFamousFood.name} has been added to your Recent Foods!`)
-    setSelectedFamousFood(null)
-    setFamousQuantity("1")
-    setFamousUnit("serving")
-    setIsFamousRecipesOpen(false)
+      source: "famous-recipe",
+      date: new Date().toISOString().slice(0, 19),
+      user: { id: user.id },
+    }
+
+    try {
+      const res = await fetch("http://localhost:8080/meals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mealData),
+      })
+
+      if (res.ok) {
+        alert(`${selectedFamousFood.name} has been added to your meals!`)
+        setSelectedFamousFood(null)
+        setFamousQuantity("1")
+        setFamousUnit("serving")
+        setIsFamousRecipesOpen(false)
+      } else {
+        console.error("Failed to log recipe meal", await res.text())
+        alert("Failed to save meal. Please try again.")
+      }
+    } catch (err) {
+      console.error("Error logging recipe meal", err)
+      alert("Error logging meal")
+    }
   }
 
   return (
@@ -445,6 +536,11 @@ export default function FoodModalPage() {
             <CardDescription style={{ color: "#708993" }}>
               Search for foods and click the + button to add them to your meal
             </CardDescription>
+            {isLoadingFoods && (
+              <p className="mt-2 text-xs" style={{ color: "#708993" }}>
+                Loading foods...
+              </p>
+            )}
             <div className="relative mt-4">
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2" style={{ color: "#708993" }} />
               <Input
@@ -505,7 +601,7 @@ export default function FoodModalPage() {
                         {food.category}
                       </p>
                       <p className="text-sm" style={{ color: "#708993" }}>
-                        {food.calories} cal • {food.protein}g protein • {food.servingSize}
+                        {food.calories} cal • {food.protein}g protein • {food.servingSize ?? "100g"}
                       </p>
                     </div>
                     <Button
@@ -546,7 +642,7 @@ export default function FoodModalPage() {
         protein={selectedFood.protein}
         carbs={selectedFood.carbs}
         fats={selectedFood.fats}
-        servingSize={selectedFood.servingSize}
+        servingSize={selectedFood.servingSize ?? "100g"}
         category={selectedFood.category}
       />
 
@@ -579,6 +675,11 @@ export default function FoodModalPage() {
 
             {!selectedFamousFood ? (
               <div className="space-y-4">
+                {isLoadingRecipes && (
+                  <p className="text-sm" style={{ color: "#708993" }}>
+                    Loading recipes...
+                  </p>
+                )}
                 {famousRecipes.map((food, index) => (
                   <div
                     key={index}
