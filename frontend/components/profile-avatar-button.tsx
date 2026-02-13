@@ -1,5 +1,5 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
 import { useEffect, useState, type CSSProperties, type MouseEventHandler } from "react"
 import { Button } from "@/components/ui/button"
 import { User } from "lucide-react"
@@ -29,7 +29,7 @@ export default function ProfileAvatarButton({
       if (user?.profilePicture) {
         const resolved = user.profilePicture.startsWith("http")
           ? user.profilePicture
-          : `http://localhost:8080${user.profilePicture}`
+          : `${API_BASE}${user.profilePicture}`
         setProfilePicture(resolved)
       }
     } catch {
@@ -41,7 +41,7 @@ export default function ProfileAvatarButton({
     <Button
       variant="outline"
       size="icon"
-      className={`rounded-full bg-transparent overflow-hidden ${className ?? ""}`}
+      className={`rounded-full bg-transparent overflow-hidden transition-all duration-200 hover:scale-105 hover:shadow-lg hover:bg-[#E7F2EF] ${className ?? ""}`}
       style={{
         borderColor: "#4A9782",
         color: "#004030",
@@ -60,3 +60,4 @@ export default function ProfileAvatarButton({
     </Button>
   )
 }
+

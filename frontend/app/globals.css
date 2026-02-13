@@ -153,12 +153,41 @@
 }
 
 @layer base {
+  html {
+    font-size: clamp(15px, 0.2vw + 14px, 18px);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  html,
+  body {
+    width: 100%;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
     transition: background-color 0.3s ease, color 0.3s ease;
+    min-width: 320px;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
   }
   
   /* Ensure all elements transition smoothly */

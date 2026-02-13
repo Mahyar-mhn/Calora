@@ -1,5 +1,5 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,18 @@ interface FoodModalProps {
   fats: number
   servingSize: string
   category?: string
+  onMealLogged?: (meal: {
+    id?: number
+    name: string
+    calories: number
+    protein: number
+    carbs: number
+    fats: number
+    mealType?: string
+    quantity?: number
+    unit?: string
+    date?: string
+  }) => void
 }
 
 export default function FoodModal({
@@ -28,6 +40,7 @@ export default function FoodModal({
   fats,
   servingSize,
   category,
+  onMealLogged,
 }: FoodModalProps) {
   const [mealType, setMealType] = useState("breakfast")
   const [quantity, setQuantity] = useState("1")
@@ -66,13 +79,27 @@ export default function FoodModal({
         user: { id: user.id }
       }
 
-      const res = await fetch("http://localhost:8080/meals", {
+      const res = await fetch(`${API_BASE}/meals`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(mealData),
       })
 
       if (res.ok) {
+        const savedMeal = await res.json()
+        onMealLogged?.({
+          id: savedMeal.id,
+          name: savedMeal.name,
+          calories: savedMeal.calories,
+          protein: savedMeal.protein,
+          carbs: savedMeal.carbs,
+          fats: savedMeal.fats,
+          mealType: savedMeal.mealType,
+          quantity: savedMeal.quantity,
+          unit: savedMeal.unit,
+          date: savedMeal.date,
+        })
+
         console.log("Meal logged successfully")
         // Show success feedback
         alert(`Successfully added ${quantity} ${unit} of ${foodName} to ${mealType}!`)
@@ -293,3 +320,4 @@ export default function FoodModal({
     </div>
   )
 }
+

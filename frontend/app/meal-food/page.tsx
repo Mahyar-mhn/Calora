@@ -1,5 +1,10 @@
+import { Suspense } from "react"
 import MealFoodView from "@/components/meal-food-view"
 
 export default function MealFoodPage() {
-  return <MealFoodView />
+  return (
+    <Suspense fallback={null}>
+      <MealFoodView />
+    </Suspense>
+  )
 }

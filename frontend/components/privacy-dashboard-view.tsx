@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,6 +24,7 @@ import ProfileAvatarButton from "./profile-avatar-button"
 
 export default function PrivacyDashboardView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const router = useRouter()
 
   const handleNavigation = (path: string) => {
@@ -49,7 +51,7 @@ export default function PrivacyDashboardView() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -60,9 +62,10 @@ export default function PrivacyDashboardView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -87,7 +90,8 @@ export default function PrivacyDashboardView() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -323,3 +327,6 @@ export default function PrivacyDashboardView() {
     </div>
   )
 }
+
+
+

@@ -1,5 +1,6 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
@@ -51,6 +52,7 @@ type SelectedFood = {
 
 export default function MealFoodView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const router = useRouter()
   const searchParams = useSearchParams()
   const quickAddRef = useRef<HTMLDivElement>(null)
@@ -128,7 +130,7 @@ export default function MealFoodView() {
 
       setIsLoadingRecents(true)
       try {
-        const res = await fetch(`http://localhost:8080/meals/user/${user.id}/range?from=${from}&to=${to}`)
+        const res = await fetch(`${API_BASE}/meals/user/${user.id}/range?from=${from}&to=${to}`)
         if (!res.ok) {
           console.error("Failed to load recent meals", await res.text())
           return
@@ -169,7 +171,7 @@ export default function MealFoodView() {
     const loadFoods = async () => {
       setIsLoadingFoods(true)
       try {
-        const res = await fetch("http://localhost:8080/foods")
+        const res = await fetch(`${API_BASE}/foods`)
         if (!res.ok) {
           console.error("Failed to load foods", await res.text())
           return
@@ -213,6 +215,10 @@ export default function MealFoodView() {
   const handleFoodClick = (food: { name: string; calories: number; protein: number; carbs: number; fats: number }) => {
     setSelectedFood(food)
     setIsFoodModalOpen(true)
+  }
+
+  const handleMealLogged = (meal: RecentMeal) => {
+    setRecentFoods((prev) => [meal, ...prev].slice(0, 10))
   }
 
   const handleBarcodeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -266,7 +272,7 @@ export default function MealFoodView() {
         user: { id: user.id },
       }
 
-      const res = await fetch("http://localhost:8080/meals", {
+      const res = await fetch(`${API_BASE}/meals`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(mealData),
@@ -321,8 +327,8 @@ export default function MealFoodView() {
       const userId = user?.id
 
       const url = userId
-        ? `http://localhost:8080/meals/${meal.id}?userId=${userId}`
-        : `http://localhost:8080/meals/${meal.id}`
+        ? `${API_BASE}/meals/${meal.id}?userId=${userId}`
+        : `${API_BASE}/meals/${meal.id}`
 
       const res = await fetch(url, { method: "DELETE" })
       if (res.ok) {
@@ -430,7 +436,7 @@ export default function MealFoodView() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -441,9 +447,10 @@ export default function MealFoodView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -465,7 +472,8 @@ export default function MealFoodView() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -545,7 +553,7 @@ export default function MealFoodView() {
       )}
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">
           {/* Quick Add Meal */}
           <div ref={quickAddRef}>
@@ -700,9 +708,9 @@ export default function MealFoodView() {
           </div>
 
           {/* Input Methods */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-2">
             <Card
-              className="cursor-pointer transition-all hover:shadow-lg"
+              className="min-h-48 cursor-pointer transition-all hover:shadow-lg"
               style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
               onClick={() => setIsBarcodeModalOpen(true)}
             >
@@ -725,7 +733,7 @@ export default function MealFoodView() {
             </Card>
 
             <Card
-              className="cursor-pointer transition-all hover:shadow-lg md:col-span-2"
+              className="min-h-48 cursor-pointer transition-all hover:shadow-lg"
               style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
               onClick={handlePremiumNavigation}
             >
@@ -790,9 +798,9 @@ export default function MealFoodView() {
                           {food.name}
                         </h4>
                         <p className="text-sm" style={{ color: "#708993" }}>
-                          {food.calories} cal ??? P: {food.protein}g ??? C: {food.carbs}g ??? F: {food.fats}g
-                          {food.quantity ? ` ??? ${food.quantity} ${food.unit ?? ""}` : ""}
-                          {food.mealType ? ` ??? ${food.mealType}` : ""}
+                          {food.calories} cal | P: {food.protein}g | C: {food.carbs}g | F: {food.fats}g
+                          {food.quantity ? ` | ${food.quantity} ${food.unit ?? ""}` : ""}
+                          {food.mealType ? ` | ${food.mealType}` : ""}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1175,9 +1183,14 @@ export default function MealFoodView() {
         fats={selectedFood?.fats ?? 0}
         servingSize={selectedFood?.servingSize ?? "100g"}
         category={selectedFood?.category}
+        onMealLogged={handleMealLogged}
       />
 
 
     </div>
   )
 }
+
+
+
+

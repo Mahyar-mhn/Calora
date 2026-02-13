@@ -1,5 +1,5 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
 import type React from "react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -49,7 +49,7 @@ export default function GoalSetupForm() {
     if (selectedGoal === "gain") dailyCalorieTarget = tdee + 500
 
     try {
-      const res = await fetch(`http://localhost:8080/users/${user.id}`, {
+      const res = await fetch(`${API_BASE}/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -174,3 +174,4 @@ export default function GoalSetupForm() {
     </Card>
   )
 }
+

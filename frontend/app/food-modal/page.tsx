@@ -1,5 +1,6 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,7 +9,6 @@ import { Menu, Plus, Search, Home, Utensils, Cookie, Activity, History, Calendar
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import FoodModal from "@/components/food-modal"
-import { ThemeToggle } from "@/components/theme-toggle"
 import ProfileAvatarButton from "@/components/profile-avatar-button"
 
 type FoodItem = {
@@ -240,6 +240,7 @@ const defaultSampleFoods: FoodItem[] = [
 
 export default function FoodModalPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("All")
@@ -259,7 +260,7 @@ export default function FoodModalPage() {
     const loadFoods = async () => {
       setIsLoadingFoods(true)
       try {
-        const res = await fetch("http://localhost:8080/foods")
+        const res = await fetch(`${API_BASE}/foods`)
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data) && data.length > 0) {
@@ -277,7 +278,7 @@ export default function FoodModalPage() {
     const loadRecipes = async () => {
       setIsLoadingRecipes(true)
       try {
-        const res = await fetch("http://localhost:8080/recipes")
+        const res = await fetch(`${API_BASE}/recipes`)
         if (res.ok) {
           const data = await res.json()
           if (Array.isArray(data) && data.length > 0) {
@@ -356,7 +357,7 @@ export default function FoodModalPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/meals", {
+      const res = await fetch(`${API_BASE}/meals`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(mealData),
@@ -382,7 +383,7 @@ export default function FoodModalPage() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -393,9 +394,10 @@ export default function FoodModalPage() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -408,10 +410,7 @@ export default function FoodModalPage() {
                 Food Modal
               </h1>
             </div>
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <ProfileAvatarButton onClick={() => router.push("/profile")} />
-            </div>
+            <ProfileAvatarButton onClick={() => router.push("/profile")} />
           </div>
         </div>
       </header>
@@ -420,7 +419,8 @@ export default function FoodModalPage() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -503,7 +503,7 @@ export default function FoodModalPage() {
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Button
-            className="w-full rounded-lg py-6 text-lg font-semibold shadow-md transition-all hover:shadow-lg"
+            className="w-full rounded-lg py-6 text-lg font-semibold shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg"
             style={{
               backgroundColor: "#4A9782",
               color: "#FFF9E5",
@@ -523,7 +523,7 @@ export default function FoodModalPage() {
 
         <div className="mb-6">
           <Button
-            className="w-full rounded-lg py-6 text-lg font-semibold shadow-md transition-all hover:shadow-lg"
+            className="w-full rounded-lg py-6 text-lg font-semibold shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg"
             style={{
               backgroundColor: "#FFC50F",
               color: "#004030",
@@ -833,3 +833,7 @@ export default function FoodModalPage() {
     </div>
   )
 }
+
+
+
+

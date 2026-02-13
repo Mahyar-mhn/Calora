@@ -1,5 +1,6 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import {
-  User,
   Plus,
   Scan,
   TrendingUp,
@@ -24,19 +24,10 @@ import {
   Cookie,
   Activity,
   History,
-  LogOut,
-  Settings,
 } from "lucide-react"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import ProfileAvatarButton from "./profile-avatar-button"
 import {
   ResponsiveContainer,
   LineChart,
@@ -63,6 +54,16 @@ export default function DashboardView() {
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
   const [isRecentLoading, setIsRecentLoading] = useState(false)
   const [aiInsights, setAiInsights] = useState<string[]>([])
+  const [loggedMacroTotals, setLoggedMacroTotals] = useState({
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+  })
+  const [animatedMacroProgress, setAnimatedMacroProgress] = useState({
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+  })
 
   useEffect(() => {
     const userData = localStorage.getItem("calora_user")
@@ -73,7 +74,7 @@ export default function DashboardView() {
 
   const fetchSummary = async (userId: number) => {
     try {
-      const res = await fetch(`http://localhost:8080/dashboard/summary/${userId}`)
+      const res = await fetch(`${API_BASE}/dashboard/summary/${userId}`)
       if (res.ok) {
         const data = await res.json()
         setSummary(data)
@@ -85,9 +86,61 @@ export default function DashboardView() {
     }
   }
 
+  const fetchLoggedMacroTotals = async (userId: number) => {
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setDate(endDate.getDate() - 60)
+
+    const from = startDate.toISOString().slice(0, 10)
+    const to = endDate.toISOString().slice(0, 10)
+
+    try {
+      const res = await fetch(`${API_BASE}/meals/user/${userId}/range?from=${from}&to=${to}`)
+      if (!res.ok) {
+        console.error("Failed to fetch meals for macro progress", await res.text())
+        return
+      }
+
+      const meals = await res.json()
+      if (!Array.isArray(meals) || meals.length === 0) {
+        setLoggedMacroTotals({ protein: 0, carbs: 0, fats: 0 })
+        return
+      }
+
+      const latestDate = meals
+        .map((meal: any) => (typeof meal.date === "string" ? meal.date.slice(0, 10) : ""))
+        .filter((date: string) => date.length === 10)
+        .sort()
+        .at(-1)
+
+      if (!latestDate) {
+        setLoggedMacroTotals({ protein: 0, carbs: 0, fats: 0 })
+        return
+      }
+
+      const mealsForLatestDay = meals.filter(
+        (meal: any) => typeof meal.date === "string" && meal.date.slice(0, 10) === latestDate,
+      )
+
+      const totals = mealsForLatestDay.reduce(
+        (acc: { protein: number; carbs: number; fats: number }, meal: any) => ({
+          protein: acc.protein + (meal.protein ?? 0),
+          carbs: acc.carbs + (meal.carbs ?? 0),
+          fats: acc.fats + (meal.fats ?? 0),
+        }),
+        { protein: 0, carbs: 0, fats: 0 },
+      )
+
+      setLoggedMacroTotals(totals)
+    } catch (err) {
+      console.error("Failed to fetch meals for macro progress", err)
+    }
+  }
+
   useEffect(() => {
     if (user?.id) {
       fetchSummary(user.id)
+      fetchLoggedMacroTotals(user.id)
       fetchRecentActivities(user.id)
     }
   }, [user?.id])
@@ -123,10 +176,27 @@ export default function DashboardView() {
 
   // Current macro intake (grams)
   const macroConsumed = {
-    protein: summary?.proteinConsumed || 0,
-    carbs: summary?.carbsConsumed || 0,
-    fats: summary?.fatsConsumed || 0,
+    protein: loggedMacroTotals.protein,
+    carbs: loggedMacroTotals.carbs,
+    fats: loggedMacroTotals.fats,
   }
+
+  const clampProgress = (value: number) => Math.max(0, Math.min(100, value))
+
+  const macroProgressTargets = {
+    protein: clampProgress((macroConsumed.protein / Math.max(1, macroTargets.protein)) * 100),
+    carbs: clampProgress((macroConsumed.carbs / Math.max(1, macroTargets.carbs)) * 100),
+    fats: clampProgress((macroConsumed.fats / Math.max(1, macroTargets.fats)) * 100),
+  }
+
+  useEffect(() => {
+    if (!summary) return
+    setAnimatedMacroProgress({ protein: 0, carbs: 0, fats: 0 })
+    const timer = setTimeout(() => {
+      setAnimatedMacroProgress(macroProgressTargets)
+    }, 120)
+    return () => clearTimeout(timer)
+  }, [summary?.proteinConsumed, summary?.carbsConsumed, summary?.fatsConsumed, summary?.proteinTarget, summary?.carbsTarget, summary?.fatsTarget])
 
   const currentWeight = typeof summary?.currentWeight === "number" ? summary.currentWeight : null
   const weightTrajectoryData =
@@ -139,6 +209,7 @@ export default function DashboardView() {
 
   // State for menu visibility and popups
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const [isAddMealOpen, setIsAddMealOpen] = useState(false)
   const [isLogActivityOpen, setIsLogActivityOpen] = useState(false)
   const [isInsightsOpen, setIsInsightsOpen] = useState(false)
@@ -159,7 +230,7 @@ export default function DashboardView() {
 
     setIsRecentLoading(true)
     try {
-      const res = await fetch(`http://localhost:8080/activities/user/${userId}/range?from=${from}&to=${to}`)
+      const res = await fetch(`${API_BASE}/activities/user/${userId}/range?from=${from}&to=${to}`)
       if (!res.ok) {
         console.error("Failed to load activities", await res.text())
         return
@@ -184,7 +255,7 @@ export default function DashboardView() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Menu button on the left */}
@@ -196,9 +267,10 @@ export default function DashboardView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -211,59 +283,7 @@ export default function DashboardView() {
                 Dashboard
               </h1>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="rounded-full bg-transparent overflow-hidden"
-                  style={{
-                    borderColor: "#4A9782",
-                    color: "#004030",
-                  }}
-                >
-                  {user && user.profilePicture ? (
-                    <img
-                      src={user.profilePicture.startsWith("http") ? user.profilePicture : `http://localhost:8080${user.profilePicture}`}
-                      alt="User"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <User className="h-5 w-5" />
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-                <DropdownMenuLabel style={{ color: "#004030" }}>
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user?.name || "User"}</p>
-                    <p className="text-xs leading-none text-muted-foreground" style={{ color: "#708993" }}>
-                      {user?.email || "user@example.com"}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator style={{ backgroundColor: "#DCD0A8" }} />
-                <DropdownMenuItem onClick={() => router.push("/profile")} style={{ color: "#004030" }}>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/settings")} style={{ color: "#004030" }}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator style={{ backgroundColor: "#DCD0A8" }} />
-                <DropdownMenuItem
-                  onClick={() => {
-                    localStorage.removeItem("calora_user")
-                    router.push("/login")
-                  }}
-                  style={{ color: "#ef4444" }}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ProfileAvatarButton onClick={() => router.push("/profile")} />
           </div>
         </div>
       </header>
@@ -272,7 +292,8 @@ export default function DashboardView() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -352,7 +373,7 @@ export default function DashboardView() {
       )}
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* Target Summary */}
           <Card className="md:col-span-2 lg:col-span-3" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
@@ -498,7 +519,7 @@ export default function DashboardView() {
                     </span>
                   </div>
                   <Progress
-                    value={(macroConsumed.protein / macroTargets.protein) * 100}
+                    value={animatedMacroProgress.protein}
                     className="h-3"
                     style={
                       {
@@ -522,7 +543,7 @@ export default function DashboardView() {
                     </span>
                   </div>
                   <Progress
-                    value={(macroConsumed.carbs / macroTargets.carbs) * 100}
+                    value={animatedMacroProgress.carbs}
                     className="h-3"
                     style={
                       {
@@ -546,7 +567,7 @@ export default function DashboardView() {
                     </span>
                   </div>
                   <Progress
-                    value={(macroConsumed.fats / macroTargets.fats) * 100}
+                    value={animatedMacroProgress.fats}
                     className="h-3"
                     style={
                       {
@@ -868,3 +889,7 @@ export default function DashboardView() {
     </div>
   )
 }
+
+
+
+

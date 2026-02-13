@@ -66,4 +66,9 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok(Map.of("message", "Logged out"));
+    }
 }

@@ -1,8 +1,8 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
 import type React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation" // Added useRouter import for navigation
+import { useRouter, useSearchParams } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,17 +11,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff } from "lucide-react"
 import Image from "next/image"
 
+const sanitizeRedirect = (redirect: string | null, fallback: string) => {
+  if (!redirect) return fallback
+  if (!redirect.startsWith("/") || redirect.startsWith("//")) return fallback
+  return redirect
+}
+
 export default function LoginForm() {
-  const router = useRouter() // Added router for navigation to dashboard
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const safeRedirect = sanitizeRedirect(searchParams.get("redirect"), "/dashboard")
+  const safeRequestedRedirect = sanitizeRedirect(searchParams.get("redirect"), "")
+  const signupHref = safeRequestedRedirect ? `/signup?redirect=${encodeURIComponent(safeRequestedRedirect)}` : "/signup"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     try {
-      const res = await fetch("http://localhost:8080/auth/login", {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -30,7 +40,7 @@ export default function LoginForm() {
       if (res.ok) {
         const user = await res.json()
         localStorage.setItem("calora_user", JSON.stringify(user))
-        router.push("/dashboard")
+        router.push(safeRedirect)
       } else {
         alert("Login failed: Invalid credentials")
       }
@@ -200,7 +210,7 @@ export default function LoginForm() {
         <div className="text-center pt-2">
           <p className="text-sm" style={{ color: "#708993" }}>
             {"Don't have an account? "}
-            <Link href="/signup" className="font-semibold hover:underline" style={{ color: "#4A9782" }}>
+            <Link href={signupHref} className="font-semibold hover:underline" style={{ color: "#4A9782" }}>
               Sign Up
             </Link>
           </p>
@@ -209,3 +219,4 @@ export default function LoginForm() {
     </Card>
   )
 }
+

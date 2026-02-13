@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -88,20 +89,27 @@ public class DashboardController {
                         LocalDate today = LocalDate.now();
 
                         // 3. Today's Consumption
-                        int caloriesConsumed = allMeals.stream()
-                                        .filter(m -> m.getDate() != null && m.getDate().toLocalDate().isEqual(today))
+                        Map<LocalDate, List<Meal>> mealsByDate = allMeals.stream()
+                                        .filter(m -> m.getDate() != null)
+                                        .collect(Collectors.groupingBy(m -> m.getDate().toLocalDate()));
+
+                        LocalDate effectiveMealDate = today;
+                        boolean hasTodayMeals = mealsByDate.containsKey(today) && !mealsByDate.get(today).isEmpty();
+                        if (!hasTodayMeals) {
+                                effectiveMealDate = mealsByDate.keySet().stream().max(LocalDate::compareTo).orElse(today);
+                        }
+
+                        List<Meal> effectiveMeals = mealsByDate.getOrDefault(effectiveMealDate, List.of());
+                        int caloriesConsumed = effectiveMeals.stream()
                                         .mapToInt(m -> m.getCalories() != null ? m.getCalories() : 0).sum();
 
-                        int proteinConsumed = allMeals.stream()
-                                        .filter(m -> m.getDate() != null && m.getDate().toLocalDate().isEqual(today))
+                        int proteinConsumed = effectiveMeals.stream()
                                         .mapToInt(m -> m.getProtein() != null ? m.getProtein() : 0).sum();
 
-                        int carbsConsumed = allMeals.stream()
-                                        .filter(m -> m.getDate() != null && m.getDate().toLocalDate().isEqual(today))
+                        int carbsConsumed = effectiveMeals.stream()
                                         .mapToInt(m -> m.getCarbs() != null ? m.getCarbs() : 0).sum();
 
-                        int fatsConsumed = allMeals.stream()
-                                        .filter(m -> m.getDate() != null && m.getDate().toLocalDate().isEqual(today))
+                        int fatsConsumed = effectiveMeals.stream()
                                         .mapToInt(m -> m.getFats() != null ? m.getFats() : 0).sum();
 
                         int caloriesBurned = allActivities.stream()

@@ -1,5 +1,5 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
 import type React from "react"
 
 import { useState } from "react"
@@ -10,15 +10,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, EyeOff } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+
+const sanitizeRedirect = (redirect: string | null, fallback: string) => {
+  if (!redirect) return fallback
+  if (!redirect.startsWith("/") || redirect.startsWith("//")) return fallback
+  return redirect
+}
 
 export default function SignUpForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const safeRedirect = sanitizeRedirect(searchParams.get("redirect"), "/profile-setup")
+  const safeRequestedRedirect = sanitizeRedirect(searchParams.get("redirect"), "")
+  const loginHref = safeRequestedRedirect ? `/login?redirect=${encodeURIComponent(safeRequestedRedirect)}` : "/login"
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,18 +39,16 @@ export default function SignUpForm() {
     }
 
     try {
-      const res = await fetch("http://localhost:8080/auth/signup", {
+      const res = await fetch(`${API_BASE}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, name: "New User" }), // Name is hardcoded for now or we can add a field
       })
 
       if (res.ok) {
-        // Auto-login or redirect to login? Original flow was profile-setup.
-        // Let's assume we redirect to profile-setup as originally intended.
         const user = await res.json()
-        localStorage.setItem("calora_user", JSON.stringify(user)) // Simple session management
-        window.location.href = "/profile-setup"
+        localStorage.setItem("calora_user", JSON.stringify(user))
+        router.push(safeRedirect)
       } else {
         const errorData = await res.json()
         console.error("Signup failed:", errorData)
@@ -165,7 +173,7 @@ export default function SignUpForm() {
         <div className="text-center pt-2">
           <p className="text-sm" style={{ color: "#708993" }}>
             Already have an account?{" "}
-            <Link href="/" className="font-semibold hover:underline" style={{ color: "#4A9782" }}>
+            <Link href={loginHref} className="font-semibold hover:underline" style={{ color: "#4A9782" }}>
               Sign In
             </Link>
           </p>
@@ -174,3 +182,4 @@ export default function SignUpForm() {
     </Card>
   )
 }
+

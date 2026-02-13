@@ -1,5 +1,5 @@
 "use client";
-
+import { API_BASE } from "@/lib/api"
 import { useState } from "react";
 
 export default function NewUserPage() {
@@ -13,7 +13,7 @@ export default function NewUserPage() {
         setError("");
         setResult(null);
 
-        const res = await fetch("http://localhost:8080/users", {
+        const res = await fetch(`${API_BASE}/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, name }),
@@ -69,3 +69,4 @@ export default function NewUserPage() {
         </main>
     );
 }
+

@@ -1,5 +1,6 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -31,6 +32,7 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react" // Added useEffect import
 export default function ProfileView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const [isEditingGoal, setIsEditingGoal] = useState(false)
   const [selectedGoal, setSelectedGoal] = useState("Lose Weight")
   const [dailyCalorieTarget, setDailyCalorieTarget] = useState(2200)
@@ -63,7 +65,7 @@ export default function ProfileView() {
         lastName: nameParts.slice(1).join(" ") || "",
         email: user.email || "",
         profilePicture: user.profilePicture
-          ? (user.profilePicture.startsWith("http") ? user.profilePicture : `http://localhost:8080${user.profilePicture}`)
+          ? (user.profilePicture.startsWith("http") ? user.profilePicture : `${API_BASE}${user.profilePicture}`)
           : "/images/logo.png",
       })
       if (user.goal) setSelectedGoal(user.goal)
@@ -82,7 +84,7 @@ export default function ProfileView() {
           const formData = new FormData()
           formData.append("file", file)
 
-          const res = await fetch(`http://localhost:8080/users/${userData.id}/image`, {
+          const res = await fetch(`${API_BASE}/users/${userData.id}/image`, {
             method: "POST",
             body: formData
           })
@@ -91,7 +93,7 @@ export default function ProfileView() {
             const updatedUser = await res.json()
 
             // Update local state
-            setUserData(prev => ({ ...prev, profilePicture: "http://localhost:8080" + updatedUser.profilePicture }))
+            setUserData(prev => ({ ...prev, profilePicture: `${API_BASE}` + updatedUser.profilePicture }))
 
             // Update local storage
             const currentUserStr = localStorage.getItem("calora_user")
@@ -120,7 +122,7 @@ export default function ProfileView() {
     if (!confirm("Are you sure you want to remove your profile picture?")) return
 
     try {
-      const res = await fetch(`http://localhost:8080/users/${userData.id}/image`, {
+      const res = await fetch(`${API_BASE}/users/${userData.id}/image`, {
         method: "DELETE",
       })
 
@@ -153,7 +155,7 @@ export default function ProfileView() {
 
     try {
       const fullName = `${userData.firstName} ${userData.lastName}`.trim()
-      const res = await fetch(`http://localhost:8080/users/${userData.id}`, {
+      const res = await fetch(`${API_BASE}/users/${userData.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -192,7 +194,7 @@ export default function ProfileView() {
 
     if (userData.id) {
       try {
-        const res = await fetch(`http://localhost:8080/users/${userData.id}`, {
+        const res = await fetch(`${API_BASE}/users/${userData.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -238,7 +240,7 @@ export default function ProfileView() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -249,9 +251,10 @@ export default function ProfileView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -285,10 +288,16 @@ export default function ProfileView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
-                onClick={() => {
-                  // Handle logout - in a real app this would clear auth tokens/session
-                  alert("Logged out successfully!")
-                  router.push("/login")
+                onClick={async () => {
+                  try {
+                    await fetch(`${API_BASE}/auth/logout`, { method: "POST" })
+                  } catch (err) {
+                    console.warn("Logout request failed", err)
+                  } finally {
+                    localStorage.removeItem("calora_user")
+                    alert("Logged out successfully!")
+                    router.replace("/")
+                  }
                 }}
                 title="Logout"
               >
@@ -303,7 +312,8 @@ export default function ProfileView() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -761,3 +771,7 @@ export default function ProfileView() {
     </div>
   )
 }
+
+
+
+

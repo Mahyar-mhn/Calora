@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -11,6 +12,7 @@ import ProfileAvatarButton from "./profile-avatar-button"
 
 export default function NotificationsSettingsView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const router = useRouter()
 
   // Notification preferences state
@@ -32,7 +34,7 @@ export default function NotificationsSettingsView() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -43,9 +45,10 @@ export default function NotificationsSettingsView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -67,7 +70,8 @@ export default function NotificationsSettingsView() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -198,16 +202,16 @@ export default function NotificationsSettingsView() {
                   role="switch"
                   aria-checked={mealReminders}
                   onClick={() => setMealReminders(!mealReminders)}
-                  className="relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                   style={{
                     backgroundColor: mealReminders ? "#4A9782" : "#708993",
                   }}
                 >
                   <span
-                    className="pointer-events-none inline-block h-7 w-7 transform rounded-full shadow-lg ring-0 transition duration-200 ease-in-out"
+                    className="pointer-events-none inline-block h-5 w-5 rounded-full shadow-lg ring-0 transition-transform duration-200 ease-in-out"
                     style={{
                       backgroundColor: "#FFFFFF",
-                      transform: mealReminders ? "translateX(24px)" : "translateX(0)",
+                      transform: mealReminders ? "translateX(20px)" : "translateX(0)",
                     }}
                   />
                 </button>
@@ -235,16 +239,16 @@ export default function NotificationsSettingsView() {
                   role="switch"
                   aria-checked={hydrationAlerts}
                   onClick={() => setHydrationAlerts(!hydrationAlerts)}
-                  className="relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                   style={{
                     backgroundColor: hydrationAlerts ? "#4A9782" : "#708993",
                   }}
                 >
                   <span
-                    className="pointer-events-none inline-block h-7 w-7 transform rounded-full shadow-lg ring-0 transition duration-200 ease-in-out"
+                    className="pointer-events-none inline-block h-5 w-5 rounded-full shadow-lg ring-0 transition-transform duration-200 ease-in-out"
                     style={{
                       backgroundColor: "#FFFFFF",
-                      transform: hydrationAlerts ? "translateX(24px)" : "translateX(0)",
+                      transform: hydrationAlerts ? "translateX(20px)" : "translateX(0)",
                     }}
                   />
                 </button>
@@ -272,16 +276,16 @@ export default function NotificationsSettingsView() {
                   role="switch"
                   aria-checked={streaksNudges}
                   onClick={() => setStreaksNudges(!streaksNudges)}
-                  className="relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                  className="relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
                   style={{
                     backgroundColor: streaksNudges ? "#4A9782" : "#708993",
                   }}
                 >
                   <span
-                    className="pointer-events-none inline-block h-7 w-7 transform rounded-full shadow-lg ring-0 transition duration-200 ease-in-out"
+                    className="pointer-events-none inline-block h-5 w-5 rounded-full shadow-lg ring-0 transition-transform duration-200 ease-in-out"
                     style={{
                       backgroundColor: "#FFFFFF",
-                      transform: streaksNudges ? "translateX(24px)" : "translateX(0)",
+                      transform: streaksNudges ? "translateX(20px)" : "translateX(0)",
                     }}
                   />
                 </button>
@@ -312,3 +316,6 @@ export default function NotificationsSettingsView() {
     </div>
   )
 }
+
+
+

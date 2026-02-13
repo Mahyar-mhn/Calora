@@ -1,5 +1,6 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -57,6 +58,7 @@ type WeightPoint = { date: string; weight: number }
 
 export default function HistoryView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const [calorieTrendsData, setCalorieTrendsData] = useState(defaultCalorieTrendsData)
   const [macroAdherenceData, setMacroAdherenceData] = useState(defaultMacroAdherenceData)
   const [weightTrajectoryData, setWeightTrajectoryData] = useState<WeightPoint[]>([])
@@ -97,9 +99,9 @@ export default function HistoryView() {
       setIsLoading(true)
       try {
         const [mealsRes, activitiesRes, userRes] = await Promise.all([
-          fetch(`http://localhost:8080/meals/user/${user.id}/range?from=${from}&to=${to}`),
-          fetch(`http://localhost:8080/activities/user/${user.id}/range?from=${from}&to=${to}`),
-          fetch(`http://localhost:8080/users/${user.id}`),
+          fetch(`${API_BASE}/meals/user/${user.id}/range?from=${from}&to=${to}`),
+          fetch(`${API_BASE}/activities/user/${user.id}/range?from=${from}&to=${to}`),
+          fetch(`${API_BASE}/users/${user.id}`),
         ])
 
         const meals = mealsRes.ok ? await mealsRes.json() : []
@@ -181,7 +183,7 @@ export default function HistoryView() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -192,9 +194,10 @@ export default function HistoryView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -217,7 +220,8 @@ export default function HistoryView() {
         <div className="relative z-50">
           
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -297,7 +301,7 @@ export default function HistoryView() {
       )}
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5" style={{ color: "#4A9782" }} />
@@ -498,3 +502,7 @@ export default function HistoryView() {
     </div>
   )
 }
+
+
+
+

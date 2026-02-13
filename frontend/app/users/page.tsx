@@ -1,5 +1,6 @@
+import { API_BASE } from "@/lib/api"
 export default async function UsersPage() {
-    const res = await fetch("http://localhost:8080/users", { cache: "no-store" });
+    const res = await fetch(`${API_BASE}/users`, { cache: "no-store" });
     const users = await res.json();
 
     return (
@@ -9,3 +10,4 @@ export default async function UsersPage() {
         </main>
     );
 }
+

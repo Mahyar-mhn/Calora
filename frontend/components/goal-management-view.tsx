@@ -1,5 +1,6 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,7 @@ import ProfileAvatarButton from "./profile-avatar-button"
 
 export default function GoalManagementView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const router = useRouter()
 
   // User physical data state
@@ -27,6 +29,18 @@ export default function GoalManagementView() {
   const [bmr, setBmr] = useState(0)
   const [tdee, setTdee] = useState(0)
 
+  const normalizeActivityLevel = (value: string) => {
+    const normalized = value.toLowerCase().trim()
+    if (normalized === "lightly-active") return "lightly-active"
+    if (normalized === "moderately-active") return "moderately-active"
+    if (normalized === "very-active") return "very-active"
+    if (normalized === "light" || normalized === "lightly active") return "lightly-active"
+    if (normalized === "moderate" || normalized === "moderately active") return "moderately-active"
+    if (normalized === "active" || normalized === "very active") return "very-active"
+    if (normalized === "sedentary") return "sedentary"
+    return "moderately-active"
+  }
+
   // Load data
 
   useEffect(() => {
@@ -38,7 +52,7 @@ export default function GoalManagementView() {
 
       if (storedUser.id) {
         // Fetch fresh data from API
-        fetch(`http://localhost:8080/users/${storedUser.id}`)
+        fetch(`${API_BASE}/users/${storedUser.id}`)
           .then(async (res) => {
             if (res.ok) return res.json();
 
@@ -74,12 +88,12 @@ export default function GoalManagementView() {
             }
             if (user.activityLevel) {
               console.log("Setting activityLevel:", user.activityLevel)
-              setActivityLevel(user.activityLevel.toLowerCase().trim())
+              setActivityLevel(normalizeActivityLevel(user.activityLevel))
             } else {
               console.log("activityLevel missing in fetched user object")
               // Fallback to local storage if API missing field (unlikely)
               if (storedUser.activityLevel) {
-                setActivityLevel(storedUser.activityLevel.toLowerCase().trim())
+                setActivityLevel(normalizeActivityLevel(storedUser.activityLevel))
               }
             }
           })
@@ -91,7 +105,7 @@ export default function GoalManagementView() {
               if (storedUser.gender) setGender(storedUser.gender.toLowerCase().trim())
               if (storedUser.height) setHeight(storedUser.height.toString())
               if (storedUser.weight) setWeight(storedUser.weight.toString())
-              if (storedUser.activityLevel) setActivityLevel(storedUser.activityLevel.toLowerCase().trim())
+              if (storedUser.activityLevel) setActivityLevel(normalizeActivityLevel(storedUser.activityLevel))
             }
           });
       }
@@ -133,7 +147,7 @@ export default function GoalManagementView() {
     if (!userId) return
 
     try {
-      const res = await fetch(`http://localhost:8080/users/${userId}`, {
+      const res = await fetch(`${API_BASE}/users/${userId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -174,7 +188,7 @@ export default function GoalManagementView() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -185,9 +199,10 @@ export default function GoalManagementView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -209,7 +224,8 @@ export default function GoalManagementView() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -423,10 +439,10 @@ export default function GoalManagementView() {
                 <Label htmlFor="activityLevel" style={{ color: "#004030" }} className="font-medium">
                   Activity Level
                 </Label>
-                <Select value={activityLevel} onValueChange={setActivityLevel}>
+                <Select value={activityLevel} onValueChange={(value) => setActivityLevel(normalizeActivityLevel(value))}>
                   <SelectTrigger
                     id="activityLevel"
-                    className="py-5 border-2 focus:ring-offset-0"
+                    className="h-12 w-full border-2 focus:ring-offset-0"
                     style={{
                       borderColor: "#A1C2BD",
                       backgroundColor: "#FFFFFF",
@@ -508,3 +524,7 @@ export default function GoalManagementView() {
     </div>
   )
 }
+
+
+
+

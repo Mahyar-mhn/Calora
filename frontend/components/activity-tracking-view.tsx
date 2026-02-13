@@ -1,5 +1,6 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -40,6 +41,20 @@ type Activity = {
   calories: number | null
   date: string
 }
+
+type DeviceConnection = {
+  id?: number
+  provider: string
+  connected: boolean
+}
+
+const SAMPLE_DEVICE_APPS: DeviceConnection[] = [
+  { provider: "Apple Health", connected: false },
+  { provider: "Google Fit", connected: false },
+  { provider: "Fitbit", connected: false },
+  { provider: "Garmin", connected: false },
+  { provider: "Strava", connected: false },
+]
 
 const workoutCategories = [
   {
@@ -151,6 +166,7 @@ const workoutCategories = [
 
 export default function ActivityTrackingView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const [isWorkoutDropdownOpen, setIsWorkoutDropdownOpen] = useState(false)
   const [workoutType, setWorkoutType] = useState("")
   const [duration, setDuration] = useState("")
@@ -159,6 +175,8 @@ export default function ActivityTrackingView() {
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false)
   const [recentActivities, setRecentActivities] = useState<Activity[]>([])
   const [isLoadingActivities, setIsLoadingActivities] = useState(false)
+  const [deviceConnections, setDeviceConnections] = useState<DeviceConnection[]>(SAMPLE_DEVICE_APPS)
+  const [isLoadingConnections, setIsLoadingConnections] = useState(false)
 
   const router = useRouter()
 
@@ -170,6 +188,68 @@ export default function ActivityTrackingView() {
   const handleWorkoutSelect = (workout: string) => {
     setWorkoutType(workout)
     setIsWorkoutDropdownOpen(false)
+  }
+
+  const loadDeviceConnections = async () => {
+    const userStr = localStorage.getItem("calora_user")
+    if (!userStr) return
+    const user = JSON.parse(userStr)
+
+    setIsLoadingConnections(true)
+    try {
+      const res = await fetch(`${API_BASE}/device-connections/user/${user.id}`)
+      if (!res.ok) {
+        console.error("Failed to load device connections", await res.text())
+        return
+      }
+      const data = await res.json()
+      if (Array.isArray(data)) {
+        const merged = SAMPLE_DEVICE_APPS.map((sample) => {
+          const backendValue = data.find(
+            (item: DeviceConnection) => item.provider.toLowerCase() === sample.provider.toLowerCase(),
+          )
+          return backendValue
+            ? { ...sample, id: backendValue.id, connected: !!backendValue.connected }
+            : sample
+        })
+        setDeviceConnections(merged)
+      }
+    } catch (err) {
+      console.error("Failed to load device connections", err)
+    } finally {
+      setIsLoadingConnections(false)
+    }
+  }
+
+  const handleToggleConnection = async (provider: string) => {
+    const userStr = localStorage.getItem("calora_user")
+    if (!userStr) {
+      alert("Please login first")
+      return
+    }
+    const user = JSON.parse(userStr)
+
+    try {
+      const res = await fetch(`${API_BASE}/device-connections/user/${user.id}/toggle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider }),
+      })
+      if (!res.ok) {
+        console.error("Failed to update device connection", await res.text())
+        alert("Failed to update connection")
+        return
+      }
+      const updated = await res.json()
+      setDeviceConnections((prev) =>
+        prev.map((device) =>
+          device.provider === updated.provider ? { ...device, connected: updated.connected } : device,
+        ),
+      )
+    } catch (err) {
+      console.error("Failed to update device connection", err)
+      alert("Failed to update connection")
+    }
   }
 
   useEffect(() => {
@@ -187,7 +267,7 @@ export default function ActivityTrackingView() {
 
       setIsLoadingActivities(true)
       try {
-        const res = await fetch(`http://localhost:8080/activities/user/${user.id}/range?from=${from}&to=${to}`)
+        const res = await fetch(`${API_BASE}/activities/user/${user.id}/range?from=${from}&to=${to}`)
         if (!res.ok) {
           console.error("Failed to load activities", await res.text())
           return
@@ -209,7 +289,13 @@ export default function ActivityTrackingView() {
     }
 
     loadActivities()
+    loadDeviceConnections()
   }, [])
+
+  useEffect(() => {
+    if (!isConnectionsModalOpen) return
+    loadDeviceConnections()
+  }, [isConnectionsModalOpen])
 
   const handleLogActivity = async () => {
     if (!workoutType || !duration) {
@@ -244,7 +330,7 @@ export default function ActivityTrackingView() {
         user: { id: user.id } // Send user ID association
       }
 
-      const res = await fetch("http://localhost:8080/activities", {
+      const res = await fetch(`${API_BASE}/activities`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(activityData),
@@ -287,8 +373,8 @@ export default function ActivityTrackingView() {
       const user = userStr ? JSON.parse(userStr) : null
       const userId = user?.id
       const url = userId
-        ? `http://localhost:8080/activities/${activity.id}?userId=${userId}`
-        : `http://localhost:8080/activities/${activity.id}`
+        ? `${API_BASE}/activities/${activity.id}?userId=${userId}`
+        : `${API_BASE}/activities/${activity.id}`
 
       const res = await fetch(url, { method: "DELETE" })
       if (res.ok) {
@@ -303,11 +389,18 @@ export default function ActivityTrackingView() {
     }
   }
 
+  const watchConnected = deviceConnections.some(
+    (d) => (d.provider === "Apple Health" || d.provider === "Fitbit" || d.provider === "Garmin") && d.connected,
+  )
+  const phoneConnected = deviceConnections.some(
+    (d) => (d.provider === "Google Fit" || d.provider === "Apple Health") && d.connected,
+  )
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -318,9 +411,10 @@ export default function ActivityTrackingView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -342,7 +436,8 @@ export default function ActivityTrackingView() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -422,7 +517,7 @@ export default function ActivityTrackingView() {
       )}
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Manual Log Section */}
           <Card className="lg:col-span-2" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
@@ -615,7 +710,11 @@ export default function ActivityTrackingView() {
                     </p>
                   </div>
                 </div>
-                <CheckCircle className="h-6 w-6" style={{ color: "#63A361" }} />
+                {watchConnected ? (
+                  <CheckCircle className="h-6 w-6" style={{ color: "#63A361" }} />
+                ) : (
+                  <XCircle className="h-6 w-6" style={{ color: "#708993" }} />
+                )}
               </div>
 
               {/* Smartphone */}
@@ -639,7 +738,11 @@ export default function ActivityTrackingView() {
                     </p>
                   </div>
                 </div>
-                <XCircle className="h-6 w-6" style={{ color: "#708993" }} />
+                {phoneConnected ? (
+                  <CheckCircle className="h-6 w-6" style={{ color: "#63A361" }} />
+                ) : (
+                  <XCircle className="h-6 w-6" style={{ color: "#708993" }} />
+                )}
               </div>
 
               <Button
@@ -777,39 +880,41 @@ export default function ActivityTrackingView() {
             </p>
 
             <div className="space-y-3">
-              {[
-                { name: "Apple Health", connected: true },
-                { name: "Google Fit", connected: true },
-                { name: "Fitbit", connected: false },
-                { name: "Garmin", connected: false },
-                { name: "Strava", connected: false },
-              ].map((device, index) => (
+              {deviceConnections.map((device) => (
                 <div
-                  key={index}
+                  key={device.id ?? device.provider}
                   className="flex items-center justify-between rounded-lg border p-4"
                   style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF" }}
                 >
                   <span className="font-medium" style={{ color: "#004030" }}>
-                    {device.name}
+                    {device.provider}
                   </span>
                   <Button
                     size="sm"
                     className="transition-all"
+                    disabled={isLoadingConnections}
                     style={{
                       backgroundColor: device.connected ? "#63A361" : "#4A9782",
                       color: "#FFF9E5",
+                      opacity: isLoadingConnections ? 0.7 : 1,
                     }}
+                    onClick={() => handleToggleConnection(device.provider)}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.opacity = "0.8"
+                      e.currentTarget.style.opacity = isLoadingConnections ? "0.7" : "0.8"
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.opacity = "1"
+                      e.currentTarget.style.opacity = isLoadingConnections ? "0.7" : "1"
                     }}
                   >
-                    {device.connected ? "Connected" : "Connect"}
+                    {device.connected ? "Disconnect" : "Connect"}
                   </Button>
                 </div>
               ))}
+              {isLoadingConnections && (
+                <p className="text-xs" style={{ color: "#708993" }}>
+                  Syncing your connection status...
+                </p>
+              )}
             </div>
 
             <Button
@@ -834,3 +939,7 @@ export default function ActivityTrackingView() {
     </div>
   )
 }
+
+
+
+

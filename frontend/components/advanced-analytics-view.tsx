@@ -1,6 +1,8 @@
 "use client"
 
+import { API_BASE } from "@/lib/api"
 import { useEffect, useState } from "react"
+import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
@@ -97,14 +99,39 @@ const weeklyPerformanceData = [
 
 export default function AdvancedAnalyticsView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
   const [selectedMonths, setSelectedMonths] = useState(6)
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isAllowed, setIsAllowed] = useState(false)
+  const [isExporting, setIsExporting] = useState<"" | "csv" | "pdf">("")
   const router = useRouter()
 
   const handleNavigation = (path: string) => {
     router.push(path)
     setIsMenuOpen(false)
+  }
+
+  const downloadReport = (format: "csv" | "pdf") => {
+    const userStr = localStorage.getItem("calora_user")
+    const currentUser = userStr ? JSON.parse(userStr) : null
+    if (!currentUser?.id) {
+      alert("Please login again to export reports.")
+      return
+    }
+
+    setIsExporting(format)
+    const exportUrl = `${API_BASE}/exports/analytics/${currentUser.id}?months=${selectedMonths}&format=${format}`
+
+    // Use direct browser navigation for file downloads to avoid fetch/CORS blob issues.
+    const link = document.createElement("a")
+    link.href = exportUrl
+    link.download = `analytics-report.${format}`
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+
+    setIsExportOpen(false)
+    window.setTimeout(() => setIsExporting(""), 400)
   }
 
   useEffect(() => {
@@ -125,7 +152,7 @@ export default function AdvancedAnalyticsView() {
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
       {/* Header */}
       <header className="border-b" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
-        <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
@@ -136,9 +163,10 @@ export default function AdvancedAnalyticsView() {
                   borderColor: "#4A9782",
                   color: "#004030",
                 }}
+                ref={menuButtonRef}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
               >
-                <Menu className="h-5 w-5" />
+                <Menu className={`h-5 w-5 transition-transform duration-300 ${isMenuOpen ? "rotate-180" : "rotate-0"}`} />
               </Button>
               <button
                 onClick={() => router.push("/dashboard")}
@@ -168,7 +196,8 @@ export default function AdvancedAnalyticsView() {
       {isMenuOpen && (
         <div className="relative z-50">
           <div
-            className="absolute left-38 top-2 w-64 rounded-lg border shadow-lg"
+            className="absolute left-4 top-2 z-50 w-[min(20rem,calc(100vw-2rem))] origin-top-left rounded-lg border shadow-lg animate-in fade-in-0 zoom-in-95 duration-200 sm:left-6"
+            ref={menuPanelRef}
             style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
           >
             <nav className="p-2">
@@ -248,7 +277,7 @@ export default function AdvancedAnalyticsView() {
       )}
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8">
         {/* Action Bar */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-col gap-3">
@@ -302,32 +331,28 @@ export default function AdvancedAnalyticsView() {
                 </p>
                 <Button
                   className="w-full py-10 flex-col flex gap-2 transition-all duration-200 hover:scale-105"
-                  onClick={() => {
-                    setIsExportOpen(false)
-                    alert(`📊 CSV Export initiated!\n\nReport includes ${selectedMonths} months of data.\nBackend will generate and download the file.`)
-                  }}
+                  onClick={() => downloadReport("csv")}
                   style={{
                     backgroundColor: "#63A361",
                     color: "#FFF9E5",
                   }}
+                  disabled={isExporting !== ""}
                 >
                   <FileText className="h-6 w-6" />
-                  Export as CSV
+                  {isExporting === "csv" ? "Exporting CSV..." : "Export as CSV"}
                   <span className="text-xs opacity-80">Spreadsheet format</span>
                 </Button>
                 <Button
                   className="w-full py-10 flex-col gap-2 transition-all duration-200 hover:scale-105"
-                  onClick={() => {
-                    setIsExportOpen(false)
-                    alert(`📄 PDF Export initiated!\n\nReport includes ${selectedMonths} months of data.\nBackend will generate and download the file.`)
-                  }}
+                  onClick={() => downloadReport("pdf")}
                   style={{
                     backgroundColor: "#FFC50F",
                     color: "#004030",
                   }}
+                  disabled={isExporting !== ""}
                 >
                   <File className="h-6 w-6" />
-                  Export as PDF
+                  {isExporting === "pdf" ? "Exporting PDF..." : "Export as PDF"}
                   <span className="text-xs opacity-80">Document format</span>
                 </Button>
               </div>
@@ -568,8 +593,11 @@ export default function AdvancedAnalyticsView() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <p className="mb-3 text-sm font-medium" style={{ color: "#708993" }}>
+                Percentage (%)
+              </p>
               <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={micronutrientData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                <BarChart data={micronutrientData} margin={{ top: 20, right: 30, left: 36, bottom: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#A1C2BD" />
                   <XAxis
                     dataKey="nutrient"
@@ -579,7 +607,7 @@ export default function AdvancedAnalyticsView() {
                     height={80}
                     interval={0}
                   />
-                  <YAxis stroke="#708993" domain={[0, 100]} label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft' }} />
+                  <YAxis stroke="#708993" domain={[0, 100]} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#FFF9E5",
@@ -700,3 +728,7 @@ export default function AdvancedAnalyticsView() {
     </div>
   )
 }
+
+
+
+

@@ -1,5 +1,5 @@
 "use client"
-
+import { API_BASE } from "@/lib/api"
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -45,7 +45,7 @@ export default function ProfileSetupForm() {
     console.log("Submitting Profile Setup:", payload)
 
     try {
-      const res = await fetch(`http://localhost:8080/users/${user.id}`, {
+      const res = await fetch(`${API_BASE}/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -244,3 +244,4 @@ export default function ProfileSetupForm() {
     </Card>
   )
 }
+
