@@ -83,6 +83,12 @@ public class User {
 
     private java.time.LocalDate premiumExpiresAt;
 
+    private String handle;
+
+    private String title;
+
+    private String avatarColor;
+
     public String getProfilePicture() {
         return profilePicture;
     }
@@ -129,6 +135,30 @@ public class User {
 
     public void setPremiumExpiresAt(java.time.LocalDate premiumExpiresAt) {
         this.premiumExpiresAt = premiumExpiresAt;
+    }
+
+    public String getHandle() {
+        return handle;
+    }
+
+    public void setHandle(String handle) {
+        this.handle = handle;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAvatarColor() {
+        return avatarColor;
+    }
+
+    public void setAvatarColor(String avatarColor) {
+        this.avatarColor = avatarColor;
     }
 
     private Integer age;

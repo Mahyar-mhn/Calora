@@ -20,6 +20,24 @@ public class UserController {
     @Autowired
     private com.calora.backend.repository.ActivityRepository activityRepository;
 
+    @Autowired
+    private com.calora.backend.repository.ExplorePostRepository explorePostRepository;
+
+    @Autowired
+    private com.calora.backend.repository.ExploreCommentRepository exploreCommentRepository;
+
+    @Autowired
+    private com.calora.backend.repository.ExploreLikeRepository exploreLikeRepository;
+
+    @Autowired
+    private com.calora.backend.repository.ExploreReactionRepository exploreReactionRepository;
+
+    @Autowired
+    private com.calora.backend.repository.ExploreFollowRepository exploreFollowRepository;
+
+    @Autowired
+    private com.calora.backend.repository.ExploreMessageRepository exploreMessageRepository;
+
     @GetMapping
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -32,6 +50,21 @@ public class UserController {
                 .map(user -> {
                     mealRepository.deleteByUserId(id);
                     activityRepository.deleteByUserId(id);
+                    java.util.List<com.calora.backend.model.ExplorePost> posts = explorePostRepository
+                            .findByUserIdOrderByCreatedAtDesc(id);
+                    for (com.calora.backend.model.ExplorePost post : posts) {
+                        Long postId = post.getId();
+                        exploreCommentRepository.deleteByPostId(postId);
+                        exploreLikeRepository.deleteByPostId(postId);
+                        exploreReactionRepository.deleteByPostId(postId);
+                    }
+                    exploreCommentRepository.deleteByUserId(id);
+                    exploreLikeRepository.deleteByUserId(id);
+                    exploreReactionRepository.deleteByUserId(id);
+                    exploreFollowRepository.deleteByFollowerId(id);
+                    exploreFollowRepository.deleteByFollowingId(id);
+                    exploreMessageRepository.deleteByFromUserIdOrToUserId(id, id);
+                    explorePostRepository.deleteByUserId(id);
                     userRepository.delete(user);
                     return org.springframework.http.ResponseEntity.ok().build();
                 })

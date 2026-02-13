@@ -30,6 +30,28 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 
 import { useEffect } from "react" // Added useEffect import
+
+type ExploreSummaryUser = {
+  id: number
+  name: string
+  handle: string
+  title: string
+  avatarColor: string
+  profilePicture?: string | null
+}
+
+type ExploreSummaryPost = {
+  id: number
+  type: "activity" | "meal"
+  title: string
+  summary: string
+  calories: number
+  protein?: number
+  carbs?: number
+  fats?: number
+  duration?: number
+  createdAt: string
+}
 export default function ProfileView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
@@ -52,6 +74,11 @@ export default function ProfileView() {
     profilePicture: "/images/logo.png",
   })
 
+  const [explorePosts, setExplorePosts] = useState<ExploreSummaryPost[]>([])
+  const [exploreFollowing, setExploreFollowing] = useState<ExploreSummaryUser[]>([])
+  const [exploreFollowers, setExploreFollowers] = useState<ExploreSummaryUser[]>([])
+  const [exploreError, setExploreError] = useState<string | null>(null)
+
   // Load user data on mount
   useEffect(() => {
     const userStr = localStorage.getItem("calora_user")
@@ -72,6 +99,34 @@ export default function ProfileView() {
       if (user.dailyCalorieTarget) setDailyCalorieTarget(user.dailyCalorieTarget)
     }
   }, [])
+
+  useEffect(() => {
+    if (!userData.id) return
+
+    const loadExploreProfile = async () => {
+      try {
+        const [postsRes, followingRes, followersRes] = await Promise.all([
+          fetch(`${API_BASE}/explore/posts?userId=${userData.id}`),
+          fetch(`${API_BASE}/explore/users/${userData.id}/following`),
+          fetch(`${API_BASE}/explore/users/${userData.id}/followers`),
+        ])
+
+        const postsData = postsRes.ok ? await postsRes.json() : []
+        const followingData = followingRes.ok ? await followingRes.json() : []
+        const followersData = followersRes.ok ? await followersRes.json() : []
+
+        setExplorePosts(Array.isArray(postsData) ? postsData : [])
+        setExploreFollowing(Array.isArray(followingData) ? followingData : [])
+        setExploreFollowers(Array.isArray(followersData) ? followersData : [])
+        setExploreError(null)
+      } catch (err) {
+        console.error("Failed to load explore profile data", err)
+        setExploreError("Unable to load explore activity right now.")
+      }
+    }
+
+    loadExploreProfile()
+  }, [userData.id])
 
   const handleProfilePictureUpload = () => {
     const input = document.createElement("input")
@@ -639,6 +694,100 @@ export default function ProfileView() {
                     </p>
                   </div>
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Explore Activity */}
+          <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
+            <CardHeader>
+              <CardTitle style={{ color: "#004030" }}>Explore Activity</CardTitle>
+              <CardDescription style={{ color: "#708993" }}>
+                Your posts, followers, and who you follow.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {exploreError && (
+                <p className="mb-4 text-sm" style={{ color: "#D96464" }}>
+                  {exploreError}
+                </p>
+              )}
+              <div className="grid gap-6 lg:grid-cols-3">
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold" style={{ color: "#004030" }}>
+                    My Posts
+                  </h3>
+                  <div className="max-h-64 space-y-3 overflow-y-auto rounded-lg border p-3" style={{ borderColor: "#DCD0A8" }}>
+                    {explorePosts.length > 0 ? (
+                      explorePosts.map((post) => (
+                        <div key={post.id} className="rounded-lg border p-3" style={{ borderColor: "#E7F2EF" }}>
+                          <p className="text-sm font-semibold" style={{ color: "#004030" }}>
+                            {post.title}
+                          </p>
+                          <p className="text-xs" style={{ color: "#708993" }}>
+                            {post.type === "meal" ? "Meal" : "Activity"} •{" "}
+                            {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : "Recently"}
+                          </p>
+                          <p className="mt-1 text-xs" style={{ color: "#708993" }}>
+                            {post.summary}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs" style={{ color: "#708993" }}>
+                        No posts yet. Share a meal or activity in Explore.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold" style={{ color: "#004030" }}>
+                    Following
+                  </h3>
+                  <div className="max-h-64 space-y-3 overflow-y-auto rounded-lg border p-3" style={{ borderColor: "#DCD0A8" }}>
+                    {exploreFollowing.length > 0 ? (
+                      exploreFollowing.map((user) => (
+                        <div key={user.id} className="rounded-lg border p-3" style={{ borderColor: "#E7F2EF" }}>
+                          <p className="text-sm font-semibold" style={{ color: "#004030" }}>
+                            {user.name}
+                          </p>
+                          <p className="text-xs" style={{ color: "#708993" }}>
+                            {user.handle} • {user.title}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs" style={{ color: "#708993" }}>
+                        You are not following anyone yet.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold" style={{ color: "#004030" }}>
+                    Followers
+                  </h3>
+                  <div className="max-h-64 space-y-3 overflow-y-auto rounded-lg border p-3" style={{ borderColor: "#DCD0A8" }}>
+                    {exploreFollowers.length > 0 ? (
+                      exploreFollowers.map((user) => (
+                        <div key={user.id} className="rounded-lg border p-3" style={{ borderColor: "#E7F2EF" }}>
+                          <p className="text-sm font-semibold" style={{ color: "#004030" }}>
+                            {user.name}
+                          </p>
+                          <p className="text-xs" style={{ color: "#708993" }}>
+                            {user.handle} • {user.title}
+                          </p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs" style={{ color: "#708993" }}>
+                        No followers yet. Start sharing in Explore.
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

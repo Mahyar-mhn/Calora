@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useMemo, useState } from "react"
 import { useMenuInteractions } from "@/hooks/use-menu-interactions"
@@ -32,25 +32,27 @@ import { useRouter } from "next/navigation"
 import ProfileAvatarButton from "./profile-avatar-button"
 
 type ExploreUser = {
-  id: string
+  id: number
   name: string
   handle: string
   title: string
   avatarColor: string
   followers: number
   following: number
+  profilePicture?: string | null
+  posts?: number
 }
 
 type ExploreComment = {
-  id: string
-  userId: string
+  id: number
+  userId: number
   text: string
   createdAt: string
 }
 
 type ExplorePost = {
-  id: string
-  userId: string
+  id: number
+  userId: number
   type: "activity" | "meal"
   title: string
   summary: string
@@ -60,24 +62,17 @@ type ExplorePost = {
   fats?: number
   duration?: number
   createdAt: string
-  likes: string[]
-  reactions: Record<string, string[]>
+  likes: number[]
+  reactions: Record<string, number[]>
   comments: ExploreComment[]
 }
 
 type ExploreMessage = {
-  id: string
-  from: string
-  to: string
+  id: number
+  fromUserId: number
+  toUserId: number
   text: string
   createdAt: string
-}
-
-type ExploreState = {
-  users: ExploreUser[]
-  posts: ExplorePost[]
-  following: string[]
-  messages: Record<string, ExploreMessage[]>
 }
 
 type RecentMeal = {
@@ -98,158 +93,7 @@ type RecentActivity = {
   date?: string
 }
 
-const STORAGE_KEY = "calora_explore_state"
-const reactionOptions = ["🔥", "💪", "🥗", "🏃", "👏"]
-
-const seedTime = Date.now()
-
-const seedUsers: ExploreUser[] = [
-  {
-    id: "u1",
-    name: "Lena Park",
-    handle: "@lena.moves",
-    title: "Trail Runner",
-    avatarColor: "#FFC50F",
-    followers: 1240,
-    following: 180,
-  },
-  {
-    id: "u2",
-    name: "Omar Reed",
-    handle: "@omar.lifts",
-    title: "Strength Coach",
-    avatarColor: "#4A9782",
-    followers: 980,
-    following: 210,
-  },
-  {
-    id: "u3",
-    name: "Sofia Mendes",
-    handle: "@sofia.eats",
-    title: "Meal Prep Enthusiast",
-    avatarColor: "#63A361",
-    followers: 1560,
-    following: 240,
-  },
-  {
-    id: "u4",
-    name: "Jay Patel",
-    handle: "@jay.cardio",
-    title: "HIIT Lover",
-    avatarColor: "#5B532C",
-    followers: 760,
-    following: 190,
-  },
-  {
-    id: "u5",
-    name: "Nora Salem",
-    handle: "@nora.balance",
-    title: "Mindful Mover",
-    avatarColor: "#FFC50F",
-    followers: 1100,
-    following: 260,
-  },
-]
-
-const seedPosts: ExplorePost[] = [
-  {
-    id: "p1",
-    userId: "u1",
-    type: "activity",
-    title: "Sunrise 5K",
-    summary: "Cool morning run by the river. Felt strong and steady today.",
-    duration: 32,
-    calories: 310,
-    createdAt: new Date(seedTime - 1000 * 60 * 35).toISOString(),
-    likes: ["u3"],
-    reactions: { "🔥": ["u2"], "💪": ["u4"] },
-    comments: [
-      {
-        id: "c1",
-        userId: "u5",
-        text: "Great pace! Love early runs.",
-        createdAt: new Date(seedTime - 1000 * 60 * 20).toISOString(),
-      },
-    ],
-  },
-  {
-    id: "p2",
-    userId: "u3",
-    type: "meal",
-    title: "Salmon Power Bowl",
-    summary: "Protein-heavy lunch with greens, quinoa, and citrus dressing.",
-    calories: 520,
-    protein: 42,
-    carbs: 48,
-    fats: 18,
-    createdAt: new Date(seedTime - 1000 * 60 * 90).toISOString(),
-    likes: ["u1", "u4"],
-    reactions: { "🥗": ["u2"], "👏": ["u5"] },
-    comments: [
-      {
-        id: "c2",
-        userId: "u2",
-        text: "That looks like the perfect macro balance.",
-        createdAt: new Date(seedTime - 1000 * 60 * 60).toISOString(),
-      },
-    ],
-  },
-  {
-    id: "p3",
-    userId: "u4",
-    type: "activity",
-    title: "HIIT Circuit",
-    summary: "20-minute interval session. Legs are on fire.",
-    duration: 20,
-    calories: 210,
-    createdAt: new Date(seedTime - 1000 * 60 * 150).toISOString(),
-    likes: ["u1"],
-    reactions: { "🔥": ["u3"], "💪": ["u2"] },
-    comments: [],
-  },
-  {
-    id: "p4",
-    userId: "u5",
-    type: "meal",
-    title: "Greek Yogurt Parfait",
-    summary: "Quick snack: yogurt, berries, almonds, drizzle of honey.",
-    calories: 280,
-    protein: 20,
-    carbs: 26,
-    fats: 9,
-    createdAt: new Date(seedTime - 1000 * 60 * 210).toISOString(),
-    likes: ["u2", "u3"],
-    reactions: { "🥗": ["u1"] },
-    comments: [
-      {
-        id: "c3",
-        userId: "u1",
-        text: "Love this combo. Easy and filling.",
-        createdAt: new Date(seedTime - 1000 * 60 * 180).toISOString(),
-      },
-    ],
-  },
-  {
-    id: "p5",
-    userId: "u2",
-    type: "activity",
-    title: "Upper Body Strength",
-    summary: "Focused on pull-ups + rows. Post-workout pump was real.",
-    duration: 45,
-    calories: 260,
-    createdAt: new Date(seedTime - 1000 * 60 * 260).toISOString(),
-    likes: ["u3", "u5"],
-    reactions: { "💪": ["u1"], "👏": ["u4"] },
-    comments: [],
-  },
-]
-
-const seedState: ExploreState = {
-  users: seedUsers,
-  posts: seedPosts,
-  following: ["u2", "u3"],
-  messages: {},
-}
+const reactionOptions = ["\uD83D\uDD25", "\uD83D\uDCAA", "\uD83E\uDD57", "\uD83C\uDFC3", "\uD83D\uDC4F"]
 
 const timeAgo = (iso: string) => {
   const timestamp = new Date(iso).getTime()
@@ -271,15 +115,6 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase()
 
-const getConversationId = (a: string, b: string) => [a, b].sort().join("__")
-
-const buildHandle = (name: string, email?: string) => {
-  if (email && email.includes("@")) {
-    return `@${email.split("@")[0]}`
-  }
-  return `@${name.toLowerCase().replace(/\s+/g, "")}`
-}
-
 export default function ExploreView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { menuButtonRef, menuPanelRef } = useMenuInteractions(isMenuOpen, setIsMenuOpen)
@@ -287,10 +122,11 @@ export default function ExploreView() {
 
   const [users, setUsers] = useState<ExploreUser[]>([])
   const [posts, setPosts] = useState<ExplorePost[]>([])
-  const [following, setFollowing] = useState<string[]>([])
-  const [messages, setMessages] = useState<Record<string, ExploreMessage[]>>({})
+  const [following, setFollowing] = useState<number[]>([])
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null)
   const [currentUser, setCurrentUser] = useState<ExploreUser | null>(null)
-  const [isReady, setIsReady] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   const [postType, setPostType] = useState<"meal" | "activity">("activity")
   const [postTitle, setPostTitle] = useState("")
@@ -301,11 +137,12 @@ export default function ExploreView() {
   const [postFats, setPostFats] = useState("")
   const [postDuration, setPostDuration] = useState("")
 
-  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({})
-  const [openComments, setOpenComments] = useState<Record<string, boolean>>({})
+  const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({})
+  const [openComments, setOpenComments] = useState<Record<number, boolean>>({})
 
   const [chatUser, setChatUser] = useState<ExploreUser | null>(null)
   const [chatMessage, setChatMessage] = useState("")
+  const [chatMessages, setChatMessages] = useState<ExploreMessage[]>([])
 
   const [recentMeals, setRecentMeals] = useState<RecentMeal[]>([])
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
@@ -317,45 +154,92 @@ export default function ExploreView() {
 
   useEffect(() => {
     const userStr = localStorage.getItem("calora_user")
-    const userData = userStr ? JSON.parse(userStr) : null
-    const fallbackName = userData?.name || "You"
-    const derivedUser: ExploreUser = {
-      id: userData?.id ? `user-${userData.id}` : "local-user",
-      name: fallbackName,
-      handle: buildHandle(fallbackName, userData?.email),
-      title: "Calora Member",
-      avatarColor: "#4A9782",
-      followers: 0,
-      following: 0,
+    if (!userStr) {
+      setLoadError("Please log in to view Explore.")
+      setIsLoading(false)
+      return
     }
-    setCurrentUser(derivedUser)
-
-    const stored = localStorage.getItem(STORAGE_KEY)
-    const parsed: ExploreState = stored ? JSON.parse(stored) : seedState
-    const userExists = parsed.users.some((user) => user.id === derivedUser.id)
-    const mergedUsers = userExists ? parsed.users : [derivedUser, ...parsed.users]
-    setUsers(mergedUsers)
-    setPosts(parsed.posts)
-    setFollowing(parsed.following ?? [])
-    setMessages(parsed.messages ?? {})
-    setIsReady(true)
+    try {
+      const userData = JSON.parse(userStr)
+      if (!userData?.id) {
+        setLoadError("Missing user information. Please log in again.")
+        setIsLoading(false)
+        return
+      }
+      setCurrentUserId(Number(userData.id))
+    } catch (err) {
+      console.error("Failed to read user", err)
+      setLoadError("Unable to read user info. Please log in again.")
+      setIsLoading(false)
+    }
   }, [])
 
-  useEffect(() => {
-    if (!isReady) return
-    const nextState: ExploreState = {
-      users,
-      posts,
-      following,
-      messages,
+  const loadUsers = async () => {
+    const res = await fetch(`${API_BASE}/explore/users`)
+    if (!res.ok) {
+      throw new Error("Failed to load explore users")
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState))
-  }, [users, posts, following, messages, isReady])
+    const data = await res.json()
+    const list = Array.isArray(data) ? data : []
+    setUsers(list)
+    return list as ExploreUser[]
+  }
+
+  const loadPosts = async (userId?: number) => {
+    const url = userId ? `${API_BASE}/explore/posts?userId=${userId}` : `${API_BASE}/explore/posts`
+    const res = await fetch(url)
+    if (!res.ok) {
+      throw new Error("Failed to load explore posts")
+    }
+    const data = await res.json()
+    const list = Array.isArray(data) ? data : []
+    setPosts(list)
+    return list as ExplorePost[]
+  }
+
+  const loadFollowing = async (userId: number) => {
+    const res = await fetch(`${API_BASE}/explore/users/${userId}/following`)
+    if (!res.ok) {
+      throw new Error("Failed to load following list")
+    }
+    const data = await res.json()
+    const list = Array.isArray(data) ? data : []
+    setFollowing(list.map((user: ExploreUser) => user.id))
+    return list as ExploreUser[]
+  }
+
+  useEffect(() => {
+    if (!currentUserId) return
+    const loadExplore = async () => {
+      setIsLoading(true)
+      setLoadError(null)
+      try {
+        const [usersData] = await Promise.all([
+          loadUsers(),
+          loadPosts(),
+          loadFollowing(currentUserId),
+        ])
+        const current = usersData.find((user) => user.id === currentUserId) ?? null
+        setCurrentUser(current)
+      } catch (err) {
+        console.error("Explore load failed", err)
+        setLoadError("Unable to load explore data right now.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    loadExplore()
+  }, [currentUserId])
+
+  useEffect(() => {
+    if (!currentUserId) return
+    setCurrentUser(users.find((user) => user.id === currentUserId) ?? null)
+  }, [users, currentUserId])
 
   useEffect(() => {
     const loadRecentData = async () => {
-      if (!currentUser?.id || !currentUser.id.startsWith("user-")) return
-      const userId = currentUser.id.replace("user-", "")
+      if (!currentUserId) return
+      const userId = currentUserId
       const endDate = new Date()
       const startDate = new Date()
       startDate.setDate(endDate.getDate() - 6)
@@ -403,7 +287,7 @@ export default function ExploreView() {
     }
 
     loadRecentData()
-  }, [currentUser?.id])
+  }, [currentUserId])
 
   const sortedPosts = useMemo(
     () => [...posts].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
@@ -411,73 +295,89 @@ export default function ExploreView() {
   )
 
   const postsByUser = useMemo(() => {
-    return posts.reduce<Record<string, number>>((acc, post) => {
+    return posts.reduce<Record<number, number>>((acc, post) => {
       acc[post.userId] = (acc[post.userId] ?? 0) + 1
       return acc
     }, {})
   }, [posts])
 
-  const isFollowing = (userId: string) => following.includes(userId)
+  const isFollowing = (userId: number) => following.includes(userId)
 
-  const toggleFollow = (userId: string) => {
-    setFollowing((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]))
-  }
-
-  const updatePost = (postId: string, updater: (post: ExplorePost) => ExplorePost) => {
-    setPosts((prev) => prev.map((post) => (post.id === postId ? updater(post) : post)))
-  }
-
-  const toggleLike = (postId: string) => {
-    if (!currentUser) return
-    updatePost(postId, (post) => {
-      const nextLikes = post.likes.includes(currentUser.id)
-        ? post.likes.filter((id) => id !== currentUser.id)
-        : [...post.likes, currentUser.id]
-      return { ...post, likes: nextLikes }
-    })
-  }
-
-  const toggleReaction = (postId: string, emoji: string) => {
-    if (!currentUser) return
-    updatePost(postId, (post) => {
-      const reactions = { ...post.reactions }
-      const alreadyReacted = reactions[emoji]?.includes(currentUser.id)
-      Object.keys(reactions).forEach((key) => {
-        reactions[key] = reactions[key].filter((id) => id !== currentUser.id)
-        if (reactions[key].length === 0) delete reactions[key]
-      })
-      if (!alreadyReacted) {
-        reactions[emoji] = [...(reactions[emoji] ?? []), currentUser.id]
+  const toggleFollow = async (userId: number) => {
+    if (!currentUserId) return
+    try {
+      if (isFollowing(userId)) {
+        await fetch(`${API_BASE}/explore/follows?followerId=${currentUserId}&followingId=${userId}`, {
+          method: "DELETE",
+        })
+      } else {
+        await fetch(`${API_BASE}/explore/follows`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ followerId: currentUserId, followingId: userId }),
+        })
       }
-      return { ...post, reactions }
-    })
+      await Promise.all([loadUsers(), loadFollowing(currentUserId)])
+    } catch (err) {
+      console.error("Failed to update follow", err)
+    }
   }
 
-  const toggleComments = (postId: string) => {
+  const toggleLike = async (postId: number) => {
+    if (!currentUserId) return
+    try {
+      const res = await fetch(`${API_BASE}/explore/posts/${postId}/like?userId=${currentUserId}`, {
+        method: "POST",
+      })
+      if (res.ok) {
+        await loadPosts()
+      }
+    } catch (err) {
+      console.error("Failed to toggle like", err)
+    }
+  }
+
+  const toggleReaction = async (postId: number, emoji: string) => {
+    if (!currentUserId) return
+    try {
+      const res = await fetch(`${API_BASE}/explore/posts/${postId}/reaction`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId, emoji }),
+      })
+      if (res.ok) {
+        await loadPosts()
+      }
+    } catch (err) {
+      console.error("Failed to toggle reaction", err)
+    }
+  }
+
+  const toggleComments = (postId: number) => {
     setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }))
   }
 
-  const handleAddComment = (postId: string) => {
-    if (!currentUser) return
+  const handleAddComment = async (postId: number) => {
+    if (!currentUserId) return
     const text = (commentDrafts[postId] ?? "").trim()
     if (!text) return
-    updatePost(postId, (post) => ({
-      ...post,
-      comments: [
-        ...post.comments,
-        {
-          id: `c-${Date.now()}`,
-          userId: currentUser.id,
-          text,
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    }))
-    setCommentDrafts((prev) => ({ ...prev, [postId]: "" }))
+    try {
+      const res = await fetch(`${API_BASE}/explore/posts/${postId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUserId, text }),
+      })
+      if (res.ok) {
+        setCommentDrafts((prev) => ({ ...prev, [postId]: "" }))
+        await loadPosts()
+      }
+    } catch (err) {
+      console.error("Failed to add comment", err)
+    }
   }
 
-  const handleCreatePost = () => {
-    if (!currentUser) return
+  const handleCreatePost = async () => {
+    if (!currentUserId) return
     if (!postTitle.trim() || !postSummary.trim()) {
       alert("Please add a title and description for your post.")
       return
@@ -488,31 +388,41 @@ export default function ExploreView() {
     const carbs = Number.parseInt(postCarbs) || 0
     const fats = Number.parseInt(postFats) || 0
 
-    const newPost: ExplorePost = {
-      id: `p-${Date.now()}`,
-      userId: currentUser.id,
-      type: postType,
-      title: postTitle.trim(),
-      summary: postSummary.trim(),
-      calories: calories,
-      protein: postType === "meal" ? protein : undefined,
-      carbs: postType === "meal" ? carbs : undefined,
-      fats: postType === "meal" ? fats : undefined,
-      duration: postType === "activity" ? duration : undefined,
-      createdAt: new Date().toISOString(),
-      likes: [],
-      reactions: {},
-      comments: [],
-    }
+    try {
+      const res = await fetch(`${API_BASE}/explore/posts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUserId,
+          type: postType,
+          title: postTitle.trim(),
+          summary: postSummary.trim(),
+          calories: calories,
+          protein: postType === "meal" ? protein : undefined,
+          carbs: postType === "meal" ? carbs : undefined,
+          fats: postType === "meal" ? fats : undefined,
+          duration: postType === "activity" ? duration : undefined,
+        }),
+      })
 
-    setPosts((prev) => [newPost, ...prev])
-    setPostTitle("")
-    setPostSummary("")
-    setPostCalories("")
-    setPostProtein("")
-    setPostCarbs("")
-    setPostFats("")
-    setPostDuration("")
+      if (res.ok) {
+        setPostTitle("")
+        setPostSummary("")
+        setPostCalories("")
+        setPostProtein("")
+        setPostCarbs("")
+        setPostFats("")
+        setPostDuration("")
+        await loadPosts()
+      } else {
+        const text = await res.text()
+        console.error("Failed to create post", text)
+        alert("Unable to post right now.")
+      }
+    } catch (err) {
+      console.error("Failed to create post", err)
+      alert("Unable to post right now.")
+    }
   }
 
   const handleShareMeal = (meal: RecentMeal) => {
@@ -533,34 +443,47 @@ export default function ExploreView() {
     setPostDuration(String(activity.duration))
   }
 
+  const loadConversation = async (targetId: number) => {
+    if (!currentUserId) return
+    try {
+      const res = await fetch(`${API_BASE}/explore/messages?userId=${currentUserId}&with=${targetId}`)
+      if (!res.ok) return
+      const data = await res.json()
+      setChatMessages(Array.isArray(data) ? data : [])
+    } catch (err) {
+      console.error("Failed to load messages", err)
+    }
+  }
+
   const openChat = (user: ExploreUser) => {
     setChatUser(user)
+    loadConversation(user.id)
   }
 
-  const sendMessage = () => {
-    if (!chatUser || !currentUser) return
+  const sendMessage = async () => {
+    if (!chatUser || !currentUserId) return
     const text = chatMessage.trim()
     if (!text) return
-    const conversationId = getConversationId(chatUser.id, currentUser.id)
-    const nextMessage: ExploreMessage = {
-      id: `m-${Date.now()}`,
-      from: currentUser.id,
-      to: chatUser.id,
-      text,
-      createdAt: new Date().toISOString(),
+    try {
+      const res = await fetch(`${API_BASE}/explore/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromUserId: currentUserId,
+          toUserId: chatUser.id,
+          text,
+        }),
+      })
+      if (res.ok) {
+        setChatMessage("")
+        await loadConversation(chatUser.id)
+      }
+    } catch (err) {
+      console.error("Failed to send message", err)
     }
-    setMessages((prev) => ({
-      ...prev,
-      [conversationId]: [...(prev[conversationId] ?? []), nextMessage],
-    }))
-    setChatMessage("")
   }
 
-  const conversationMessages = useMemo(() => {
-    if (!chatUser || !currentUser) return []
-    const conversationId = getConversationId(chatUser.id, currentUser.id)
-    return messages[conversationId] ?? []
-  }, [chatUser, currentUser, messages])
+  const conversationMessages = chatMessages
 
   const trendingPosts = useMemo(() => {
     return [...posts]
@@ -578,8 +501,26 @@ export default function ExploreView() {
       .slice(0, 3)
   }, [posts])
 
-  const canRender = isReady && currentUser
-  if (!canRender) {
+  if (isLoading) {
+    return null
+  }
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ backgroundColor: "#E7F2EF" }}>
+        <div className="max-w-lg text-center">
+          <h2 className="text-2xl font-bold" style={{ color: "#004030" }}>
+            Explore is unavailable
+          </h2>
+          <p className="mt-2 text-sm" style={{ color: "#708993" }}>
+            {loadError}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!currentUser) {
     return null
   }
 
@@ -878,7 +819,7 @@ export default function ExploreView() {
                                 {meal.name}
                               </p>
                               <p className="text-xs" style={{ color: "#708993" }}>
-                                {meal.calories} cal • P {meal.protein}g • C {meal.carbs}g • F {meal.fats}g
+                                {meal.calories} cal â€¢ P {meal.protein}g â€¢ C {meal.carbs}g â€¢ F {meal.fats}g
                               </p>
                             </div>
                             <Button
@@ -910,7 +851,7 @@ export default function ExploreView() {
                                 {activity.type}
                               </p>
                               <p className="text-xs" style={{ color: "#708993" }}>
-                                {activity.duration} min • {activity.caloriesBurned} cal
+                                {activity.duration} min â€¢ {activity.caloriesBurned} cal
                               </p>
                             </div>
                             <Button
@@ -963,7 +904,7 @@ export default function ExploreView() {
                             </p>
                             <div className="flex items-center gap-2 text-xs" style={{ color: "#708993" }}>
                               <span>{user.handle}</span>
-                              <span>•</span>
+                              <span>â€¢</span>
                               <span>{timeAgo(post.createdAt)}</span>
                             </div>
                           </div>
@@ -1193,7 +1134,7 @@ export default function ExploreView() {
                             {user.name}
                           </p>
                           <p className="text-xs" style={{ color: "#708993" }}>
-                            {user.title} • {followerCount} followers • {postsByUser[user.id] ?? 0} posts
+                            {user.title} â€¢ {followerCount} followers â€¢ {postsByUser[user.id] ?? 0} posts
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -1243,7 +1184,7 @@ export default function ExploreView() {
                         {post.title}
                       </p>
                       <p className="text-xs" style={{ color: "#708993" }}>
-                        {user.name} • {post.likes.length + post.comments.length} interactions
+                        {user.name} â€¢ {post.likes.length + post.comments.length} interactions
                       </p>
                     </div>
                   )
@@ -1259,7 +1200,15 @@ export default function ExploreView() {
         </div>
       </main>
 
-      <Dialog open={!!chatUser} onOpenChange={(open) => !open && setChatUser(null)}>
+      <Dialog
+        open={!!chatUser}
+        onOpenChange={(open) => {
+          if (!open) {
+            setChatUser(null)
+            setChatMessages([])
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-lg" style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
           <DialogHeader>
             <DialogTitle style={{ color: "#004030" }}>
@@ -1272,11 +1221,11 @@ export default function ExploreView() {
                 <div
                   key={message.id}
                   className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
-                    message.from === currentUser.id ? "self-end" : "self-start"
+                    message.fromUserId === currentUser.id ? "self-end" : "self-start"
                   }`}
                   style={{
-                    backgroundColor: message.from === currentUser.id ? "#4A9782" : "#E7F2EF",
-                    color: message.from === currentUser.id ? "#FFF9E5" : "#004030",
+                    backgroundColor: message.fromUserId === currentUser.id ? "#4A9782" : "#E7F2EF",
+                    color: message.fromUserId === currentUser.id ? "#FFF9E5" : "#004030",
                   }}
                 >
                   {message.text}
@@ -1308,3 +1257,4 @@ export default function ExploreView() {
     </div>
   )
 }
+
