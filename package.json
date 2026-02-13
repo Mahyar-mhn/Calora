@@ -1,0 +1,27 @@
+{
+  "name": "calora",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "backend": "cd backend && mvn spring-boot:run",
+    "frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mahyar-mhn/Calora.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mahyar-mhn/Calora/issues"
+  },
+  "homepage": "https://github.com/Mahyar-mhn/Calora#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
