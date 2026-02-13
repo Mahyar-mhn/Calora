@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useState } from "react"
 import { useMenuInteractions } from "@/hooks/use-menu-interactions"
@@ -75,6 +75,17 @@ type ExploreMessage = {
   createdAt: string
 }
 
+type ExploreThread = {
+  withUserId: number
+  withName: string
+  withHandle: string
+  withTitle: string
+  withAvatarColor: string
+  profilePicture?: string | null
+  lastMessage: string
+  lastAt: string
+}
+
 type RecentMeal = {
   id?: number
   name: string
@@ -144,6 +155,11 @@ export default function ExploreView() {
   const [chatMessage, setChatMessage] = useState("")
   const [chatMessages, setChatMessages] = useState<ExploreMessage[]>([])
 
+  const [directThreads, setDirectThreads] = useState<ExploreThread[]>([])
+  const [directUser, setDirectUser] = useState<ExploreUser | null>(null)
+  const [directMessages, setDirectMessages] = useState<ExploreMessage[]>([])
+  const [directMessage, setDirectMessage] = useState("")
+
   const [recentMeals, setRecentMeals] = useState<RecentMeal[]>([])
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
 
@@ -208,6 +224,17 @@ export default function ExploreView() {
     return list as ExploreUser[]
   }
 
+  const loadThreads = async (userId: number) => {
+    const res = await fetch(`${API_BASE}/explore/messages/threads?userId=${userId}`)
+    if (!res.ok) {
+      throw new Error("Failed to load direct message threads")
+    }
+    const data = await res.json()
+    const list = Array.isArray(data) ? data : []
+    setDirectThreads(list)
+    return list as ExploreThread[]
+  }
+
   useEffect(() => {
     if (!currentUserId) return
     const loadExplore = async () => {
@@ -218,6 +245,7 @@ export default function ExploreView() {
           loadUsers(),
           loadPosts(),
           loadFollowing(currentUserId),
+          loadThreads(currentUserId),
         ])
         const current = usersData.find((user) => user.id === currentUserId) ?? null
         setCurrentUser(current)
@@ -460,6 +488,34 @@ export default function ExploreView() {
     loadConversation(user.id)
   }
 
+  const loadDirectConversation = async (targetId: number) => {
+    if (!currentUserId) return
+    try {
+      const res = await fetch(`${API_BASE}/explore/messages?userId=${currentUserId}&with=${targetId}`)
+      if (!res.ok) return
+      const data = await res.json()
+      setDirectMessages(Array.isArray(data) ? data : [])
+    } catch (err) {
+      console.error("Failed to load direct messages", err)
+    }
+  }
+
+  const handleSelectThread = async (thread: ExploreThread) => {
+    const fallbackUser: ExploreUser = {
+      id: thread.withUserId,
+      name: thread.withName,
+      handle: thread.withHandle,
+      title: thread.withTitle,
+      avatarColor: thread.withAvatarColor || "#4A9782",
+      followers: 0,
+      following: 0,
+      profilePicture: thread.profilePicture ?? null,
+    }
+    const resolved = users.find((user) => user.id === thread.withUserId) ?? fallbackUser
+    setDirectUser(resolved)
+    await loadDirectConversation(thread.withUserId)
+  }
+
   const sendMessage = async () => {
     if (!chatUser || !currentUserId) return
     const text = chatMessage.trim()
@@ -476,7 +532,7 @@ export default function ExploreView() {
       })
       if (res.ok) {
         setChatMessage("")
-        await loadConversation(chatUser.id)
+        await Promise.all([loadConversation(chatUser.id), loadThreads(currentUserId)])
       }
     } catch (err) {
       console.error("Failed to send message", err)
@@ -484,6 +540,29 @@ export default function ExploreView() {
   }
 
   const conversationMessages = chatMessages
+
+  const sendDirectMessage = async () => {
+    if (!directUser || !currentUserId) return
+    const text = directMessage.trim()
+    if (!text) return
+    try {
+      const res = await fetch(`${API_BASE}/explore/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fromUserId: currentUserId,
+          toUserId: directUser.id,
+          text,
+        }),
+      })
+      if (res.ok) {
+        setDirectMessage("")
+        await Promise.all([loadDirectConversation(directUser.id), loadThreads(currentUserId)])
+      }
+    } catch (err) {
+      console.error("Failed to send direct message", err)
+    }
+  }
 
   const trendingPosts = useMemo(() => {
     return [...posts]
@@ -1192,6 +1271,102 @@ export default function ExploreView() {
                 {trendingPosts.length === 0 && (
                   <p className="text-sm" style={{ color: "#708993" }}>
                     No trending posts yet. Start the conversation!
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2" style={{ color: "#004030" }}>
+                  <Send className="h-5 w-5" style={{ color: "#4A9782" }} />
+                  Direct Messages
+                </CardTitle>
+                <CardDescription style={{ color: "#708993" }}>
+                  Chat with people you have messaged.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="max-h-56 space-y-3 overflow-y-auto rounded-lg border p-3" style={{ borderColor: "#DCD0A8" }}>
+                  {directThreads.length > 0 ? (
+                    directThreads.map((thread) => {
+                      const isActive = directUser?.id === thread.withUserId
+                      return (
+                        <button
+                          key={thread.withUserId}
+                          type="button"
+                          className="flex w-full flex-col rounded-lg border p-3 text-left transition-colors"
+                          style={{
+                            borderColor: isActive ? "#4A9782" : "#E7F2EF",
+                            backgroundColor: isActive ? "#E7F2EF" : "#FFFFFF",
+                          }}
+                          onClick={() => handleSelectThread(thread)}
+                        >
+                          <span className="text-sm font-semibold" style={{ color: "#004030" }}>
+                            {thread.withName}
+                          </span>
+                          <span className="text-xs" style={{ color: "#708993" }}>
+                            {thread.lastMessage}
+                          </span>
+                        </button>
+                      )
+                    })
+                  ) : (
+                    <p className="text-sm" style={{ color: "#708993" }}>
+                      No direct messages yet. Start a chat from a post.
+                    </p>
+                  )}
+                </div>
+
+                {directUser ? (
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: "#004030" }}>
+                        {directUser.name}
+                      </p>
+                      <p className="text-xs" style={{ color: "#708993" }}>
+                        {directUser.handle} • {directUser.title}
+                      </p>
+                    </div>
+                    <div className="max-h-48 space-y-2 overflow-y-auto rounded-lg border p-3" style={{ borderColor: "#DCD0A8" }}>
+                      {directMessages.length > 0 ? (
+                        directMessages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`max-w-[80%] rounded-lg px-3 py-2 text-xs ${message.fromUserId === currentUser.id ? "ml-auto" : ""}`}
+                            style={{
+                              backgroundColor: message.fromUserId === currentUser.id ? "#4A9782" : "#E7F2EF",
+                              color: message.fromUserId === currentUser.id ? "#FFF9E5" : "#004030",
+                            }}
+                          >
+                            {message.text}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs" style={{ color: "#708993" }}>
+                          No messages yet. Say hello!
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Input
+                        value={directMessage}
+                        onChange={(e) => setDirectMessage(e.target.value)}
+                        placeholder="Type a reply..."
+                        style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF", color: "#004030" }}
+                      />
+                      <Button
+                        className="transition-all"
+                        style={{ backgroundColor: "#4A9782", color: "#FFF9E5" }}
+                        onClick={sendDirectMessage}
+                      >
+                        Send
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm" style={{ color: "#708993" }}>
+                    Select a conversation to view and reply.
                   </p>
                 )}
               </CardContent>

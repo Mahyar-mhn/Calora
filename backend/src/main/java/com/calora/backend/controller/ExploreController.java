@@ -236,6 +236,39 @@ public class ExploreController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/messages/threads")
+    public ResponseEntity<?> getThreads(@RequestParam Long userId) {
+        if (userRepository.findById(userId).isEmpty()) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+
+        List<ExploreMessage> messages = messageRepository
+                .findByFromUserIdOrToUserIdOrderByCreatedAtDesc(userId, userId);
+
+        Map<Long, ExploreThreadSummary> threads = new LinkedHashMap<>();
+        for (ExploreMessage message : messages) {
+            User other = message.getFromUser().getId().equals(userId)
+                    ? message.getToUser()
+                    : message.getFromUser();
+            if (other == null) continue;
+            if (!threads.containsKey(other.getId())) {
+                ExploreUserSummary userSummary = toUserSummary(other);
+                threads.put(other.getId(), new ExploreThreadSummary(
+                        other.getId(),
+                        userSummary.name(),
+                        userSummary.handle(),
+                        userSummary.title(),
+                        userSummary.avatarColor(),
+                        userSummary.profilePicture(),
+                        message.getText(),
+                        message.getCreatedAt()
+                ));
+            }
+        }
+
+        return ResponseEntity.ok(new ArrayList<>(threads.values()));
+    }
+
     @PostMapping("/messages")
     public ResponseEntity<?> sendMessage(@RequestBody MessageRequest request) {
         if (request == null || request.fromUserId == null || request.toUserId == null
@@ -436,6 +469,17 @@ public class ExploreController {
             Long toUserId,
             String text,
             LocalDateTime createdAt
+    ) {}
+
+    public record ExploreThreadSummary(
+            Long withUserId,
+            String withName,
+            String withHandle,
+            String withTitle,
+            String withAvatarColor,
+            String profilePicture,
+            String lastMessage,
+            LocalDateTime lastAt
     ) {}
 
     public record LikeState(boolean liked) {}

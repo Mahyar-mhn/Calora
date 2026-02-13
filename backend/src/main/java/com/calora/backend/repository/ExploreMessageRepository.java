@@ -20,4 +20,6 @@ public interface ExploreMessageRepository extends JpaRepository<ExploreMessage, 
     List<ExploreMessage> findConversation(@Param("userId") Long userId, @Param("withId") Long withId);
 
     void deleteByFromUserIdOrToUserId(Long fromUserId, Long toUserId);
+
+    List<ExploreMessage> findByFromUserIdOrToUserIdOrderByCreatedAtDesc(Long fromUserId, Long toUserId);
 }

@@ -6,9 +6,9 @@
   "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "backend": "cd backend && mvn spring-boot:run",
-    "frontend": "cd frontend && npm run dev",
-    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+    "backend": "cd backend && mvnw.cmd spring-boot:run",
+    "frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently -k -n backend,frontend -c green,blue \"npm run backend\" \"npm run frontend\""
   },
   "repository": {
     "type": "git",
