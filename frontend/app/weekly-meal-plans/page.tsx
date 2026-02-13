@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Menu, Home, Utensils, Cookie, Activity, History, Calendar, Crown, ChevronRight } from "lucide-react"
+import { Menu, Home, Compass, Utensils, Cookie, Activity, History, Calendar, Crown, ChevronRight } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -166,6 +166,20 @@ export default function WeeklyMealPlansPage() {
               >
                 <Home className="h-5 w-5" />
                 <span className="font-medium">Dashboard</span>
+              </button>
+              <button
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"
+                style={{ color: "#004030" }}
+                onClick={() => handleNavigation("/explore")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#E7F2EF"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <Compass className="h-5 w-5" />
+                <span className="font-medium">Explore</span>
               </button>
               <button
                 className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors"

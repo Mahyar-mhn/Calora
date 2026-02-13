@@ -20,6 +20,7 @@ import {
   Sparkles,
   Menu,
   Home,
+  Compass,
   Utensils,
   Cookie,
   Activity,
@@ -310,6 +311,20 @@ export default function DashboardView() {
               >
                 <Home className="h-5 w-5" />
                 <span className="font-medium">Dashboard</span>
+              </button>
+              <button
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-opacity-50"
+                style={{ color: "#004030" }}
+                onClick={() => handleNavigation("/explore")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#E7F2EF"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              >
+                <Compass className="h-5 w-5" />
+                <span className="font-medium">Explore</span>
               </button>
               <button
                 className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-opacity-50"

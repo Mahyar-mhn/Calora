@@ -18,3 +18,6 @@ frontend/.env*
 Thumbs.db
 
 backend.zip
+
+node_modules/
+*.mv.db
