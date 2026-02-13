@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import ThemeToggle from "@/components/theme-toggle"
 import { ArrowLeft, Mail } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -23,7 +24,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#E7F2EF" }}>
+    <div className="relative min-h-screen flex items-center justify-center p-4" style={{ background: "#E7F2EF" }}>
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
       <Card className="w-full max-w-md border-0 shadow-2xl" style={{ background: "#FFF9E5" }}>
         <CardHeader className="space-y-6 pt-8 pb-6">
           <div className="flex justify-center">

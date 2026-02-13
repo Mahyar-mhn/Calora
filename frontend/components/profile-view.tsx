@@ -28,6 +28,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 import { useEffect } from "react" // Added useEffect import
 
@@ -323,6 +324,7 @@ export default function ProfileView() {
               </h1>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Button
                 variant="outline"
                 size="icon"

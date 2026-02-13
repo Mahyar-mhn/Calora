@@ -3,6 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Activity, Utensils, Sparkles, ShieldCheck } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useEffect, useState } from "react"
 
 export default function LandingPage() {
@@ -78,6 +79,7 @@ export default function LandingPage() {
             </nav>
 
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Link
                 href="/login"
                 className="rounded-xl border border-[#A1C2BD] bg-transparent px-4 py-2 text-sm font-semibold text-[#004030] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#4A9782] hover:bg-[#E7F2EF]"

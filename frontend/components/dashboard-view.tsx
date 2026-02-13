@@ -29,6 +29,7 @@ import {
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import ProfileAvatarButton from "./profile-avatar-button"
+import { ThemeToggle } from "@/components/theme-toggle"
 import {
   ResponsiveContainer,
   LineChart,
@@ -284,7 +285,10 @@ export default function DashboardView() {
                 Dashboard
               </h1>
             </div>
-            <ProfileAvatarButton onClick={() => router.push("/profile")} />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <ProfileAvatarButton onClick={() => router.push("/profile")} />
+            </div>
           </div>
         </div>
       </header>

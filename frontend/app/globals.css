@@ -64,6 +64,17 @@
   --dark-bg-secondary: #234C6A;
   --dark-bg-tertiary: #456882;
   --dark-bg-light: #D2C1B6;
+
+  --dark-text-primary: #D2C1B6;
+  --dark-text-muted: #DCD7C9;
+  --dark-border: #456882;
+  --dark-surface: #234C6A;
+  --dark-surface-alt: #1B3C53;
+  --dark-accent: #5A9690;
+  --dark-accent-strong: #2F5755;
+  --dark-warning: #A27B5C;
+  --dark-success: #3F4F44;
+  --dark-brown: #2C3930;
   
   /* Dark theme Chart color palette */
   --dark-chart-1: #2C3930;
@@ -215,7 +226,8 @@
     background-color: #E7F2EF;
   }
   
-  body.dark {
+  body.dark,
+  .dark body {
     background-color: #1B3C53 !important;
     color: #D2C1B6 !important;
   }
@@ -225,12 +237,17 @@
   .dark [style*="background-color: #E7F2EF"],
   .dark [style*="background: #FFF9E5"],
   .dark [style*="background-color: #FFF9E5"] {
-    background-color: #234C6A !important;
+    background-color: var(--dark-surface) !important;
   }
-  
+
   .dark [style*="background: #FFFFFF"],
   .dark [style*="background-color: #FFFFFF"] {
-    background-color: #234C6A !important;
+    background-color: var(--dark-surface) !important;
+  }
+
+  .dark [style*="background: #DCD0A8"],
+  .dark [style*="background-color: #DCD0A8"] {
+    background-color: var(--dark-accent-strong) !important;
   }
   
   /* Dark theme - Text colors */
@@ -241,26 +258,48 @@
   .dark h4[style*="color: #004030"],
   .dark label[style*="color: #004030"],
   .dark [style*="color: #19183B"] {
-    color: #D2C1B6 !important;
+    color: var(--dark-text-primary) !important;
   }
   
   .dark [style*="color: #708993"],
   .dark p[style*="color: #708993"],
   .dark span[style*="color: #708993"] {
-    color: #DCD7C9 !important;
+    color: var(--dark-text-muted) !important;
+  }
+
+  .dark [style*="color: #4A9782"] {
+    color: var(--dark-accent) !important;
+  }
+
+  .dark [style*="color: #FFC50F"] {
+    color: var(--dark-warning) !important;
+  }
+
+  .dark [style*="color: #63A361"] {
+    color: var(--dark-success) !important;
+  }
+
+  .dark [style*="color: #5B532C"] {
+    color: var(--dark-brown) !important;
   }
   
   /* Dark theme - Border colors */
   .dark [style*="borderColor: #DCD0A8"],
   .dark [style*="border-color: #DCD0A8"],
   .dark [style*="borderColor: #A1C2BD"],
-  .dark [style*="border-color: #A1C2BD"] {
-    border-color: #456882 !important;
+  .dark [style*="border-color: #A1C2BD"],
+  .dark [style*="border: 1px solid #DCD0A8"],
+  .dark [style*="border:1px solid #DCD0A8"],
+  .dark [style*="border: 1px solid #A1C2BD"],
+  .dark [style*="border:1px solid #A1C2BD"],
+  .dark [style*="border: 2px solid #FFF9E5"],
+  .dark [style*="border:2px solid #FFF9E5"] {
+    border-color: var(--dark-border) !important;
   }
   
   .dark [style*="borderColor: #4A9782"],
   .dark [style*="border-color: #4A9782"] {
-    border-color: #5A9690 !important;
+    border-color: var(--dark-accent) !important;
   }
   
   /* Dark theme - Button colors (Form palette) */
@@ -268,13 +307,13 @@
   .dark [style*="background-color: #4A9782"],
   .dark button[style*="background: #4A9782"],
   .dark button[style*="background-color: #4A9782"] {
-    background-color: #5A9690 !important;
-    color: #E0D9D9 !important;
+    background-color: var(--dark-accent) !important;
+    color: var(--dark-form-light) !important;
   }
   
   .dark [style*="color: #FFF9E5"],
   .dark button[style*="color: #FFF9E5"] {
-    color: #E0D9D9 !important;
+    color: var(--dark-form-light) !important;
   }
   
   /* Dark theme - Input backgrounds (Form palette) */
@@ -284,28 +323,28 @@
   .dark select[style*="background-color: #FFFFFF"],
   .dark textarea[style*="background: #FFFFFF"],
   .dark textarea[style*="background-color: #FFFFFF"] {
-    background-color: #234C6A !important;
-    color: #D2C1B6 !important;
-    border-color: #456882 !important;
+    background-color: var(--dark-surface) !important;
+    color: var(--dark-text-primary) !important;
+    border-color: var(--dark-border) !important;
   }
   
   .dark input::placeholder,
   .dark textarea::placeholder,
   .dark select::placeholder {
-    color: #DCD7C9 !important;
+    color: var(--dark-text-muted) !important;
   }
   
   /* Dark theme - Headers */
   .dark header[style*="background: #FFF9E5"],
   .dark header[style*="background-color: #FFF9E5"] {
-    background-color: #234C6A !important;
-    border-color: #456882 !important;
+    background-color: var(--dark-surface) !important;
+    border-color: var(--dark-border) !important;
   }
   
   /* Dark theme - Navigation menus */
   .dark nav[style*="background: #FFF9E5"],
   .dark nav[style*="background-color: #FFF9E5"] {
-    background-color: #234C6A !important;
+    background-color: var(--dark-surface) !important;
   }
   
   /* Dark theme - Modals and dialogs */
@@ -313,27 +352,27 @@
   .dark div[style*="background-color: #FFF9E5"],
   .dark [role="dialog"][style*="background: #FFF9E5"],
   .dark [role="dialog"][style*="background-color: #FFF9E5"] {
-    background-color: #234C6A !important;
+    background-color: var(--dark-surface) !important;
   }
   
   /* Dark theme - Select dropdowns (Form palette) */
   .dark [role="listbox"],
   .dark [data-slot="select-content"],
   .dark [data-slot="select-content"][style*="background"] {
-    background-color: #234C6A !important;
-    border-color: #456882 !important;
+    background-color: var(--dark-surface) !important;
+    border-color: var(--dark-border) !important;
   }
   
   .dark [role="option"],
   .dark [data-slot="select-item"] {
-    color: #D2C1B6 !important;
+    color: var(--dark-text-primary) !important;
   }
   
   .dark [role="option"]:hover,
   .dark [data-slot="select-item"]:hover,
   .dark [data-slot="select-item"][data-highlighted] {
-    background-color: #2F5755 !important;
-    color: #E0D9D9 !important;
+    background-color: var(--dark-accent-strong) !important;
+    color: var(--dark-form-light) !important;
   }
   
   /* Dark theme - Cards */
@@ -343,14 +382,14 @@
   .dark [class*="Card"][style*="background-color: #FFF9E5"],
   .dark article[style*="background: #FFF9E5"],
   .dark article[style*="background-color: #FFF9E5"] {
-    background-color: #234C6A !important;
-    border-color: #456882 !important;
+    background-color: var(--dark-surface) !important;
+    border-color: var(--dark-border) !important;
   }
   
   /* Dark theme - All divs with light backgrounds */
   .dark div[style*="background: #E7F2EF"],
   .dark div[style*="background-color: #E7F2EF"] {
-    background-color: #456882 !important;
+    background-color: var(--dark-bg-tertiary) !important;
   }
   
   /* Dark theme - Chart colors (Chart palette: #2C3930, #3F4F44, #A27B5C, #DCD7C9) */
@@ -366,7 +405,7 @@
   .dark rect[style*="fill: #FFC50F"],
   .dark rect[style*="fill: #5B532C"],
   .dark rect[style*="fill: #4A9782"] {
-    fill: #A27B5C !important;
+    fill: var(--dark-warning) !important;
   }
   
   .dark [style*="stroke: #63A361"],
@@ -381,7 +420,7 @@
   .dark line[style*="stroke: #FFC50F"],
   .dark line[style*="stroke: #5B532C"],
   .dark line[style*="stroke: #4A9782"] {
-    stroke: #A27B5C !important;
+    stroke: var(--dark-warning) !important;
   }
   
   /* Chart specific overrides for Recharts - use CSS variables */
@@ -399,67 +438,235 @@
   .dark [style*="stop-color: #FFC50F"],
   .dark stop[style*="stopColor: #FFC50F"],
   .dark stop[style*="stop-color: #FFC50F"] {
-    stop-color: #A27B5C !important;
+    stop-color: var(--dark-warning) !important;
   }
   
   .dark [style*="stopColor: #63A361"],
   .dark [style*="stop-color: #63A361"],
   .dark stop[style*="stopColor: #63A361"],
   .dark stop[style*="stop-color: #63A361"] {
-    stop-color: #3F4F44 !important;
+    stop-color: var(--dark-success) !important;
   }
   
   .dark [style*="stopColor: #5B532C"],
   .dark [style*="stop-color: #5B532C"],
   .dark stop[style*="stopColor: #5B532C"],
   .dark stop[style*="stop-color: #5B532C"] {
-    stop-color: #2C3930 !important;
+    stop-color: var(--dark-brown) !important;
   }
   
   /* Dark theme - Progress bars and secondary backgrounds */
   .dark [style*="background: #E7F2EF"],
   .dark [style*="background-color: #E7F2EF"],
   .dark [class*="progress"] {
-    background-color: #2F5755 !important;
+    background-color: var(--dark-accent-strong) !important;
   }
   
   /* Dark theme - Links */
   .dark a[style*="color: #4A9782"] {
-    color: #5A9690 !important;
+    color: var(--dark-accent) !important;
   }
   
   /* Dark theme - Icons */
   .dark svg[style*="color: #004030"],
   .dark svg[style*="color: #4A9782"] {
-    color: #5A9690 !important;
+    color: var(--dark-accent) !important;
   }
   
   .dark svg[style*="color: #708993"] {
-    color: #DCD7C9 !important;
+    color: var(--dark-text-muted) !important;
   }
   
   /* Dark theme - All main containers */
   .dark main {
-    background-color: #1B3C53 !important;
+    background-color: var(--dark-bg-primary) !important;
   }
   
   /* Dark theme - Section backgrounds */
   .dark section[style*="background: #E7F2EF"],
   .dark section[style*="background-color: #E7F2EF"] {
-    background-color: #456882 !important;
+    background-color: var(--dark-bg-tertiary) !important;
   }
   
   /* Dark theme - Hover states */
   .dark button:hover[style*="background: #4A9782"],
   .dark button:hover[style*="background-color: #4A9782"] {
-    background-color: #2F5755 !important;
+    background-color: var(--dark-accent-strong) !important;
   }
   
   /* Dark theme - Focus states */
   .dark input:focus,
   .dark select:focus,
   .dark textarea:focus {
-    border-color: #5A9690 !important;
-    outline-color: #5A9690 !important;
+    border-color: var(--dark-accent) !important;
+    outline-color: var(--dark-accent) !important;
+  }
+
+  /* Dark theme - Tailwind arbitrary hex colors */
+  .dark [class*="bg-[#E7F2EF]"] {
+    background-color: var(--dark-bg-primary) !important;
+  }
+
+  .dark [class*="bg-[#FFF9E5]"],
+  .dark [class*="bg-[#FFFFFF]"] {
+    background-color: var(--dark-surface) !important;
+  }
+
+  .dark [class*="bg-[#4A9782]"] {
+    background-color: var(--dark-accent) !important;
+    color: var(--dark-form-light) !important;
+  }
+
+  .dark [class*="bg-[#FFC50F]"] {
+    background-color: var(--dark-warning) !important;
+    color: var(--dark-form-light) !important;
+  }
+
+  .dark [class*="bg-[#DCD0A8]"] {
+    background-color: var(--dark-accent-strong) !important;
+  }
+
+  .dark [class*="bg-white"],
+  .dark .bg-white {
+    background-color: var(--dark-surface) !important;
+  }
+
+  .dark [class*="text-[#004030]"],
+  .dark [class*="text-[#19183B]"] {
+    color: var(--dark-text-primary) !important;
+  }
+
+  .dark [class*="text-[#708993]"] {
+    color: var(--dark-text-muted) !important;
+  }
+
+  .dark [class*="text-[#4A9782]"] {
+    color: var(--dark-accent) !important;
+  }
+
+  .dark [class*="text-[#FFF9E5]"] {
+    color: var(--dark-form-light) !important;
+  }
+
+  .dark [class*="text-[#FFC50F]"] {
+    color: var(--dark-warning) !important;
+  }
+
+  .dark [class*="text-[#63A361]"] {
+    color: var(--dark-success) !important;
+  }
+
+  .dark [class*="text-[#5B532C]"] {
+    color: var(--dark-brown) !important;
+  }
+
+  .dark [class*="border-[#DCD0A8]"],
+  .dark [class*="border-[#A1C2BD]"] {
+    border-color: var(--dark-border) !important;
+  }
+
+  .dark [class*="border-[#4A9782]"] {
+    border-color: var(--dark-accent) !important;
+  }
+
+  .dark [class*="hover:bg-[#E7F2EF]"]:hover {
+    background-color: var(--dark-accent-strong) !important;
+  }
+
+  .dark [class*="hover:bg-[#FFF9E5]"]:hover,
+  .dark [class*="hover:bg-[#FFFFFF]"]:hover {
+    background-color: var(--dark-bg-tertiary) !important;
+  }
+
+  .dark [class*="hover:bg-red-50"]:hover {
+    background-color: #3b2a2a !important;
+  }
+
+  .dark [class*="hover:border-[#4A9782]"]:hover {
+    border-color: var(--dark-accent) !important;
+  }
+
+  .dark [class*="from-[#004030]"][class*="via-[#4A9782]"][class*="to-[#63A361]"] {
+    background-image: linear-gradient(90deg, var(--dark-text-primary), var(--dark-accent), var(--dark-warning)) !important;
+  }
+
+  /* Dark theme - Inline rgb fallbacks (React inline styles) */
+  .dark [style*="background-color: rgb(231, 242, 239)"],
+  .dark [style*="background: rgb(231, 242, 239)"] {
+    background-color: var(--dark-bg-primary) !important;
+  }
+
+  .dark [style*="background-color: rgb(255, 249, 229)"],
+  .dark [style*="background: rgb(255, 249, 229)"] {
+    background-color: var(--dark-surface) !important;
+  }
+
+  .dark [style*="background-color: rgb(255, 255, 255)"],
+  .dark [style*="background: rgb(255, 255, 255)"] {
+    background-color: var(--dark-surface) !important;
+  }
+
+  .dark [style*="background-color: rgb(220, 208, 168)"],
+  .dark [style*="background: rgb(220, 208, 168)"] {
+    background-color: var(--dark-accent-strong) !important;
+  }
+
+  .dark [style*="background-color: rgb(74, 151, 130)"],
+  .dark [style*="background: rgb(74, 151, 130)"] {
+    background-color: var(--dark-accent) !important;
+    color: var(--dark-form-light) !important;
+  }
+
+  .dark [style*="background-color: rgb(61, 127, 109)"],
+  .dark [style*="background: rgb(61, 127, 109)"] {
+    background-color: var(--dark-accent-strong) !important;
+  }
+
+  .dark [style*="background-color: rgb(255, 197, 15)"],
+  .dark [style*="background: rgb(255, 197, 15)"],
+  .dark [style*="background-color: rgb(230, 177, 14)"],
+  .dark [style*="background: rgb(230, 177, 14)"] {
+    background-color: var(--dark-warning) !important;
+    color: var(--dark-form-light) !important;
+  }
+
+  .dark [style*="color: rgb(0, 64, 48)"],
+  .dark [style*="color: rgb(25, 24, 59)"] {
+    color: var(--dark-text-primary) !important;
+  }
+
+  .dark [style*="color: rgb(112, 137, 147)"] {
+    color: var(--dark-text-muted) !important;
+  }
+
+  .dark [style*="color: rgb(74, 151, 130)"] {
+    color: var(--dark-accent) !important;
+  }
+
+  .dark [style*="color: rgb(255, 249, 229)"] {
+    color: var(--dark-form-light) !important;
+  }
+
+  .dark [style*="color: rgb(255, 197, 15)"] {
+    color: var(--dark-warning) !important;
+  }
+
+  .dark [style*="color: rgb(99, 163, 97)"] {
+    color: var(--dark-success) !important;
+  }
+
+  .dark [style*="color: rgb(91, 83, 44)"] {
+    color: var(--dark-brown) !important;
+  }
+
+  .dark [style*="border-color: rgb(220, 208, 168)"],
+  .dark [style*="border-color: rgb(161, 194, 189)"],
+  .dark [style*="border: 1px solid rgb(220, 208, 168)"],
+  .dark [style*="border: 1px solid rgb(161, 194, 189)"] {
+    border-color: var(--dark-border) !important;
+  }
+
+  .dark [style*="border-color: rgb(74, 151, 130)"] {
+    border-color: var(--dark-accent) !important;
   }
 }

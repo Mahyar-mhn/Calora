@@ -4,6 +4,7 @@ import { API_BASE } from "@/lib/api"
 import Image from "next/image"
 import Link from "next/link"
 import { LockKeyhole, ShieldCheck } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
@@ -96,6 +97,7 @@ export default function PrivacyPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Link href="/" className="rounded-lg border border-[#A1C2BD] px-4 py-2 text-sm font-semibold hover:bg-[#E7F2EF]">
               Home
             </Link>

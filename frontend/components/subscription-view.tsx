@@ -27,6 +27,7 @@ import {
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import ProfileAvatarButton from "./profile-avatar-button"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function SubscriptionView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -209,16 +210,19 @@ export default function SubscriptionView() {
                 Subscription & Premium
               </h1>
             </div>
-            <ProfileAvatarButton
-              onClick={() => handleNavigation("/profile")}
-              className="transition-all hover:shadow-md"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#E7F2EF"
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent"
-              }}
-            />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <ProfileAvatarButton
+                onClick={() => handleNavigation("/profile")}
+                className="transition-all hover:shadow-md"
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#E7F2EF"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent"
+                }}
+              />
+            </div>
           </div>
         </div>
       </header>

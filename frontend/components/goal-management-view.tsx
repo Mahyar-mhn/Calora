@@ -11,6 +11,7 @@ import { Menu, Home, Utensils, Cookie, Activity, History, ArrowLeft } from "luci
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import ProfileAvatarButton from "./profile-avatar-button"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function GoalManagementView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -215,7 +216,10 @@ export default function GoalManagementView() {
                 Goal Management
               </h1>
             </div>
-            <ProfileAvatarButton onClick={() => handleNavigation("/profile")} />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <ProfileAvatarButton onClick={() => handleNavigation("/profile")} />
+            </div>
           </div>
         </div>
       </header>

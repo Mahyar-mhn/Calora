@@ -1,4 +1,5 @@
 "use client";
+import ThemeToggle from "@/components/theme-toggle"
 import { API_BASE } from "@/lib/api"
 import { useState } from "react";
 
@@ -31,7 +32,10 @@ export default function NewUserPage() {
 
     return (
         <main style={{ padding: 24 }}>
-            <h1>Create User</h1>
+            <div className="mb-4 flex items-center justify-between">
+                <h1>Create User</h1>
+                <ThemeToggle />
+            </div>
 
             <form onSubmit={onSubmit} style={{ display: "grid", gap: 12, maxWidth: 360 }}>
                 <label>

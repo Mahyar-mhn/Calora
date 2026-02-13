@@ -27,6 +27,7 @@ import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import FoodModal from "./food-modal"
 import ProfileAvatarButton from "./profile-avatar-button"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 type RecentMeal = {
   id?: number
@@ -464,7 +465,10 @@ export default function MealFoodView() {
                 Meal & Food
               </h1>
             </div>
-            <ProfileAvatarButton onClick={() => router.push("/profile")} />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <ProfileAvatarButton onClick={() => router.push("/profile")} />
+            </div>
           </div>
         </div>
       </header>

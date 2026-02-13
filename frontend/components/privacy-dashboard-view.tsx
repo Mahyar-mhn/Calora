@@ -21,6 +21,7 @@ import {
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import ProfileAvatarButton from "./profile-avatar-button"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function PrivacyDashboardView() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -78,10 +79,13 @@ export default function PrivacyDashboardView() {
                 Privacy Dashboard
               </h1>
             </div>
-            <ProfileAvatarButton
-              onClick={() => handleNavigation("/profile")}
-              className="transition-colors hover:bg-[#E7F2EF]"
-            />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <ProfileAvatarButton
+                onClick={() => handleNavigation("/profile")}
+                className="transition-colors hover:bg-[#E7F2EF]"
+              />
+            </div>
           </div>
         </div>
       </header>
