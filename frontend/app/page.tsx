@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, Activity, Utensils, Sparkles, ShieldCheck } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 
 const LANDING_GRADIENT_BLOBS = [
@@ -17,9 +18,26 @@ const LANDING_GRADIENT_BLOBS = [
   { top: "80%", left: "60%", width: 290, height: 200, delay: 1.3, duration: 27.2, opacity: 0.34, colorA: "rgba(255,249,229,0.40)", colorB: "rgba(255,197,15,0.18)", colorC: "rgba(74,151,130,0)" },
 ] as const
 
+const DARK_LANDING_BLOB_COLORS = [
+  { colorA: "rgba(90,150,144,0.38)", colorB: "rgba(35,76,106,0.22)", colorC: "rgba(27,60,83,0)" },
+  { colorA: "rgba(162,123,92,0.38)", colorB: "rgba(35,76,106,0.18)", colorC: "rgba(27,60,83,0)" },
+  { colorA: "rgba(90,150,144,0.32)", colorB: "rgba(69,104,130,0.2)", colorC: "rgba(27,60,83,0)" },
+  { colorA: "rgba(63,79,68,0.38)", colorB: "rgba(35,76,106,0.22)", colorC: "rgba(27,60,83,0)" },
+  { colorA: "rgba(162,123,92,0.34)", colorB: "rgba(27,60,83,0.2)", colorC: "rgba(27,60,83,0)" },
+  { colorA: "rgba(90,150,144,0.34)", colorB: "rgba(35,76,106,0.2)", colorC: "rgba(27,60,83,0)" },
+  { colorA: "rgba(63,79,68,0.3)", colorB: "rgba(27,60,83,0.22)", colorC: "rgba(27,60,83,0)" },
+  { colorA: "rgba(162,123,92,0.28)", colorB: "rgba(35,76,106,0.18)", colorC: "rgba(27,60,83,0)" },
+] as const
+
 export default function LandingPage() {
   const [scrollDirection, setScrollDirection] = useState<"down" | "up">("down")
   const [introPhase, setIntroPhase] = useState<"fire" | "logo" | "done">("fire")
+  const { resolvedTheme } = useTheme()
+  const [themeReady, setThemeReady] = useState(false)
+
+  useEffect(() => {
+    setThemeReady(true)
+  }, [])
 
   useEffect(() => {
     const revealElements = Array.from(document.querySelectorAll<HTMLElement>(".scroll-reveal"))
@@ -61,10 +79,31 @@ export default function LandingPage() {
     }
   }, [])
 
+  const isDark = themeReady && resolvedTheme === "dark"
+  const gradientBlobs = LANDING_GRADIENT_BLOBS.map((blob, index) => ({
+    ...blob,
+    ...(isDark ? DARK_LANDING_BLOB_COLORS[index % DARK_LANDING_BLOB_COLORS.length] : {}),
+  }))
+  const orbA = isDark
+    ? "radial-gradient(circle, rgba(90,150,144,0.3) 0%, rgba(90,150,144,0) 72%)"
+    : "radial-gradient(circle, rgba(74,151,130,0.25) 0%, rgba(74,151,130,0) 70%)"
+  const orbB = isDark
+    ? "radial-gradient(circle, rgba(162,123,92,0.26) 0%, rgba(162,123,92,0) 75%)"
+    : "radial-gradient(circle, rgba(255,197,15,0.20) 0%, rgba(255,197,15,0) 75%)"
+  const overlayBackground = isDark
+    ? "radial-gradient(circle at center, rgba(35, 76, 106, 0.96) 0%, rgba(27, 60, 83, 0.98) 58%)"
+    : "radial-gradient(circle at center, rgba(255, 249, 229, 0.95) 0%, rgba(231, 242, 239, 0.98) 60%)"
+  const baseGradient = isDark
+    ? "linear-gradient(120deg, #1b3c53 0%, #234c6a 34%, #2f5755 62%, #1b3c53 100%)"
+    : "linear-gradient(120deg, #d4e4e8 0%, #dbe9eb 34%, #dce7de 62%, #cfe1e6 100%)"
+
   return (
     <div data-scroll-dir={scrollDirection} className="relative min-h-screen overflow-x-hidden bg-[#E7F2EF] text-[#004030]">
       {introPhase !== "done" && (
-        <div className={`startup-overlay ${introPhase === "logo" ? "startup-logo" : "startup-fire"}`}>
+        <div
+          className={`startup-overlay ${introPhase === "logo" ? "startup-logo" : "startup-fire"}`}
+          style={{ background: overlayBackground }}
+        >
           <div className="startup-center">
             <div className="startup-fire-wrap" aria-hidden={introPhase !== "fire"}>
               <div className="fire-aura fire-aura-wide" />
@@ -93,17 +132,17 @@ export default function LandingPage() {
 
       <div className={`landing-content ${introPhase === "done" ? "landing-ready" : ""}`}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="base-live-gradient" />
+        <div className="base-live-gradient" style={{ background: baseGradient }} />
         <div
           className="absolute -top-36 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(74,151,130,0.25) 0%, rgba(74,151,130,0) 70%)" }}
+          style={{ background: orbA }}
         />
         <div
           className="absolute bottom-[-12rem] right-[-8rem] h-[26rem] w-[26rem] rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(255,197,15,0.20) 0%, rgba(255,197,15,0) 75%)" }}
+          style={{ background: orbB }}
         />
         <div className="gradient-blob-field" aria-hidden="true">
-          {LANDING_GRADIENT_BLOBS.map((blob, idx) => (
+          {gradientBlobs.map((blob, idx) => (
             <span
               key={`blob-${idx}`}
               className="floating-gradient-blob"
@@ -359,7 +398,6 @@ export default function LandingPage() {
           z-index: 120;
           display: grid;
           place-items: center;
-          background: radial-gradient(circle at center, rgba(255, 249, 229, 0.95) 0%, rgba(231, 242, 239, 0.98) 60%);
           transition: opacity 360ms ease, transform 360ms ease;
         }
 
@@ -374,7 +412,6 @@ export default function LandingPage() {
         .base-live-gradient {
           position: absolute;
           inset: -18%;
-          background: linear-gradient(120deg, #d4e4e8 0%, #dbe9eb 34%, #dce7de 62%, #cfe1e6 100%);
           background-size: 170% 170%;
           animation: baseGradientDrift 22s ease-in-out infinite;
           opacity: 0.9;
@@ -451,6 +488,28 @@ export default function LandingPage() {
           font-weight: 700;
           letter-spacing: 0.24em;
           color: #4a9782;
+        }
+
+        :global(.dark) .base-live-gradient {
+          opacity: 0.92;
+        }
+
+        :global(.dark) .gradient-blob-field {
+          opacity: 0.48;
+        }
+
+        :global(.dark) .floating-gradient-blob::after {
+          background: radial-gradient(circle, rgba(210, 193, 182, 0.18) 0%, rgba(210, 193, 182, 0) 86%);
+        }
+
+        :global(.dark) .startup-logo-shell {
+          border-color: #456882;
+          background: #234c6a;
+          animation-name: logoBreatheDark;
+        }
+
+        :global(.dark) .startup-brand {
+          color: #5a9690;
         }
 
         .startup-fire-wrap {
@@ -792,6 +851,18 @@ export default function LandingPage() {
           50% {
             transform: translateY(-4px);
             box-shadow: 0 20px 40px rgba(74, 151, 130, 0.28);
+          }
+        }
+
+        @keyframes logoBreatheDark {
+          0%,
+          100% {
+            transform: translateY(0);
+            box-shadow: 0 16px 36px rgba(90, 150, 144, 0.18);
+          }
+          50% {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(90, 150, 144, 0.24);
           }
         }
       `}</style>
