@@ -21,3 +21,5 @@ backend.zip
 
 node_modules/
 *.mv.db
+*.lock.db
+backend/data/
