@@ -1,5 +1,9 @@
 # Calora
 
+<p align="center">
+  <img src="frontend/public/images/logo.png" alt="Calora logo" width="140" />
+</p>
+
 Calora is a full-stack nutrition and activity tracking app with dashboards, meal logging, activity history, premium features, and a lightweight social explore feed. The project is designed for local development with a Spring Boot backend and a Next.js frontend.
 
 ## Features
@@ -95,3 +99,15 @@ mvnw.cmd test
 - Premium features are enforced locally based on the user record.
 - AI-related features are implemented locally without third-party APIs.
 
+## Screenshots
+<p align="center">
+  <img src="figures/landing light.png" alt="Landing page (light)" width="420" />
+  <img src="figures/landing dark.png" alt="Landing page (dark)" width="420" />
+</p>
+<p align="center">
+  <img src="figures/explore.png" alt="Explore feed" width="420" />
+  <img src="figures/charts.png" alt="Dashboard insights" width="420" />
+</p>
+<p align="center">
+  <img src="figures/advance analysis.png" alt="Advanced analytics" width="420" />
+</p>
