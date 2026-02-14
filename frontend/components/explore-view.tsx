@@ -26,6 +26,7 @@ import {
   Dumbbell,
   Apple,
   Users,
+  Search,
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -35,6 +36,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 type ExploreUser = {
   id: number
   name: string
+  email?: string
   handle: string
   title: string
   avatarColor: string
@@ -163,6 +165,11 @@ export default function ExploreView() {
 
   const [recentMeals, setRecentMeals] = useState<RecentMeal[]>([])
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
+  const [searchEmail, setSearchEmail] = useState("")
+  const [searchResults, setSearchResults] = useState<ExploreUser[]>([])
+  const [hasSearched, setHasSearched] = useState(false)
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
 
   const handleNavigation = (path: string) => {
     router.push(path)
@@ -332,6 +339,12 @@ export default function ExploreView() {
 
   const isFollowing = (userId: number) => following.includes(userId)
 
+  const peopleToShow = useMemo(() => {
+    const source = hasSearched ? searchResults : users
+    const filtered = source.filter((user) => user.id !== currentUserId)
+    return filtered.slice(0, hasSearched ? 10 : 5)
+  }, [hasSearched, searchResults, users, currentUserId])
+
   const toggleFollow = async (userId: number) => {
     if (!currentUserId) return
     try {
@@ -349,6 +362,41 @@ export default function ExploreView() {
       await Promise.all([loadUsers(), loadFollowing(currentUserId)])
     } catch (err) {
       console.error("Failed to update follow", err)
+    }
+  }
+
+  const handleSearchUsers = async () => {
+    const query = searchEmail.trim()
+    if (!query) {
+      setHasSearched(false)
+      setSearchResults([])
+      setSearchError(null)
+      return
+    }
+
+    setIsSearchingUsers(true)
+    setSearchError(null)
+
+    try {
+      const requester = currentUserId ? `&requesterId=${currentUserId}` : ""
+      const res = await fetch(`${API_BASE}/explore/users/search?email=${encodeURIComponent(query)}${requester}`)
+      if (!res.ok) {
+        throw new Error("Failed to search users")
+      }
+      const data = await res.json()
+      const list = Array.isArray(data) ? (data as ExploreUser[]) : []
+      setSearchResults(list)
+      setHasSearched(true)
+      if (list.length === 0) {
+        setSearchError("No users found with this email.")
+      }
+    } catch (err) {
+      console.error("Failed to search users by email", err)
+      setSearchResults([])
+      setHasSearched(true)
+      setSearchError("Unable to search users right now.")
+    } finally {
+      setIsSearchingUsers(false)
     }
   }
 
@@ -902,7 +950,7 @@ export default function ExploreView() {
                                 {meal.name}
                               </p>
                               <p className="text-xs" style={{ color: "#708993" }}>
-                                {meal.calories} cal â€¢ P {meal.protein}g â€¢ C {meal.carbs}g â€¢ F {meal.fats}g
+                                {meal.calories} cal | P {meal.protein}g | C {meal.carbs}g | F {meal.fats}g
                               </p>
                             </div>
                             <Button
@@ -934,7 +982,7 @@ export default function ExploreView() {
                                 {activity.type}
                               </p>
                               <p className="text-xs" style={{ color: "#708993" }}>
-                                {activity.duration} min â€¢ {activity.caloriesBurned} cal
+                                {activity.duration} min | {activity.caloriesBurned} cal
                               </p>
                             </div>
                             <Button
@@ -987,7 +1035,7 @@ export default function ExploreView() {
                             </p>
                             <div className="flex items-center gap-2 text-xs" style={{ color: "#708993" }}>
                               <span>{user.handle}</span>
-                              <span>â€¢</span>
+                              <span>|</span>
                               <span>{timeAgo(post.createdAt)}</span>
                             </div>
                           </div>
@@ -1201,11 +1249,58 @@ export default function ExploreView() {
                 <CardDescription style={{ color: "#708993" }}>Follow and connect with the community.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {users
-                  .filter((user) => user.id !== currentUser.id)
-                  .slice(0, 5)
-                  .map((user) => {
+                <div className="space-y-2 rounded-lg border p-3" style={{ borderColor: "#DCD0A8", backgroundColor: "#FFFFFF" }}>
+                  <Label htmlFor="searchByEmail" style={{ color: "#004030" }}>
+                    Search by Email
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="searchByEmail"
+                      value={searchEmail}
+                      onChange={(e) => setSearchEmail(e.target.value)}
+                      placeholder="example@email.com"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault()
+                          handleSearchUsers()
+                        }
+                      }}
+                      style={{ borderColor: "#A1C2BD", backgroundColor: "#FFFFFF", color: "#004030" }}
+                    />
+                    <Button
+                      className="transition-all"
+                      style={{ backgroundColor: "#4A9782", color: "#FFF9E5" }}
+                      onClick={handleSearchUsers}
+                      disabled={isSearchingUsers}
+                    >
+                      <Search className="mr-1 h-4 w-4" />
+                      {isSearchingUsers ? "Searching..." : "Search"}
+                    </Button>
+                    {hasSearched && (
+                      <Button
+                        variant="outline"
+                        className="bg-transparent"
+                        style={{ borderColor: "#A1C2BD", color: "#004030" }}
+                        onClick={() => {
+                          setSearchEmail("")
+                          setSearchResults([])
+                          setHasSearched(false)
+                          setSearchError(null)
+                        }}
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                  {searchError && (
+                    <p className="text-xs" style={{ color: "#708993" }}>
+                      {searchError}
+                    </p>
+                  )}
+                </div>
+                {peopleToShow.map((user) => {
                     const followerCount = user.followers + (isFollowing(user.id) ? 1 : 0)
+                    const postCount = postsByUser[user.id] ?? 0
                     return (
                       <div
                         key={user.id}
@@ -1216,8 +1311,13 @@ export default function ExploreView() {
                           <p className="font-semibold" style={{ color: "#004030" }}>
                             {user.name}
                           </p>
+                          {user.email && (
+                            <p className="text-xs" style={{ color: "#708993" }}>
+                              {user.email}
+                            </p>
+                          )}
                           <p className="text-xs" style={{ color: "#708993" }}>
-                            {user.title} â€¢ {followerCount} followers â€¢ {postsByUser[user.id] ?? 0} posts
+                            {user.title} | {followerCount} {followerCount === 1 ? "follower" : "followers"} | {postCount} {postCount === 1 ? "post" : "posts"}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -1242,6 +1342,11 @@ export default function ExploreView() {
                       </div>
                     )
                   })}
+                {peopleToShow.length === 0 && (
+                  <p className="text-sm" style={{ color: "#708993" }}>
+                    No users to show yet. Try searching by email.
+                  </p>
+                )}
               </CardContent>
             </Card>
 
@@ -1267,7 +1372,7 @@ export default function ExploreView() {
                         {post.title}
                       </p>
                       <p className="text-xs" style={{ color: "#708993" }}>
-                        {user.name} â€¢ {post.likes.length + post.comments.length} interactions
+                        {user.name} | {post.likes.length + post.comments.length} interactions
                       </p>
                     </div>
                   )
@@ -1436,4 +1541,5 @@ export default function ExploreView() {
     </div>
   )
 }
+
 

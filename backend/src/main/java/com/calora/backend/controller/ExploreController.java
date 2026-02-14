@@ -42,6 +42,26 @@ public class ExploreController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/users/search")
+    public ResponseEntity<?> searchUsersByEmail(
+            @RequestParam String email,
+            @RequestParam(required = false) Long requesterId
+    ) {
+        if (email == null || email.trim().isBlank()) {
+            return ResponseEntity.badRequest().body("email query is required");
+        }
+
+        String query = email.trim();
+        List<ExploreUserSummary> response = userRepository.findByEmailContainingIgnoreCase(query).stream()
+                .filter(user -> requesterId == null || !user.getId().equals(requesterId))
+                .sorted(Comparator.comparing(User::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .limit(20)
+                .map(this::toUserSummary)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/users/{userId}/followers")
     public ResponseEntity<?> getFollowers(@PathVariable Long userId) {
         if (userRepository.findById(userId).isEmpty()) {
@@ -312,6 +332,7 @@ public class ExploreController {
         return new ExploreUserSummary(
                 user.getId(),
                 user.getName() == null ? "Calora Member" : user.getName(),
+                user.getEmail() == null ? "" : user.getEmail(),
                 handle,
                 title,
                 avatarColor,
@@ -430,6 +451,7 @@ public class ExploreController {
     public record ExploreUserSummary(
             Long id,
             String name,
+            String email,
             String handle,
             String title,
             String avatarColor,

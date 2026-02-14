@@ -32,6 +32,7 @@ export default function SignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const normalizedEmail = email.trim().toLowerCase()
 
     if (password !== confirmPassword) {
       console.log("[v0] Password mismatch")
@@ -42,7 +43,7 @@ export default function SignUpForm() {
       const res = await fetch(`${API_BASE}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name: "New User" }), // Name is hardcoded for now or we can add a field
+        body: JSON.stringify({ email: normalizedEmail, password, name: "New User" }), // Name is hardcoded for now or we can add a field
       })
 
       if (res.ok) {
