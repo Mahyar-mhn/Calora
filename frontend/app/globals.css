@@ -60,67 +60,68 @@
 
 .dark {
   /* Dark theme Background color palette */
-  --dark-bg-primary: #162c3e;
-  --dark-bg-secondary: #1f3f58;
-  --dark-bg-tertiary: #2b4f6b;
-  --dark-bg-light: #D2C1B6;
+  --dark-bg-primary: #132c3d;
+  --dark-bg-secondary: #1a3a51;
+  --dark-bg-tertiary: #234c6a;
+  --dark-bg-light: #d2c1b6;
 
-  --dark-text-primary: #e2d8cf;
-  --dark-text-muted: #c8c0b7;
-  --dark-border: #35526a;
-  --dark-border-strong: #4b6b86;
-  --dark-surface: #23445c;
-  --dark-surface-alt: #1a3246;
-  --dark-accent: #5A9690;
-  --dark-accent-strong: #2a4a4d;
-  --dark-warning: #A27B5C;
-  --dark-success: #3F4F44;
-  --dark-brown: #2C3930;
+  --dark-text-primary: #e9f0f2;
+  --dark-text-muted: #b8c7cf;
+  --dark-border: #3a6078;
+  --dark-border-strong: #4f748d;
+  --dark-surface: #1d4158;
+  --dark-surface-alt: #18364a;
+  --dark-accent: #5a9690;
+  --dark-accent-strong: #2f5f67;
+  --dark-warning: #cda26d;
+  --dark-warning-tint: rgba(205, 162, 109, 0.2);
+  --dark-success: #6ea587;
+  --dark-brown: #7d6e4f;
   
   /* Dark theme Chart color palette */
-  --dark-chart-1: #2C3930;
-  --dark-chart-2: #3F4F44;
-  --dark-chart-3: #A27B5C;
-  --dark-chart-4: #DCD7C9;
+  --dark-chart-1: #6ea587;
+  --dark-chart-2: #5a9690;
+  --dark-chart-3: #cda26d;
+  --dark-chart-4: #dcd7c9;
   
   /* Dark theme Form color palette */
-  --dark-form-primary: #432323;
-  --dark-form-secondary: #2F5755;
-  --dark-form-accent: #5A9690;
-  --dark-form-light: #E0D9D9;
+  --dark-form-primary: #2a2020;
+  --dark-form-secondary: #2f5755;
+  --dark-form-accent: #5a9690;
+  --dark-form-light: #ecf1f2;
   
-  --background: #162c3e;
-  --foreground: #e2d8cf;
-  --card: #23445c;
-  --card-foreground: #e2d8cf;
-  --popover: #23445c;
-  --popover-foreground: #e2d8cf;
-  --primary: #5A9690;
-  --primary-foreground: #E0D9D9;
-  --secondary: #2b4f6b;
-  --secondary-foreground: #e2d8cf;
-  --muted: #2a4a4d;
-  --muted-foreground: #c8c0b7;
-  --accent: #5A9690;
-  --accent-foreground: #E0D9D9;
+  --background: #132c3d;
+  --foreground: #e9f0f2;
+  --card: #1d4158;
+  --card-foreground: #e9f0f2;
+  --popover: #1d4158;
+  --popover-foreground: #e9f0f2;
+  --primary: #5a9690;
+  --primary-foreground: #ecf1f2;
+  --secondary: #234c6a;
+  --secondary-foreground: #e9f0f2;
+  --muted: #2f5f67;
+  --muted-foreground: #b8c7cf;
+  --accent: #5a9690;
+  --accent-foreground: #ecf1f2;
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: #35526a;
-  --input: #23445c;
-  --ring: #5A9690;
-  --chart-1: #2C3930;
-  --chart-2: #3F4F44;
-  --chart-3: #A27B5C;
-  --chart-4: #DCD7C9;
-  --chart-5: #2C3930;
-  --sidebar: #23445c;
-  --sidebar-foreground: #e2d8cf;
-  --sidebar-primary: #5A9690;
-  --sidebar-primary-foreground: #E0D9D9;
-  --sidebar-accent: #2b4f6b;
-  --sidebar-accent-foreground: #e2d8cf;
-  --sidebar-border: #35526a;
-  --sidebar-ring: #5A9690;
+  --border: #3a6078;
+  --input: #1d4158;
+  --ring: #5a9690;
+  --chart-1: #6ea587;
+  --chart-2: #5a9690;
+  --chart-3: #cda26d;
+  --chart-4: #dcd7c9;
+  --chart-5: #7d6e4f;
+  --sidebar: #1d4158;
+  --sidebar-foreground: #e9f0f2;
+  --sidebar-primary: #5a9690;
+  --sidebar-primary-foreground: #ecf1f2;
+  --sidebar-accent: #234c6a;
+  --sidebar-accent-foreground: #e9f0f2;
+  --sidebar-border: #3a6078;
+  --sidebar-ring: #5a9690;
 }
 
 @theme inline {
@@ -396,35 +397,53 @@
     background-color: var(--dark-bg-tertiary) !important;
   }
   
-  /* Dark theme - Chart colors (Chart palette: #2C3930, #3F4F44, #A27B5C, #DCD7C9) */
+  /* Dark theme - Chart colors keep distinct series */
   .dark [style*="fill: #63A361"],
-  .dark [style*="fill: #FFC50F"],
-  .dark [style*="fill: #5B532C"],
-  .dark [style*="fill: #4A9782"],
   .dark path[style*="fill: #63A361"],
-  .dark path[style*="fill: #FFC50F"],
-  .dark path[style*="fill: #5B532C"],
+  .dark rect[style*="fill: #63A361"] {
+    fill: var(--dark-chart-1) !important;
+  }
+
+  .dark [style*="fill: #4A9782"],
   .dark path[style*="fill: #4A9782"],
-  .dark rect[style*="fill: #63A361"],
-  .dark rect[style*="fill: #FFC50F"],
-  .dark rect[style*="fill: #5B532C"],
   .dark rect[style*="fill: #4A9782"] {
-    fill: var(--dark-warning) !important;
+    fill: var(--dark-chart-2) !important;
+  }
+
+  .dark [style*="fill: #FFC50F"],
+  .dark path[style*="fill: #FFC50F"],
+  .dark rect[style*="fill: #FFC50F"] {
+    fill: var(--dark-chart-3) !important;
+  }
+
+  .dark [style*="fill: #5B532C"],
+  .dark path[style*="fill: #5B532C"],
+  .dark rect[style*="fill: #5B532C"] {
+    fill: var(--dark-chart-4) !important;
   }
   
   .dark [style*="stroke: #63A361"],
-  .dark [style*="stroke: #FFC50F"],
-  .dark [style*="stroke: #5B532C"],
-  .dark [style*="stroke: #4A9782"],
   .dark path[style*="stroke: #63A361"],
-  .dark path[style*="stroke: #FFC50F"],
-  .dark path[style*="stroke: #5B532C"],
+  .dark line[style*="stroke: #63A361"] {
+    stroke: var(--dark-chart-1) !important;
+  }
+
+  .dark [style*="stroke: #4A9782"],
   .dark path[style*="stroke: #4A9782"],
-  .dark line[style*="stroke: #63A361"],
-  .dark line[style*="stroke: #FFC50F"],
-  .dark line[style*="stroke: #5B532C"],
   .dark line[style*="stroke: #4A9782"] {
-    stroke: var(--dark-warning) !important;
+    stroke: var(--dark-chart-2) !important;
+  }
+
+  .dark [style*="stroke: #FFC50F"],
+  .dark path[style*="stroke: #FFC50F"],
+  .dark line[style*="stroke: #FFC50F"] {
+    stroke: var(--dark-chart-3) !important;
+  }
+
+  .dark [style*="stroke: #5B532C"],
+  .dark path[style*="stroke: #5B532C"],
+  .dark line[style*="stroke: #5B532C"] {
+    stroke: var(--dark-chart-4) !important;
   }
   
   /* Chart specific overrides for Recharts - use CSS variables */
@@ -442,21 +461,28 @@
   .dark [style*="stop-color: #FFC50F"],
   .dark stop[style*="stopColor: #FFC50F"],
   .dark stop[style*="stop-color: #FFC50F"] {
-    stop-color: var(--dark-warning) !important;
+    stop-color: var(--dark-chart-3) !important;
   }
   
   .dark [style*="stopColor: #63A361"],
   .dark [style*="stop-color: #63A361"],
   .dark stop[style*="stopColor: #63A361"],
   .dark stop[style*="stop-color: #63A361"] {
-    stop-color: var(--dark-success) !important;
+    stop-color: var(--dark-chart-1) !important;
   }
   
   .dark [style*="stopColor: #5B532C"],
   .dark [style*="stop-color: #5B532C"],
   .dark stop[style*="stopColor: #5B532C"],
   .dark stop[style*="stop-color: #5B532C"] {
-    stop-color: var(--dark-brown) !important;
+    stop-color: var(--dark-chart-4) !important;
+  }
+
+  .dark [style*="stopColor: #4A9782"],
+  .dark [style*="stop-color: #4A9782"],
+  .dark stop[style*="stopColor: #4A9782"],
+  .dark stop[style*="stop-color: #4A9782"] {
+    stop-color: var(--dark-chart-2) !important;
   }
   
   /* Dark theme - Progress bars and secondary backgrounds */
@@ -484,6 +510,20 @@
   /* Dark theme - All main containers */
   .dark main {
     background-color: var(--dark-bg-primary) !important;
+  }
+
+  /* Landing page should stay transparent in dark mode to avoid panel color split */
+  .dark main.landing-main {
+    background-color: transparent !important;
+    background-image: none !important;
+  }
+
+  /* Keep card header surfaces consistent with card body in dark mode */
+  .dark [data-slot="card-header"],
+  .dark [data-slot="card-header"]::before,
+  .dark [data-slot="card-header"]::after {
+    background-color: transparent !important;
+    background-image: none !important;
   }
   
   /* Dark theme - Section backgrounds */
@@ -523,7 +563,13 @@
 
   .dark [class*="bg-[#FFC50F]"] {
     background-color: var(--dark-warning) !important;
-    color: var(--dark-form-light) !important;
+    color: var(--dark-bg-primary) !important;
+  }
+
+  .dark [class*="bg-[#FFC50F20]"],
+  .dark [class*="bg-[#ffc50f20]"] {
+    background-color: var(--dark-warning-tint) !important;
+    border-color: var(--dark-warning) !important;
   }
 
   .dark [class*="bg-[#DCD0A8]"] {
@@ -575,6 +621,11 @@
 
   .dark [class*="border-[#4A9782]"] {
     border-color: var(--dark-accent) !important;
+  }
+
+  .dark [class*="border-[#FFC50F]"],
+  .dark [class*="border-[#ffc50f]"] {
+    border-color: var(--dark-warning) !important;
   }
 
   .dark [class*="border-white"] {
@@ -654,12 +705,43 @@
     background-color: var(--dark-accent-strong) !important;
   }
 
+  .dark [style*="background-color: rgb(61, 130, 112)"],
+  .dark [style*="background: rgb(61, 130, 112)"],
+  .dark [style*="background-color: #3d8270"],
+  .dark [style*="background: #3d8270"] {
+    background-color: var(--dark-accent-strong) !important;
+  }
+
+  .dark [style*="background-color: rgb(0, 40, 32)"],
+  .dark [style*="background: rgb(0, 40, 32)"],
+  .dark [style*="background-color: #002820"],
+  .dark [style*="background: #002820"] {
+    background-color: #1b3c53 !important;
+    color: var(--dark-form-light) !important;
+  }
+
   .dark [style*="background-color: rgb(255, 197, 15)"],
   .dark [style*="background: rgb(255, 197, 15)"],
   .dark [style*="background-color: rgb(230, 177, 14)"],
   .dark [style*="background: rgb(230, 177, 14)"] {
     background-color: var(--dark-warning) !important;
-    color: var(--dark-form-light) !important;
+    color: var(--dark-bg-primary) !important;
+  }
+
+  .dark [style*="background-color: rgb(240, 184, 0)"],
+  .dark [style*="background: rgb(240, 184, 0)"],
+  .dark [style*="background-color: #f0b800"],
+  .dark [style*="background: #f0b800"] {
+    background-color: var(--dark-warning) !important;
+    color: var(--dark-bg-primary) !important;
+  }
+
+  .dark [style*="background-color: rgba(255, 197, 15"],
+  .dark [style*="background: rgba(255, 197, 15"],
+  .dark [style*="background-color: #FFC50F20"],
+  .dark [style*="background: #FFC50F20"] {
+    background-color: var(--dark-warning-tint) !important;
+    border-color: var(--dark-warning) !important;
   }
 
   .dark [style*="color: rgb(0, 64, 48)"],
@@ -700,5 +782,24 @@
 
   .dark [style*="border-color: rgb(74, 151, 130)"] {
     border-color: var(--dark-accent) !important;
+  }
+
+  .dark [style*="borderColor: #FFC50F"],
+  .dark [style*="border-color: #FFC50F"],
+  .dark [style*="border-color: rgb(255, 197, 15)"] {
+    border-color: var(--dark-warning) !important;
+  }
+
+  .dark [style*="color: #D96464"],
+  .dark [style*="color: #FF6B6B"],
+  .dark [style*="color: #ff4444"],
+  .dark [style*="color: #ef4444"] {
+    color: #ff9a96 !important;
+  }
+
+  .dark [style*="background-color: #FFE5E5"],
+  .dark [style*="background: #FFE5E5"] {
+    background-color: rgba(255, 107, 107, 0.18) !important;
+    border-color: rgba(255, 107, 107, 0.45) !important;
   }
 }

@@ -1,4 +1,4 @@
-import ThemeToggle from "@/components/theme-toggle"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { API_BASE } from "@/lib/api"
 export default async function UsersPage() {
     const res = await fetch(`${API_BASE}/users`, { cache: "no-store" });

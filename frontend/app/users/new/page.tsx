@@ -1,5 +1,5 @@
 "use client";
-import ThemeToggle from "@/components/theme-toggle"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { API_BASE } from "@/lib/api"
 import { useState } from "react";
 

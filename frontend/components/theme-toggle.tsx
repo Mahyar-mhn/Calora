@@ -6,7 +6,7 @@ import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
+  const { theme, resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
 
   React.useEffect(() => {
@@ -25,11 +25,17 @@ export function ThemeToggle() {
     )
   }
 
+  const isDark = resolvedTheme === "dark"
+  const toggleStyle = isDark
+    ? { backgroundColor: "#1d4158", borderColor: "#4f748d", color: "#e9f0f2" }
+    : { backgroundColor: "transparent", borderColor: "#A1C2BD", color: "#004030" }
+
   return (
     <Button
       variant="outline"
       size="icon"
       className="rounded-full bg-transparent transition-all hover:shadow-md hover:bg-accent"
+      style={toggleStyle}
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
       aria-label="Toggle theme"
     >

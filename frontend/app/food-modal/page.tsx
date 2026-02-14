@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation"
 import FoodModal from "@/components/food-modal"
 import ProfileAvatarButton from "@/components/profile-avatar-button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { useTheme } from "next-themes"
 
 type FoodItem = {
   name: string
@@ -256,6 +257,12 @@ export default function FoodModalPage() {
   const [isLoadingFoods, setIsLoadingFoods] = useState(false)
   const [isLoadingRecipes, setIsLoadingRecipes] = useState(false)
   const [selectedFood, setSelectedFood] = useState<FoodItem>(defaultSampleFoods[0])
+  const [themeReady, setThemeReady] = useState(false)
+  const { resolvedTheme } = useTheme()
+
+  useEffect(() => {
+    setThemeReady(true)
+  }, [])
 
   useEffect(() => {
     const loadFoods = async () => {
@@ -379,6 +386,16 @@ export default function FoodModalPage() {
       alert("Error logging meal")
     }
   }
+
+  const isDark = themeReady && resolvedTheme === "dark"
+  const premiumPillStyle = isDark
+    ? { backgroundColor: "#cda26d", color: "#132c3d" }
+    : { backgroundColor: "#FFC50F", color: "#004030" }
+  const famousButtonStyle = isDark
+    ? { backgroundColor: "#cda26d", color: "#132c3d" }
+    : { backgroundColor: "#FFC50F", color: "#004030" }
+  const famousHoverBg = isDark ? "#b98f5f" : "#e6b10e"
+  const famousDefaultBg = isDark ? "#cda26d" : "#FFC50F"
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
@@ -532,7 +549,7 @@ export default function FoodModalPage() {
             View AI Weekly Meal Plans
             <span
               className="ml-2 rounded-full px-2 py-1 text-xs font-bold"
-              style={{ backgroundColor: "#FFC50F", color: "#004030" }}
+              style={premiumPillStyle}
             >
               Premium
             </span>
@@ -542,16 +559,13 @@ export default function FoodModalPage() {
         <div className="mb-6">
           <Button
             className="w-full rounded-lg py-6 text-lg font-semibold shadow-md transition-all duration-200 hover:scale-105 hover:shadow-lg"
-            style={{
-              backgroundColor: "#FFC50F",
-              color: "#004030",
-            }}
+            style={famousButtonStyle}
             onClick={() => setIsFamousRecipesOpen(true)}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = "#e6b10e"
+              e.currentTarget.style.backgroundColor = famousHoverBg
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = "#FFC50F"
+              e.currentTarget.style.backgroundColor = famousDefaultBg
             }}
           >
             <Star className="mr-2 h-5 w-5" />

@@ -1,5 +1,5 @@
 import ProfileSetupForm from "@/components/profile-setup-form"
-import ThemeToggle from "@/components/theme-toggle"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function ProfileSetupPage() {
   return (

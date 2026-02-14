@@ -2,6 +2,7 @@
 
 import { API_BASE } from "@/lib/api"
 import { useEffect, useState } from "react"
+import { useTheme } from "next-themes"
 import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -106,6 +107,8 @@ export default function AdvancedAnalyticsView() {
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isAllowed, setIsAllowed] = useState(false)
   const [isExporting, setIsExporting] = useState<"" | "csv" | "pdf">("")
+  const [themeReady, setThemeReady] = useState(false)
+  const { resolvedTheme } = useTheme()
   const router = useRouter()
 
   const handleNavigation = (path: string) => {
@@ -137,6 +140,10 @@ export default function AdvancedAnalyticsView() {
   }
 
   useEffect(() => {
+    setThemeReady(true)
+  }, [])
+
+  useEffect(() => {
     const userStr = localStorage.getItem("calora_user")
     const currentUser = userStr ? JSON.parse(userStr) : null
     if (!currentUser?.isPremium) {
@@ -149,6 +156,23 @@ export default function AdvancedAnalyticsView() {
   if (!isAllowed) {
     return null
   }
+
+  const isDark = themeReady && resolvedTheme === "dark"
+  const premiumBadgeStyle = isDark
+    ? { backgroundColor: "#cda26d", color: "#132c3d" }
+    : { backgroundColor: "#FFC50F", color: "#004030" }
+  const exportDialogStyle = isDark
+    ? { backgroundColor: "#1d4158", borderColor: "#3a6078" }
+    : { backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }
+  const exportTitleColor = isDark ? "#e9f0f2" : "#004030"
+  const exportSubColor = isDark ? "#d3dee4" : "#708993"
+  const exportCsvStyle = isDark
+    ? { backgroundColor: "#4e8a63", color: "#ecf1f2" }
+    : { backgroundColor: "#63A361", color: "#FFF9E5" }
+  const exportPdfStyle = isDark
+    ? { backgroundColor: "#cda26d", color: "#132c3d" }
+    : { backgroundColor: "#FFC50F", color: "#004030" }
+  const exportHintColor = isDark ? "#d3dee4" : "currentColor"
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
@@ -183,7 +207,7 @@ export default function AdvancedAnalyticsView() {
                 </h1>
                 <span
                   className="rounded-full px-3 py-1 text-xs font-semibold"
-                  style={{ backgroundColor: "#FFC50F", color: "#004030" }}
+                  style={premiumBadgeStyle}
                 >
                   PREMIUM
                 </span>
@@ -339,40 +363,34 @@ export default function AdvancedAnalyticsView() {
             </DialogTrigger>
             <DialogContent
               className="sm:max-w-md"
-              style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}
+              style={exportDialogStyle}
             >
               <DialogHeader>
-                <DialogTitle style={{ color: "#004030" }}>Export Analytics Report</DialogTitle>
+                <DialogTitle style={{ color: exportTitleColor }}>Export Analytics Report</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <p className="text-sm" style={{ color: "#708993" }}>
+                <p className="text-sm" style={{ color: exportSubColor }}>
                   Choose your preferred export format. The report will include your {selectedMonths}-month analytics data.
                 </p>
                 <Button
                   className="w-full py-10 flex-col flex gap-2 transition-all duration-200 hover:scale-105"
                   onClick={() => downloadReport("csv")}
-                  style={{
-                    backgroundColor: "#63A361",
-                    color: "#FFF9E5",
-                  }}
+                  style={exportCsvStyle}
                   disabled={isExporting !== ""}
                 >
                   <FileText className="h-6 w-6" />
                   {isExporting === "csv" ? "Exporting CSV..." : "Export as CSV"}
-                  <span className="text-xs opacity-80">Spreadsheet format</span>
+                  <span className="text-xs opacity-90" style={{ color: exportHintColor }}>Spreadsheet format</span>
                 </Button>
                 <Button
                   className="w-full py-10 flex-col gap-2 transition-all duration-200 hover:scale-105"
                   onClick={() => downloadReport("pdf")}
-                  style={{
-                    backgroundColor: "#FFC50F",
-                    color: "#004030",
-                  }}
+                  style={exportPdfStyle}
                   disabled={isExporting !== ""}
                 >
                   <File className="h-6 w-6" />
                   {isExporting === "pdf" ? "Exporting PDF..." : "Export as PDF"}
-                  <span className="text-xs opacity-80">Document format</span>
+                  <span className="text-xs opacity-90" style={{ color: exportHintColor }}>Document format</span>
                 </Button>
               </div>
             </DialogContent>

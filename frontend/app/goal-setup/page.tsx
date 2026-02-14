@@ -1,5 +1,5 @@
 import GoalSetupForm from "@/components/goal-setup-form"
-import ThemeToggle from "@/components/theme-toggle"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function GoalSetupPage() {
   return (

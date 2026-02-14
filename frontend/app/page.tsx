@@ -19,14 +19,14 @@ const LANDING_GRADIENT_BLOBS = [
 ] as const
 
 const DARK_LANDING_BLOB_COLORS = [
-  { colorA: "rgba(90,150,144,0.38)", colorB: "rgba(35,76,106,0.22)", colorC: "rgba(27,60,83,0)" },
-  { colorA: "rgba(162,123,92,0.38)", colorB: "rgba(35,76,106,0.18)", colorC: "rgba(27,60,83,0)" },
-  { colorA: "rgba(90,150,144,0.32)", colorB: "rgba(69,104,130,0.2)", colorC: "rgba(27,60,83,0)" },
-  { colorA: "rgba(63,79,68,0.38)", colorB: "rgba(35,76,106,0.22)", colorC: "rgba(27,60,83,0)" },
-  { colorA: "rgba(162,123,92,0.34)", colorB: "rgba(27,60,83,0.2)", colorC: "rgba(27,60,83,0)" },
-  { colorA: "rgba(90,150,144,0.34)", colorB: "rgba(35,76,106,0.2)", colorC: "rgba(27,60,83,0)" },
-  { colorA: "rgba(63,79,68,0.3)", colorB: "rgba(27,60,83,0.22)", colorC: "rgba(27,60,83,0)" },
-  { colorA: "rgba(162,123,92,0.28)", colorB: "rgba(35,76,106,0.18)", colorC: "rgba(27,60,83,0)" },
+  { colorA: "rgba(255,197,15,0.34)", colorB: "rgba(69,104,130,0.26)", colorC: "rgba(18,41,58,0)" },
+  { colorA: "rgba(90,150,144,0.30)", colorB: "rgba(35,76,106,0.22)", colorC: "rgba(18,41,58,0)" },
+  { colorA: "rgba(255,197,15,0.28)", colorB: "rgba(90,150,144,0.2)", colorC: "rgba(18,41,58,0)" },
+  { colorA: "rgba(117,165,178,0.3)", colorB: "rgba(35,76,106,0.24)", colorC: "rgba(18,41,58,0)" },
+  { colorA: "rgba(255,197,15,0.24)", colorB: "rgba(69,104,130,0.26)", colorC: "rgba(18,41,58,0)" },
+  { colorA: "rgba(90,150,144,0.28)", colorB: "rgba(35,76,106,0.2)", colorC: "rgba(18,41,58,0)" },
+  { colorA: "rgba(255,197,15,0.22)", colorB: "rgba(117,165,178,0.18)", colorC: "rgba(18,41,58,0)" },
+  { colorA: "rgba(90,150,144,0.24)", colorB: "rgba(35,76,106,0.2)", colorC: "rgba(18,41,58,0)" },
 ] as const
 
 export default function LandingPage() {
@@ -85,16 +85,16 @@ export default function LandingPage() {
     ...(isDark ? DARK_LANDING_BLOB_COLORS[index % DARK_LANDING_BLOB_COLORS.length] : {}),
   }))
   const orbA = isDark
-    ? "radial-gradient(circle, rgba(90,150,144,0.3) 0%, rgba(90,150,144,0) 72%)"
+    ? "radial-gradient(circle, rgba(90,150,144,0.34) 0%, rgba(90,150,144,0.08) 58%, rgba(90,150,144,0) 78%)"
     : "radial-gradient(circle, rgba(74,151,130,0.25) 0%, rgba(74,151,130,0) 70%)"
   const orbB = isDark
-    ? "radial-gradient(circle, rgba(162,123,92,0.26) 0%, rgba(162,123,92,0) 75%)"
+    ? "radial-gradient(circle, rgba(255,197,15,0.28) 0%, rgba(255,197,15,0.09) 52%, rgba(255,197,15,0) 78%)"
     : "radial-gradient(circle, rgba(255,197,15,0.20) 0%, rgba(255,197,15,0) 75%)"
   const overlayBackground = isDark
     ? "radial-gradient(circle at center, rgba(35, 76, 106, 0.96) 0%, rgba(27, 60, 83, 0.98) 58%)"
     : "radial-gradient(circle at center, rgba(255, 249, 229, 0.95) 0%, rgba(231, 242, 239, 0.98) 60%)"
   const baseGradient = isDark
-    ? "linear-gradient(120deg, #1b3c53 0%, #234c6a 34%, #2f5755 62%, #1b3c53 100%)"
+    ? "linear-gradient(120deg, #12293a 0%, #17364d 30%, #1e4460 58%, #1b3c53 82%, #12293a 100%)"
     : "linear-gradient(120deg, #d4e4e8 0%, #dbe9eb 34%, #dce7de 62%, #cfe1e6 100%)"
 
   return (
@@ -207,7 +207,10 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <main className="landing-main grid items-center gap-10 lg:grid-cols-[1.08fr_1fr] lg:gap-12">
+        <main
+          className="landing-main grid items-center gap-10 lg:grid-cols-[1.08fr_1fr] lg:gap-12"
+          style={isDark ? { background: "transparent", backgroundColor: "transparent" } : undefined}
+        >
           <section className="space-y-6 scroll-reveal">
             <p className="landing-pill inline-flex items-center gap-2 rounded-full border border-[#DCD0A8] bg-[#FFF9E5] px-4 py-1.5 text-xs font-semibold tracking-[0.2em] text-[#4A9782]">
               <Sparkles className="h-3.5 w-3.5" />
@@ -399,8 +402,11 @@ export default function LandingPage() {
           color: #e9e1d7;
         }
 
-        .landing-dark .landing-main {
+        .landing-dark .landing-main,
+        .landing-dark .landing-main::before,
+        .landing-dark .landing-main::after {
           background: transparent !important;
+          background-image: none !important;
         }
 
         .landing-dark .landing-header {
@@ -595,7 +601,7 @@ export default function LandingPage() {
         .base-live-gradient {
           position: absolute;
           inset: -18%;
-          background-size: 170% 170%;
+          background-size: 220% 220%;
           animation: baseGradientDrift 22s ease-in-out infinite;
           opacity: 0.9;
         }
@@ -674,15 +680,20 @@ export default function LandingPage() {
         }
 
         :global(.dark) .base-live-gradient {
-          opacity: 0.92;
+          opacity: 0.97;
         }
 
         :global(.dark) .gradient-blob-field {
-          opacity: 0.48;
+          opacity: 0.82;
+        }
+
+        :global(.dark) .floating-gradient-blob {
+          mix-blend-mode: screen;
+          filter: blur(1.5px);
         }
 
         :global(.dark) .floating-gradient-blob::after {
-          background: radial-gradient(circle, rgba(210, 193, 182, 0.18) 0%, rgba(210, 193, 182, 0) 86%);
+          background: radial-gradient(circle, rgba(255, 220, 138, 0.28) 0%, rgba(255, 220, 138, 0) 84%);
         }
 
         :global(.dark) .startup-logo-shell {

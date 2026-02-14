@@ -2,6 +2,7 @@
 import { API_BASE } from "@/lib/api"
 import { useMenuInteractions } from "@/hooks/use-menu-interactions"
 import { useState, useEffect } from "react"
+import { useTheme } from "next-themes"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
@@ -16,6 +17,7 @@ import {
   Calendar,
   Sparkles,
   Crown,
+  Check,
 } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -66,6 +68,8 @@ export default function HistoryView() {
   const [weightTrajectoryData, setWeightTrajectoryData] = useState<WeightPoint[]>([])
   const [currentWeight, setCurrentWeight] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [themeReady, setThemeReady] = useState(false)
+  const { resolvedTheme } = useTheme()
   const router = useRouter()
 
   const handleNavigation = (path: string) => {
@@ -83,6 +87,10 @@ export default function HistoryView() {
     }
     handleNavigation(path)
   }
+
+  useEffect(() => {
+    setThemeReady(true)
+  }, [])
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -180,6 +188,29 @@ export default function HistoryView() {
 
     fetchHistory()
   }, [])
+
+  const isDark = themeReady && resolvedTheme === "dark"
+  const teaserCardStyle = isDark
+    ? {
+        backgroundColor: "#1d4158",
+        borderColor: "#3a6078",
+        background: "linear-gradient(135deg, #1b3c53 0%, #234c6a 100%)",
+      }
+    : {
+        backgroundColor: "#FFF9E5",
+        borderColor: "#DCD0A8",
+        background: "linear-gradient(135deg, #FFF9E5 0%, #E7F2EF 100%)",
+      }
+  const teaserTitleColor = isDark ? "#e9f0f2" : "#004030"
+  const teaserSubColor = isDark ? "#d3dee4" : "#708993"
+  const teaserBadgeStyle = isDark
+    ? { backgroundColor: "#cda26d", color: "#132c3d" }
+    : { backgroundColor: "#FFC50F", color: "#004030" }
+  const teaserListColor = isDark ? "#e9f0f2" : "#004030"
+  const teaserCheckColor = isDark ? "#8dcfc2" : "#4A9782"
+  const teaserButtonStyle = isDark
+    ? { backgroundColor: "#cda26d", color: "#132c3d" }
+    : { backgroundColor: "#FFC50F", color: "#004030" }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#E7F2EF" }}>
@@ -350,7 +381,7 @@ export default function HistoryView() {
           {/* Calorie Trends Chart */}
           <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2" style={{ color: "#004030" }}>
+              <CardTitle className="flex items-center gap-2" style={{ color: teaserTitleColor }}>
                 <TrendingUp className="h-5 w-5" style={{ color: "#FFC50F" }} />
                 Calorie Trends
               </CardTitle>
@@ -384,7 +415,7 @@ export default function HistoryView() {
           {/* Macro Adherence Chart */}
           <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2" style={{ color: "#004030" }}>
+              <CardTitle className="flex items-center gap-2" style={{ color: teaserTitleColor }}>
                 <Sparkles className="h-5 w-5" style={{ color: "#63A361" }} />
                 Macro Adherence
               </CardTitle>
@@ -418,7 +449,7 @@ export default function HistoryView() {
           {/* Weight Trajectory Chart */}
           <Card style={{ backgroundColor: "#FFF9E5", borderColor: "#DCD0A8" }}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2" style={{ color: "#004030" }}>
+              <CardTitle className="flex items-center gap-2" style={{ color: teaserTitleColor }}>
                 <TrendingUp className="h-5 w-5" style={{ color: "#4A9782" }} />
                 Weight Trajectory
               </CardTitle>
@@ -460,54 +491,45 @@ export default function HistoryView() {
           </Card>
 
           {/* Advanced Analytics Teaser */}
-          <Card
-            style={{
-              backgroundColor: "#FFF9E5",
-              borderColor: "#DCD0A8",
-              background: "linear-gradient(135deg, #FFF9E5 0%, #E7F2EF 100%)",
-            }}
-          >
+          <Card style={teaserCardStyle}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2" style={{ color: "#004030" }}>
+              <CardTitle className="flex items-center gap-2" style={{ color: teaserTitleColor }}>
                 <Crown className="h-5 w-5" style={{ color: "#FFC50F" }} />
                 Advanced Analytics
                 <span
                   className="ml-2 rounded-full px-3 py-1 text-xs font-semibold"
-                  style={{ backgroundColor: "#FFC50F", color: "#004030" }}
+                  style={teaserBadgeStyle}
                 >
                   PREMIUM
                 </span>
               </CardTitle>
-              <CardDescription style={{ color: "#708993" }}>
+              <CardDescription style={{ color: teaserSubColor }}>
                 Unlock deeper insights and comprehensive health reports
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <ul className="space-y-2" style={{ color: "#004030" }}>
+                <ul className="space-y-2" style={{ color: teaserListColor }}>
                   <li className="flex items-start gap-2">
-                    <span className="mt-1">✓</span>
+                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: teaserCheckColor }} />
                     <span>Detailed nutrient breakdown and micronutrient tracking</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="mt-1">✓</span>
+                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: teaserCheckColor }} />
                     <span>Custom date range analysis and export reports</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="mt-1">✓</span>
+                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: teaserCheckColor }} />
                     <span>AI-powered insights and personalized recommendations</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="mt-1">✓</span>
+                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: teaserCheckColor }} />
                     <span>Comparative analysis and progress predictions</span>
                   </li>
                 </ul>
                 <Button
                   className="w-full"
-                  style={{
-                    backgroundColor: "#FFC50F",
-                    color: "#004030",
-                  }}
+                  style={teaserButtonStyle}
                   onClick={() => handlePremiumNavigation("/advanced-analytics")}
                 >
                   <Crown className="mr-2 h-4 w-4" />
@@ -521,6 +543,7 @@ export default function HistoryView() {
     </div>
   )
 }
+
 
 
 
