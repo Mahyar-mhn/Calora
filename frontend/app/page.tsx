@@ -5,8 +5,20 @@ import Link from "next/link"
 import { ArrowRight, Activity, Utensils, Sparkles, ShieldCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 
+const LANDING_GRADIENT_BLOBS = [
+  { top: "6%", left: "6%", width: 280, height: 190, delay: 0.4, duration: 24.2, opacity: 0.5, colorA: "rgba(255,197,15,0.58)", colorB: "rgba(255,249,229,0.22)", colorC: "rgba(74,151,130,0)" },
+  { top: "15%", left: "30%", width: 340, height: 240, delay: 2.2, duration: 29.6, opacity: 0.4, colorA: "rgba(220,208,168,0.42)", colorB: "rgba(255,197,15,0.20)", colorC: "rgba(74,151,130,0)" },
+  { top: "12%", left: "66%", width: 250, height: 180, delay: 1.6, duration: 26.4, opacity: 0.45, colorA: "rgba(255,197,15,0.48)", colorB: "rgba(161,194,189,0.24)", colorC: "rgba(74,151,130,0)" },
+  { top: "37%", left: "10%", width: 360, height: 250, delay: 3.1, duration: 31.8, opacity: 0.34, colorA: "rgba(255,249,229,0.45)", colorB: "rgba(74,151,130,0.24)", colorC: "rgba(74,151,130,0)" },
+  { top: "46%", left: "42%", width: 310, height: 210, delay: 0.8, duration: 28.5, opacity: 0.42, colorA: "rgba(255,197,15,0.44)", colorB: "rgba(255,249,229,0.18)", colorC: "rgba(74,151,130,0)" },
+  { top: "58%", left: "74%", width: 260, height: 180, delay: 4.3, duration: 25.9, opacity: 0.38, colorA: "rgba(220,208,168,0.48)", colorB: "rgba(255,197,15,0.21)", colorC: "rgba(74,151,130,0)" },
+  { top: "76%", left: "22%", width: 320, height: 220, delay: 2.9, duration: 30.2, opacity: 0.36, colorA: "rgba(255,197,15,0.35)", colorB: "rgba(161,194,189,0.23)", colorC: "rgba(74,151,130,0)" },
+  { top: "80%", left: "60%", width: 290, height: 200, delay: 1.3, duration: 27.2, opacity: 0.34, colorA: "rgba(255,249,229,0.40)", colorB: "rgba(255,197,15,0.18)", colorC: "rgba(74,151,130,0)" },
+] as const
+
 export default function LandingPage() {
   const [scrollDirection, setScrollDirection] = useState<"down" | "up">("down")
+  const [introPhase, setIntroPhase] = useState<"fire" | "logo" | "done">("fire")
 
   useEffect(() => {
     const revealElements = Array.from(document.querySelectorAll<HTMLElement>(".scroll-reveal"))
@@ -39,9 +51,48 @@ export default function LandingPage() {
     }
   }, [])
 
+  useEffect(() => {
+    const fireTimer = window.setTimeout(() => setIntroPhase("logo"), 1200)
+    const doneTimer = window.setTimeout(() => setIntroPhase("done"), 2300)
+    return () => {
+      window.clearTimeout(fireTimer)
+      window.clearTimeout(doneTimer)
+    }
+  }, [])
+
   return (
     <div data-scroll-dir={scrollDirection} className="relative min-h-screen overflow-x-hidden bg-[#E7F2EF] text-[#004030]">
+      {introPhase !== "done" && (
+        <div className={`startup-overlay ${introPhase === "logo" ? "startup-logo" : "startup-fire"}`}>
+          <div className="startup-center">
+            <div className="startup-fire-wrap" aria-hidden={introPhase !== "fire"}>
+              <div className="fire-aura fire-aura-wide" />
+              <div className="fire-aura fire-aura-tight" />
+              <div className="tiny-fire fire-outer" />
+              <div className="tiny-fire fire-mid" />
+              <div className="tiny-fire fire-inner" />
+              <div className="tiny-fire fire-core" />
+              <div className="tiny-fire fire-base" />
+              <span className="fire-ember ember-1" />
+              <span className="fire-ember ember-2" />
+              <span className="fire-ember ember-3" />
+              <span className="fire-ember ember-4" />
+              <span className="fire-smoke smoke-1" />
+              <span className="fire-smoke smoke-2" />
+            </div>
+            <div className="startup-logo-wrap" aria-hidden={introPhase !== "logo"}>
+              <div className="startup-logo-shell">
+                <Image src="/images/logo.png" alt="Calora Icon" width={86} height={86} className="h-20 w-20 object-contain sm:h-[5.4rem] sm:w-[5.4rem]" />
+              </div>
+              <p className="startup-brand">CALORA</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className={`landing-content ${introPhase === "done" ? "landing-ready" : ""}`}>
       <div className="pointer-events-none absolute inset-0">
+        <div className="base-live-gradient" />
         <div
           className="absolute -top-36 left-1/2 h-[32rem] w-[32rem] -translate-x-1/2 rounded-full blur-3xl"
           style={{ background: "radial-gradient(circle, rgba(74,151,130,0.25) 0%, rgba(74,151,130,0) 70%)" }}
@@ -50,10 +101,28 @@ export default function LandingPage() {
           className="absolute bottom-[-12rem] right-[-8rem] h-[26rem] w-[26rem] rounded-full blur-3xl"
           style={{ background: "radial-gradient(circle, rgba(255,197,15,0.20) 0%, rgba(255,197,15,0) 75%)" }}
         />
+        <div className="gradient-blob-field" aria-hidden="true">
+          {LANDING_GRADIENT_BLOBS.map((blob, idx) => (
+            <span
+              key={`blob-${idx}`}
+              className="floating-gradient-blob"
+              style={{
+                top: blob.top,
+                left: blob.left,
+                width: `${blob.width}px`,
+                height: `${blob.height}px`,
+                opacity: blob.opacity,
+                background: `radial-gradient(ellipse at 32% 38%, ${blob.colorA} 0%, ${blob.colorB} 50%, ${blob.colorC} 100%)`,
+                animationDuration: `${blob.duration}s, ${Math.max(7.2, blob.duration * 0.56)}s`,
+                animationDelay: `-${blob.delay}s, -${(blob.delay * 0.7).toFixed(2)}s`,
+              }}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[1240px] flex-col px-4 pb-14 pt-6 sm:px-6 lg:px-8">
-        <header className="mb-8 rounded-2xl border border-[#A1C2BD] bg-[#FFF9E5]/85 p-3 backdrop-blur-md sm:mb-12 sm:p-4">
+      <div className="relative z-10 mx-auto flex w-full max-w-[1240px] flex-col px-4 pb-14 pt-6 sm:px-6 lg:px-8">
+        <header className="mb-8 rounded-2xl border border-[#A1C2BD] bg-[#FFF9E5] p-3 sm:mb-12 sm:p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-2 shadow-sm">
@@ -109,8 +178,8 @@ export default function LandingPage() {
             </h1>
 
             <p className="max-w-xl text-pretty text-base leading-relaxed text-[#708993] sm:text-lg">
-              Track meals, activities, macros, and weekly progress with a clean flow designed for focus. Calora helps
-              you move from scattered logs to clear daily decisions.
+              Track meals, activities, macros, and weekly progress with a clean flow designed for focus. Explore the
+              community, follow people, and use direct messaging while staying consistent with your own goals.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -220,9 +289,9 @@ export default function LandingPage() {
           </article>
           <article className="scroll-reveal rounded-2xl border border-[#DCD0A8] bg-[#FFF9E5] p-6">
             <p className="text-xs font-semibold tracking-[0.18em] text-[#4A9782]">STEP 03</p>
-            <h2 className="mt-2 text-xl font-semibold">Review Insights Weekly</h2>
+            <h2 className="mt-2 text-xl font-semibold">Explore and Message</h2>
             <p className="mt-2 text-sm text-[#708993]">
-              Open analytics and history to understand trends and improve your nutrition consistency.
+              Find people in Explore, follow progress, and send direct messages to stay accountable together.
             </p>
           </article>
         </section>
@@ -234,7 +303,7 @@ export default function LandingPage() {
               <h2 className="mt-2 text-3xl font-semibold sm:text-4xl">Built for Daily Clarity, Not Data Overload</h2>
               <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[#708993] sm:text-base">
                 Calora keeps your flow simple: dashboard for overview, meal and activity pages for logging, and goal
-                management for personalization. Premium users can export clean reports and monitor deeper trends.
+                management for personalization. You also get Explore and direct messaging for community support.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
@@ -257,8 +326,8 @@ export default function LandingPage() {
                 <p className="mt-1 text-xs text-[#708993]">Calorie and macro status in one glance.</p>
               </div>
               <div className="rounded-xl border border-[#DCD0A8] bg-[#E7F2EF] p-4">
-                <p className="text-sm font-semibold">Activity and Device Connections</p>
-                <p className="mt-1 text-xs text-[#708993]">Track burned calories and sync behavior.</p>
+                <p className="text-sm font-semibold">Explore and Messaging</p>
+                <p className="mt-1 text-xs text-[#708993]">Search people, follow, and chat directly.</p>
               </div>
               <div className="rounded-xl border border-[#DCD0A8] bg-[#E7F2EF] p-4">
                 <p className="text-sm font-semibold">Advanced Analytics and Exports</p>
@@ -268,8 +337,279 @@ export default function LandingPage() {
           </div>
         </section>
       </div>
+      </div>
 
       <style jsx>{`
+        .landing-content {
+          opacity: 0;
+          transform: translateY(16px) scale(0.992);
+          transition: opacity 520ms ease, transform 520ms ease;
+        }
+
+        .landing-content.landing-ready {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+
+        .startup-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 120;
+          display: grid;
+          place-items: center;
+          background: radial-gradient(circle at center, rgba(255, 249, 229, 0.95) 0%, rgba(231, 242, 239, 0.98) 60%);
+          transition: opacity 360ms ease, transform 360ms ease;
+        }
+
+        .gradient-blob-field {
+          position: absolute;
+          inset: 0;
+          overflow: clip;
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        .base-live-gradient {
+          position: absolute;
+          inset: -18%;
+          background: linear-gradient(120deg, #d4e4e8 0%, #dbe9eb 34%, #dce7de 62%, #cfe1e6 100%);
+          background-size: 170% 170%;
+          animation: baseGradientDrift 22s ease-in-out infinite;
+          opacity: 0.9;
+        }
+
+        .floating-gradient-blob {
+          position: absolute;
+          border-radius: 58% 42% 50% 50% / 38% 55% 45% 62%;
+          filter: blur(2px);
+          mix-blend-mode: normal;
+          animation-name: blobFloat, blobGlow;
+          animation-iteration-count: infinite, infinite;
+          animation-timing-function: ease-in-out, ease-in-out;
+          will-change: transform, opacity;
+        }
+
+        .floating-gradient-blob::after {
+          content: "";
+          position: absolute;
+          top: 20%;
+          left: 16%;
+          width: 46%;
+          height: 38%;
+          border-radius: 999px;
+          background: radial-gradient(circle, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0) 86%);
+          filter: blur(3px);
+        }
+
+        .startup-center {
+          display: grid;
+          place-items: center;
+          min-height: 12rem;
+        }
+
+        .startup-fire-wrap,
+        .startup-logo-wrap {
+          grid-area: 1 / 1;
+          opacity: 0;
+          transform: scale(0.86) translateY(10px);
+          transition: opacity 280ms ease, transform 280ms ease;
+        }
+
+        .startup-fire .startup-fire-wrap {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+
+        .startup-logo .startup-fire-wrap {
+          opacity: 0;
+          transform: scale(0.72) translateY(12px);
+        }
+
+        .startup-logo .startup-logo-wrap {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+
+        .startup-logo-shell {
+          display: grid;
+          place-items: center;
+          width: 6.1rem;
+          height: 6.1rem;
+          border: 1px solid #dcd0a8;
+          border-radius: 1.35rem;
+          background: #fff9e5;
+          box-shadow: 0 16px 36px rgba(74, 151, 130, 0.24);
+          animation: logoBreathe 900ms ease-in-out infinite;
+        }
+
+        .startup-brand {
+          margin-top: 0.5rem;
+          text-align: center;
+          font-size: 0.78rem;
+          font-weight: 700;
+          letter-spacing: 0.24em;
+          color: #4a9782;
+        }
+
+        .startup-fire-wrap {
+          position: relative;
+          width: 7rem;
+          height: 8.8rem;
+        }
+
+        .tiny-fire {
+          position: absolute;
+          left: 50%;
+          transform-origin: 50% 100%;
+          border-radius: 56% 44% 52% 48% / 70% 70% 30% 30%;
+        }
+
+        .fire-aura {
+          position: absolute;
+          left: 50%;
+          bottom: 0.2rem;
+          transform: translateX(-50%);
+          border-radius: 999px;
+          pointer-events: none;
+          mix-blend-mode: multiply;
+        }
+
+        .fire-aura-wide {
+          width: 7rem;
+          height: 2.8rem;
+          background: radial-gradient(circle at center, rgba(255, 153, 0, 0.45) 0%, rgba(255, 153, 0, 0) 72%);
+          filter: blur(8px);
+          animation: auraPulse 950ms ease-in-out infinite;
+        }
+
+        .fire-aura-tight {
+          width: 4.9rem;
+          height: 1.8rem;
+          background: radial-gradient(circle at center, rgba(255, 224, 130, 0.65) 0%, rgba(255, 224, 130, 0) 76%);
+          filter: blur(4px);
+          animation: auraPulse 720ms ease-in-out 130ms infinite;
+        }
+
+        .fire-outer {
+          width: 4.1rem;
+          height: 6.6rem;
+          bottom: 0.55rem;
+          margin-left: -2.05rem;
+          background: radial-gradient(
+            82% 68% at 50% 24%,
+            rgba(255, 253, 235, 0.98) 0%,
+            rgba(255, 208, 87, 0.9) 34%,
+            rgba(255, 150, 27, 0.92) 62%,
+            rgba(239, 62, 0, 0.95) 100%
+          );
+          filter: drop-shadow(0 0 18px rgba(255, 132, 8, 0.6));
+          animation: flicker 620ms ease-in-out infinite;
+        }
+
+        .fire-mid {
+          width: 2.9rem;
+          height: 5rem;
+          bottom: 0.9rem;
+          margin-left: -1.45rem;
+          background: radial-gradient(
+            84% 70% at 50% 20%,
+            rgba(255, 252, 237, 0.98) 0%,
+            rgba(255, 225, 143, 0.92) 42%,
+            rgba(255, 167, 46, 0.92) 100%
+          );
+          animation: flicker 500ms ease-in-out 80ms infinite;
+        }
+
+        .fire-inner {
+          width: 2rem;
+          height: 3.25rem;
+          bottom: 1.5rem;
+          margin-left: -1rem;
+          background: radial-gradient(
+            88% 74% at 50% 22%,
+            rgba(255, 255, 249, 0.98) 0%,
+            rgba(255, 244, 198, 0.95) 52%,
+            rgba(255, 209, 112, 0.9) 100%
+          );
+          animation: flicker 430ms ease-in-out 120ms infinite;
+        }
+
+        .fire-core {
+          width: 1rem;
+          height: 1.65rem;
+          bottom: 2.1rem;
+          margin-left: -0.5rem;
+          background: radial-gradient(circle at 50% 22%, #ffffff 0%, #fff8d9 70%, #ffe9b3 100%);
+          animation: flicker 340ms ease-in-out 140ms infinite;
+        }
+
+        .fire-base {
+          width: 3.7rem;
+          height: 0.62rem;
+          bottom: 0;
+          margin-left: -1.85rem;
+          background: linear-gradient(90deg, rgba(255, 126, 0, 0.32) 0%, rgba(255, 188, 62, 0.72) 48%, rgba(255, 126, 0, 0.32) 100%);
+          filter: blur(3px);
+          animation: baseGlow 680ms ease-in-out infinite;
+        }
+
+        .fire-ember {
+          position: absolute;
+          bottom: 1.1rem;
+          left: 50%;
+          width: 0.32rem;
+          height: 0.32rem;
+          border-radius: 999px;
+          background: radial-gradient(circle, rgba(255, 244, 173, 1) 0%, rgba(255, 167, 37, 0.95) 60%, rgba(255, 120, 0, 0) 100%);
+          pointer-events: none;
+          animation: emberRise 1.25s linear infinite;
+        }
+
+        .ember-1 {
+          margin-left: -1.55rem;
+          animation-delay: 0ms;
+        }
+
+        .ember-2 {
+          margin-left: 1.3rem;
+          animation-delay: 340ms;
+        }
+
+        .ember-3 {
+          margin-left: -0.2rem;
+          animation-delay: 520ms;
+        }
+
+        .ember-4 {
+          margin-left: 0.85rem;
+          animation-delay: 780ms;
+        }
+
+        .fire-smoke {
+          position: absolute;
+          left: 50%;
+          top: 0.2rem;
+          border-radius: 999px;
+          background: rgba(92, 122, 129, 0.16);
+          filter: blur(1.2px);
+          pointer-events: none;
+          animation: smokeDrift 1.4s ease-out infinite;
+        }
+
+        .smoke-1 {
+          width: 0.9rem;
+          height: 0.9rem;
+          margin-left: -1rem;
+          animation-delay: 120ms;
+        }
+
+        .smoke-2 {
+          width: 0.72rem;
+          height: 0.72rem;
+          margin-left: 0.4rem;
+          animation-delay: 560ms;
+        }
+
         .scroll-reveal {
           opacity: 0;
           transition: transform 700ms ease, opacity 700ms ease;
@@ -320,6 +660,136 @@ export default function LandingPage() {
           50% {
             transform: scale(1.06);
             opacity: 1;
+          }
+        }
+
+        @keyframes flicker {
+          0%,
+          100% {
+            transform: translateX(-50%) scaleY(1) scaleX(1) rotate(0deg);
+            opacity: 0.95;
+          }
+          30% {
+            transform: translateX(-50%) scaleY(1.13) scaleX(0.92) rotate(-1.8deg);
+            opacity: 1;
+          }
+          56% {
+            transform: translateX(-50%) scaleY(0.91) scaleX(1.05) rotate(1.5deg);
+            opacity: 0.88;
+          }
+          80% {
+            transform: translateX(-50%) scaleY(1.05) scaleX(0.96) rotate(-0.6deg);
+            opacity: 0.97;
+          }
+        }
+
+        @keyframes auraPulse {
+          0%,
+          100% {
+            opacity: 0.45;
+            transform: translateX(-50%) scale(0.96);
+          }
+          50% {
+            opacity: 0.95;
+            transform: translateX(-50%) scale(1.08);
+          }
+        }
+
+        @keyframes emberRise {
+          0% {
+            transform: translateY(0) translateX(0) scale(1);
+            opacity: 0;
+          }
+          12% {
+            opacity: 0.95;
+          }
+          75% {
+            opacity: 0.65;
+          }
+          100% {
+            transform: translateY(-4.6rem) translateX(0.5rem) scale(0.56);
+            opacity: 0;
+          }
+        }
+
+        @keyframes smokeDrift {
+          0% {
+            transform: translateY(0) translateX(0) scale(0.72);
+            opacity: 0;
+          }
+          35% {
+            opacity: 0.34;
+          }
+          100% {
+            transform: translateY(-2.2rem) translateX(0.8rem) scale(1.15);
+            opacity: 0;
+          }
+        }
+
+        @keyframes blobFloat {
+          0% {
+            transform: translate3d(0, 0, 0) scale(0.96) rotate(0deg);
+          }
+          20% {
+            transform: translate3d(12vw, -10vh, 0) scale(1.03) rotate(6deg);
+          }
+          42% {
+            transform: translate3d(-11vw, 14vh, 0) scale(0.94) rotate(-7deg);
+          }
+          68% {
+            transform: translate3d(14vw, 21vh, 0) scale(1.06) rotate(4deg);
+          }
+          86% {
+            transform: translate3d(-8vw, -12vh, 0) scale(0.98) rotate(-4deg);
+          }
+          100% {
+            transform: translate3d(0, 0, 0) scale(0.96) rotate(0deg);
+          }
+        }
+
+        @keyframes blobGlow {
+          0%,
+          100% {
+            opacity: 0.24;
+            filter: blur(2px);
+          }
+          50% {
+            opacity: 0.6;
+            filter: blur(0.8px);
+          }
+        }
+
+        @keyframes baseGradientDrift {
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+
+        @keyframes baseGlow {
+          0%,
+          100% {
+            opacity: 0.58;
+            transform: translateX(-50%) scaleX(1);
+          }
+          50% {
+            opacity: 0.88;
+            transform: translateX(-50%) scaleX(1.14);
+          }
+        }
+
+        @keyframes logoBreathe {
+          0%,
+          100% {
+            transform: translateY(0);
+            box-shadow: 0 16px 36px rgba(74, 151, 130, 0.24);
+          }
+          50% {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(74, 151, 130, 0.28);
           }
         }
       `}</style>

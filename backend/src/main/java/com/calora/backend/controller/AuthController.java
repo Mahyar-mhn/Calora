@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -18,9 +19,16 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
+        String normalizedEmail = normalizeEmail(user.getEmail());
+        if (normalizedEmail == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Email is required"));
+        }
+
+        if (userRepository.findByEmailIgnoreCase(normalizedEmail).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
         }
+
+        user.setEmail(normalizedEmail);
         if (user.getRole() == null) {
             user.setRole(com.calora.backend.model.Role.USER);
         }
@@ -36,11 +44,14 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
+        String email = normalizeEmail(credentials.get("email"));
         String password = credentials.get("password");
+        if (email == null || password == null) {
+            return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
+        }
 
-        Optional<User> user = userRepository.findByEmail(email)
-                .filter(u -> u.getPassword().equals(password));
+        Optional<User> user = userRepository.findByEmailIgnoreCase(email)
+                .filter(u -> Objects.equals(u.getPassword(), password));
 
         if (user.isPresent()) {
             User currentUser = user.get();
@@ -70,5 +81,11 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         return ResponseEntity.ok(Map.of("message", "Logged out"));
+    }
+
+    private String normalizeEmail(String email) {
+        if (email == null) return null;
+        String normalized = email.trim().toLowerCase();
+        return normalized.isEmpty() ? null : normalized;
     }
 }
