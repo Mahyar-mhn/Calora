@@ -98,7 +98,10 @@ export default function LandingPage() {
     : "linear-gradient(120deg, #d4e4e8 0%, #dbe9eb 34%, #dce7de 62%, #cfe1e6 100%)"
 
   return (
-    <div data-scroll-dir={scrollDirection} className="relative min-h-screen overflow-x-hidden bg-[#E7F2EF] text-[#004030]">
+    <div
+      data-scroll-dir={scrollDirection}
+      className={`relative min-h-screen overflow-x-hidden bg-[#E7F2EF] text-[#004030] landing-root ${isDark ? "landing-dark" : ""}`}
+    >
       {introPhase !== "done" && (
         <div
           className={`startup-overlay ${introPhase === "logo" ? "startup-logo" : "startup-fire"}`}
@@ -162,19 +165,19 @@ export default function LandingPage() {
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-[1240px] flex-col px-4 pb-14 pt-6 sm:px-6 lg:px-8">
-        <header className="mb-8 rounded-2xl border border-[#A1C2BD] bg-[#FFF9E5] p-3 sm:mb-12 sm:p-4">
+        <header className="landing-header mb-8 rounded-2xl border border-[#A1C2BD] bg-[#FFF9E5] p-3 sm:mb-12 sm:p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-2 shadow-sm">
+              <div className="landing-logo-shell rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-2 shadow-sm">
                 <Image src="/images/logo.png" alt="Calora Logo" width={32} height={32} className="h-8 w-8 object-contain" />
               </div>
               <div>
-                <p className="text-sm font-semibold tracking-[0.18em] text-[#4A9782]">CALORA</p>
+                <p className="landing-brand text-sm font-semibold tracking-[0.18em] text-[#4A9782]">CALORA</p>
                 <p className="text-xs text-[#708993]">Smart Nutrition & Activity Tracking</p>
               </div>
             </div>
 
-            <nav className="hidden items-center gap-8 text-sm text-[#708993] md:flex">
+            <nav className="landing-nav hidden items-center gap-8 text-sm text-[#708993] md:flex">
               <Link href="/features" className="transition-colors hover:text-[#004030]">
                 Features
               </Link>
@@ -190,13 +193,13 @@ export default function LandingPage() {
               <ThemeToggle />
               <Link
                 href="/login"
-                className="rounded-xl border border-[#A1C2BD] bg-transparent px-4 py-2 text-sm font-semibold text-[#004030] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#4A9782] hover:bg-[#E7F2EF]"
+                className="landing-signin rounded-xl border border-[#A1C2BD] bg-transparent px-4 py-2 text-sm font-semibold text-[#004030] transition-all duration-200 hover:-translate-y-0.5 hover:border-[#4A9782] hover:bg-[#E7F2EF]"
               >
                 Sign In
               </Link>
               <Link
                 href="/signup"
-                className="rounded-xl border border-[#4A9782] bg-[#4A9782] px-4 py-2 text-sm font-semibold text-[#FFF9E5] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#4A9782]/30"
+                className="landing-register rounded-xl border border-[#4A9782] bg-[#4A9782] px-4 py-2 text-sm font-semibold text-[#FFF9E5] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#4A9782]/30"
               >
                 Register
               </Link>
@@ -204,9 +207,9 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <main className="grid items-center gap-10 lg:grid-cols-[1.08fr_1fr] lg:gap-12">
+        <main className="landing-main grid items-center gap-10 lg:grid-cols-[1.08fr_1fr] lg:gap-12">
           <section className="space-y-6 scroll-reveal">
-            <p className="inline-flex items-center gap-2 rounded-full border border-[#DCD0A8] bg-[#FFF9E5] px-4 py-1.5 text-xs font-semibold tracking-[0.2em] text-[#4A9782]">
+            <p className="landing-pill inline-flex items-center gap-2 rounded-full border border-[#DCD0A8] bg-[#FFF9E5] px-4 py-1.5 text-xs font-semibold tracking-[0.2em] text-[#4A9782]">
               <Sparkles className="h-3.5 w-3.5" />
               NEW EXPERIENCE
             </p>
@@ -226,29 +229,29 @@ export default function LandingPage() {
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <Link
                 href="/signup"
-                className="group inline-flex items-center gap-2 rounded-xl border border-[#4A9782] bg-[#4A9782] px-6 py-3 text-sm font-semibold text-[#FFF9E5] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#4A9782]/35"
+                className="landing-primary group inline-flex items-center gap-2 rounded-xl border border-[#4A9782] bg-[#4A9782] px-6 py-3 text-sm font-semibold text-[#FFF9E5] transition-all duration-200 hover:-translate-y-1 hover:shadow-xl hover:shadow-[#4A9782]/35"
               >
                 Start Registration
                 <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/features"
-                className="inline-flex items-center gap-2 rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] px-6 py-3 text-sm font-semibold text-[#004030] transition-all duration-200 hover:-translate-y-1 hover:border-[#4A9782]"
+                className="landing-secondary inline-flex items-center gap-2 rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] px-6 py-3 text-sm font-semibold text-[#004030] transition-all duration-200 hover:-translate-y-1 hover:border-[#4A9782]"
               >
                 Explore Features
               </Link>
             </div>
 
             <div className="grid gap-3 pt-2 sm:grid-cols-3">
-              <div className="rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-4 transition-transform duration-200 hover:-translate-y-1">
+              <div className="landing-stat-card rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-4 transition-transform duration-200 hover:-translate-y-1">
                 <p className="text-2xl font-semibold text-[#004030]">360</p>
                 <p className="text-xs text-[#708993]">nutrition + activity visibility</p>
               </div>
-              <div className="rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-4 transition-transform duration-200 hover:-translate-y-1">
+              <div className="landing-stat-card rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-4 transition-transform duration-200 hover:-translate-y-1">
                 <p className="text-2xl font-semibold text-[#004030]">AI</p>
                 <p className="text-xs text-[#708993]">powered weekly insights</p>
               </div>
-              <div className="rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-4 transition-transform duration-200 hover:-translate-y-1">
+              <div className="landing-stat-card rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-4 transition-transform duration-200 hover:-translate-y-1">
                 <p className="text-2xl font-semibold text-[#004030]">1 Tap</p>
                 <p className="text-xs text-[#708993]">fast logging workflows</p>
               </div>
@@ -256,52 +259,52 @@ export default function LandingPage() {
           </section>
 
           <section id="insights" className="relative scroll-reveal">
-            <div className="relative overflow-hidden rounded-3xl border border-[#A1C2BD] bg-[#FFF9E5] p-6 shadow-2xl shadow-[#4A9782]/15 sm:p-7">
-              <div className="absolute inset-0 opacity-35" style={{ backgroundImage: "linear-gradient(125deg, #FFF9E5 0%, #E7F2EF 45%, #FFF9E5 100%)" }} />
+            <div className="landing-hero-card relative overflow-hidden rounded-3xl border border-[#A1C2BD] bg-[#FFF9E5] p-6 shadow-2xl shadow-[#4A9782]/15 sm:p-7">
+              <div className="landing-hero-overlay absolute inset-0 opacity-35" style={{ backgroundImage: "linear-gradient(125deg, #FFF9E5 0%, #E7F2EF 45%, #FFF9E5 100%)" }} />
 
               <div className="relative z-10">
                 <div className="mb-6 flex items-center justify-between">
-                  <p className="text-sm font-semibold tracking-[0.16em] text-[#4A9782]">CALORA LIVE OVERVIEW</p>
-                  <span className="rounded-full bg-[#E7F2EF] px-3 py-1 text-xs font-semibold text-[#004030]">Today</span>
+                  <p className="landing-overview-label text-sm font-semibold tracking-[0.16em] text-[#4A9782]">CALORA LIVE OVERVIEW</p>
+                  <span className="landing-today rounded-full bg-[#E7F2EF] px-3 py-1 text-xs font-semibold text-[#004030]">Today</span>
                 </div>
 
                 <div className="relative mx-auto mb-7 flex h-72 w-full max-w-[370px] items-center justify-center sm:h-80">
                   <div className="pulse-ring absolute h-72 w-72 rounded-full border border-[#A1C2BD]" />
                   <div className="pulse-ring-delayed absolute h-60 w-60 rounded-full border border-[#DCD0A8]" />
-                  <div className="float-logo relative rounded-[2rem] border border-[#DCD0A8] bg-[#E7F2EF] p-6 shadow-xl shadow-[#4A9782]/20">
+                  <div className="landing-logo-card float-logo relative rounded-[2rem] border border-[#DCD0A8] bg-[#E7F2EF] p-6 shadow-xl shadow-[#4A9782]/20">
                     <Image src="/images/logo.png" alt="Calora Icon" width={130} height={130} className="h-28 w-28 object-contain sm:h-32 sm:w-32" />
                   </div>
 
-                  <div className="absolute left-1 top-12 rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] px-3 py-2 text-xs shadow-md">
+                  <div className="landing-float-card absolute left-1 top-12 rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] px-3 py-2 text-xs shadow-md">
                     <p className="font-semibold text-[#004030]">Consumed</p>
                     <p className="text-[#63A361]">1,580 kcal</p>
                   </div>
 
-                  <div className="absolute right-0 top-6 rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] px-3 py-2 text-xs shadow-md">
+                  <div className="landing-float-card absolute right-0 top-6 rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] px-3 py-2 text-xs shadow-md">
                     <p className="font-semibold text-[#004030]">Burned</p>
                     <p className="text-[#FFC50F]">420 kcal</p>
                   </div>
 
-                  <div className="absolute -bottom-1 right-7 rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] px-3 py-2 text-xs shadow-md">
+                  <div className="landing-float-card absolute -bottom-1 right-7 rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] px-3 py-2 text-xs shadow-md">
                     <p className="font-semibold text-[#004030]">Protein Goal</p>
                     <p className="text-[#4A9782]">84%</p>
                   </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-3" id="features">
-                  <article className="group rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-3 transition-all duration-200 hover:-translate-y-1 hover:border-[#4A9782]">
+                  <article className="landing-mini-card group rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-3 transition-all duration-200 hover:-translate-y-1 hover:border-[#4A9782]">
                     <Utensils className="mb-2 h-5 w-5 text-[#4A9782]" />
                     <h3 className="text-sm font-semibold text-[#004030]">Meal Tracking</h3>
                     <p className="text-xs text-[#708993]">Fast log + instant macro updates.</p>
                   </article>
-                  <article className="group rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-3 transition-all duration-200 hover:-translate-y-1 hover:border-[#4A9782]">
+                  <article className="landing-mini-card group rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-3 transition-all duration-200 hover:-translate-y-1 hover:border-[#4A9782]">
                     <Activity className="mb-2 h-5 w-5 text-[#4A9782]" />
                     <h3 className="text-sm font-semibold text-[#004030]">Activity Sync</h3>
                     <p className="text-xs text-[#708993]">Workouts and calories in one feed.</p>
                   </article>
                   <article
                     id="security"
-                    className="group rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-3 transition-all duration-200 hover:-translate-y-1 hover:border-[#4A9782]"
+                    className="landing-mini-card group rounded-xl border border-[#DCD0A8] bg-[#FFF9E5] p-3 transition-all duration-200 hover:-translate-y-1 hover:border-[#4A9782]"
                   >
                     <ShieldCheck className="mb-2 h-5 w-5 text-[#4A9782]" />
                     <h3 className="text-sm font-semibold text-[#004030]">Privacy First</h3>
@@ -314,21 +317,21 @@ export default function LandingPage() {
         </main>
 
         <section className="mt-14 grid gap-4 md:grid-cols-3">
-          <article className="scroll-reveal rounded-2xl border border-[#DCD0A8] bg-[#FFF9E5] p-6">
+          <article className="landing-step-card scroll-reveal rounded-2xl border border-[#DCD0A8] bg-[#FFF9E5] p-6">
             <p className="text-xs font-semibold tracking-[0.18em] text-[#4A9782]">STEP 01</p>
             <h2 className="mt-2 text-xl font-semibold">Create Your Account</h2>
             <p className="mt-2 text-sm text-[#708993]">
               Start with sign up, complete profile setup, and define your goal and daily calorie target.
             </p>
           </article>
-          <article className="scroll-reveal rounded-2xl border border-[#DCD0A8] bg-[#FFF9E5] p-6">
+          <article className="landing-step-card scroll-reveal rounded-2xl border border-[#DCD0A8] bg-[#FFF9E5] p-6">
             <p className="text-xs font-semibold tracking-[0.18em] text-[#4A9782]">STEP 02</p>
             <h2 className="mt-2 text-xl font-semibold">Log Meals and Activities</h2>
             <p className="mt-2 text-sm text-[#708993]">
               Use meal logging, food lookup, and activity tracking pages to keep your daily progress accurate.
             </p>
           </article>
-          <article className="scroll-reveal rounded-2xl border border-[#DCD0A8] bg-[#FFF9E5] p-6">
+          <article className="landing-step-card scroll-reveal rounded-2xl border border-[#DCD0A8] bg-[#FFF9E5] p-6">
             <p className="text-xs font-semibold tracking-[0.18em] text-[#4A9782]">STEP 03</p>
             <h2 className="mt-2 text-xl font-semibold">Explore and Message</h2>
             <p className="mt-2 text-sm text-[#708993]">
@@ -337,7 +340,7 @@ export default function LandingPage() {
           </article>
         </section>
 
-        <section className="mt-12 scroll-reveal rounded-3xl border border-[#A1C2BD] bg-[#FFF9E5] p-6 sm:p-8">
+        <section className="landing-why mt-12 scroll-reveal rounded-3xl border border-[#A1C2BD] bg-[#FFF9E5] p-6 sm:p-8">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] lg:items-center">
             <div>
               <p className="text-xs font-semibold tracking-[0.2em] text-[#4A9782]">WHY CALORA</p>
@@ -349,28 +352,28 @@ export default function LandingPage() {
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link
                   href="/login"
-                  className="rounded-xl border border-[#A1C2BD] px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-[#E7F2EF]"
+                  className="landing-cta-secondary rounded-xl border border-[#A1C2BD] px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-[#E7F2EF]"
                 >
                   Login
                 </Link>
                 <Link
                   href="/signup"
-                  className="rounded-xl border border-[#4A9782] bg-[#4A9782] px-5 py-2.5 text-sm font-semibold text-[#FFF9E5] transition-opacity hover:opacity-90"
+                  className="landing-cta-primary rounded-xl border border-[#4A9782] bg-[#4A9782] px-5 py-2.5 text-sm font-semibold text-[#FFF9E5] transition-opacity hover:opacity-90"
                 >
                   Sign Up
                 </Link>
               </div>
             </div>
             <div className="grid gap-3">
-              <div className="rounded-xl border border-[#DCD0A8] bg-[#E7F2EF] p-4">
+              <div className="landing-why-item rounded-xl border border-[#DCD0A8] bg-[#E7F2EF] p-4">
                 <p className="text-sm font-semibold">Dashboard + Macro Progress</p>
                 <p className="mt-1 text-xs text-[#708993]">Calorie and macro status in one glance.</p>
               </div>
-              <div className="rounded-xl border border-[#DCD0A8] bg-[#E7F2EF] p-4">
+              <div className="landing-why-item rounded-xl border border-[#DCD0A8] bg-[#E7F2EF] p-4">
                 <p className="text-sm font-semibold">Explore and Messaging</p>
                 <p className="mt-1 text-xs text-[#708993]">Search people, follow, and chat directly.</p>
               </div>
-              <div className="rounded-xl border border-[#DCD0A8] bg-[#E7F2EF] p-4">
+              <div className="landing-why-item rounded-xl border border-[#DCD0A8] bg-[#E7F2EF] p-4">
                 <p className="text-sm font-semibold">Advanced Analytics and Exports</p>
                 <p className="mt-1 text-xs text-[#708993]">Professional CSV/PDF reports for follow-up.</p>
               </div>
@@ -390,6 +393,186 @@ export default function LandingPage() {
         .landing-content.landing-ready {
           opacity: 1;
           transform: translateY(0) scale(1);
+        }
+
+        .landing-dark {
+          color: #e9e1d7;
+        }
+
+        .landing-dark .landing-main {
+          background: transparent !important;
+        }
+
+        .landing-dark .landing-header {
+          background: rgba(16, 32, 44, 0.82) !important;
+          border-color: rgba(117, 165, 178, 0.28) !important;
+          box-shadow: 0 18px 40px rgba(7, 18, 28, 0.45) !important;
+          backdrop-filter: blur(18px);
+        }
+
+        .landing-dark .landing-logo-shell {
+          background: rgba(14, 30, 42, 0.9) !important;
+          border-color: rgba(117, 165, 178, 0.35) !important;
+          box-shadow: 0 12px 24px rgba(7, 18, 28, 0.5) !important;
+        }
+
+        .landing-dark .landing-brand {
+          color: #9bd3c8 !important;
+        }
+
+        .landing-dark .landing-nav a {
+          color: #c7d3de !important;
+        }
+
+        .landing-dark .landing-nav a:hover {
+          color: #f3ede3 !important;
+        }
+
+        .landing-dark .landing-signin {
+          background: rgba(12, 26, 37, 0.6) !important;
+          border-color: rgba(117, 165, 178, 0.35) !important;
+          color: #e9e1d7 !important;
+        }
+
+        .landing-dark .landing-signin:hover {
+          background: rgba(29, 54, 70, 0.7) !important;
+          border-color: rgba(90, 150, 144, 0.55) !important;
+        }
+
+        .landing-dark .landing-register,
+        .landing-dark .landing-primary,
+        .landing-dark .landing-cta-primary {
+          background: linear-gradient(135deg, #5a9690 0%, #3f7f7a 100%) !important;
+          border-color: rgba(90, 150, 144, 0.85) !important;
+          color: #f2ede6 !important;
+          box-shadow: 0 18px 34px rgba(7, 18, 28, 0.5) !important;
+        }
+
+        .landing-dark .landing-register:hover,
+        .landing-dark .landing-primary:hover,
+        .landing-dark .landing-cta-primary:hover {
+          filter: brightness(1.08);
+        }
+
+        .landing-dark .landing-secondary,
+        .landing-dark .landing-cta-secondary {
+          background: rgba(16, 32, 44, 0.7) !important;
+          border-color: rgba(117, 165, 178, 0.32) !important;
+          color: #e9e1d7 !important;
+        }
+
+        .landing-dark .landing-secondary:hover,
+        .landing-dark .landing-cta-secondary:hover {
+          background: rgba(29, 54, 70, 0.78) !important;
+          border-color: rgba(90, 150, 144, 0.6) !important;
+        }
+
+        .landing-dark .landing-pill {
+          background: rgba(21, 44, 60, 0.72) !important;
+          border-color: rgba(90, 150, 144, 0.45) !important;
+          color: #9fd0c7 !important;
+        }
+
+        .landing-dark .landing-pill svg {
+          color: #9fd0c7 !important;
+        }
+
+        .landing-dark .landing-stat-card {
+          background: rgba(19, 39, 55, 0.9) !important;
+          border-color: rgba(117, 165, 178, 0.25) !important;
+          box-shadow: 0 18px 36px rgba(7, 18, 28, 0.45) !important;
+        }
+
+        .landing-dark .landing-stat-card p {
+          color: #f1eae1 !important;
+        }
+
+        .landing-dark .landing-stat-card p + p {
+          color: #c0b7ad !important;
+        }
+
+        .landing-dark .landing-hero-card {
+          background: rgba(20, 40, 56, 0.92) !important;
+          border-color: rgba(117, 165, 178, 0.3) !important;
+          box-shadow: 0 32px 70px rgba(7, 18, 28, 0.6) !important;
+        }
+
+        .landing-dark .landing-hero-overlay {
+          background-image: linear-gradient(135deg, rgba(36, 72, 92, 0.6) 0%, rgba(18, 36, 52, 0.9) 56%, rgba(36, 72, 92, 0.6) 100%) !important;
+          opacity: 0.7 !important;
+        }
+
+        .landing-dark .landing-overview-label {
+          color: #8dcfc2 !important;
+        }
+
+        .landing-dark .landing-today {
+          background: rgba(15, 30, 43, 0.8) !important;
+          color: #e9e1d7 !important;
+          border: 1px solid rgba(90, 150, 144, 0.35) !important;
+        }
+
+        .landing-dark .pulse-ring {
+          border-color: rgba(117, 165, 178, 0.25) !important;
+        }
+
+        .landing-dark .pulse-ring-delayed {
+          border-color: rgba(90, 150, 144, 0.25) !important;
+        }
+
+        .landing-dark .landing-logo-card {
+          background: rgba(15, 32, 45, 0.92) !important;
+          border-color: rgba(90, 150, 144, 0.35) !important;
+          box-shadow: 0 18px 40px rgba(7, 18, 28, 0.5) !important;
+        }
+
+        .landing-dark .landing-float-card {
+          background: rgba(20, 43, 60, 0.92) !important;
+          border-color: rgba(117, 165, 178, 0.25) !important;
+          box-shadow: 0 12px 26px rgba(7, 18, 28, 0.45) !important;
+        }
+
+        .landing-dark .landing-mini-card {
+          background: rgba(20, 43, 60, 0.9) !important;
+          border-color: rgba(117, 165, 178, 0.24) !important;
+        }
+
+        .landing-dark .landing-mini-card:hover {
+          background: rgba(28, 54, 72, 0.95) !important;
+          border-color: rgba(90, 150, 144, 0.55) !important;
+        }
+
+        .landing-dark .landing-step-card {
+          background: rgba(20, 40, 56, 0.9) !important;
+          border-color: rgba(117, 165, 178, 0.25) !important;
+          box-shadow: 0 18px 36px rgba(7, 18, 28, 0.45) !important;
+        }
+
+        .landing-dark .landing-step-card p {
+          color: #c8c0b7 !important;
+        }
+
+        .landing-dark .landing-step-card h2 {
+          color: #f1eae1 !important;
+        }
+
+        .landing-dark .landing-why {
+          background: rgba(18, 36, 52, 0.9) !important;
+          border-color: rgba(117, 165, 178, 0.3) !important;
+          box-shadow: 0 24px 54px rgba(7, 18, 28, 0.5) !important;
+        }
+
+        .landing-dark .landing-why-item {
+          background: rgba(16, 32, 44, 0.85) !important;
+          border-color: rgba(117, 165, 178, 0.22) !important;
+        }
+
+        .landing-dark .landing-why-item p {
+          color: #e7dfd6 !important;
+        }
+
+        .landing-dark .landing-why-item p + p {
+          color: #c0b7ad !important;
         }
 
         .startup-overlay {

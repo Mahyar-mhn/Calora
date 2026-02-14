@@ -60,18 +60,19 @@
 
 .dark {
   /* Dark theme Background color palette */
-  --dark-bg-primary: #1B3C53;
-  --dark-bg-secondary: #234C6A;
-  --dark-bg-tertiary: #456882;
+  --dark-bg-primary: #162c3e;
+  --dark-bg-secondary: #1f3f58;
+  --dark-bg-tertiary: #2b4f6b;
   --dark-bg-light: #D2C1B6;
 
-  --dark-text-primary: #D2C1B6;
-  --dark-text-muted: #DCD7C9;
-  --dark-border: #456882;
-  --dark-surface: #234C6A;
-  --dark-surface-alt: #1B3C53;
+  --dark-text-primary: #e2d8cf;
+  --dark-text-muted: #c8c0b7;
+  --dark-border: #35526a;
+  --dark-border-strong: #4b6b86;
+  --dark-surface: #23445c;
+  --dark-surface-alt: #1a3246;
   --dark-accent: #5A9690;
-  --dark-accent-strong: #2F5755;
+  --dark-accent-strong: #2a4a4d;
   --dark-warning: #A27B5C;
   --dark-success: #3F4F44;
   --dark-brown: #2C3930;
@@ -88,37 +89,37 @@
   --dark-form-accent: #5A9690;
   --dark-form-light: #E0D9D9;
   
-  --background: #1B3C53;
-  --foreground: #D2C1B6;
-  --card: #234C6A;
-  --card-foreground: #D2C1B6;
-  --popover: #234C6A;
-  --popover-foreground: #D2C1B6;
+  --background: #162c3e;
+  --foreground: #e2d8cf;
+  --card: #23445c;
+  --card-foreground: #e2d8cf;
+  --popover: #23445c;
+  --popover-foreground: #e2d8cf;
   --primary: #5A9690;
   --primary-foreground: #E0D9D9;
-  --secondary: #456882;
-  --secondary-foreground: #D2C1B6;
-  --muted: #2F5755;
-  --muted-foreground: #DCD7C9;
+  --secondary: #2b4f6b;
+  --secondary-foreground: #e2d8cf;
+  --muted: #2a4a4d;
+  --muted-foreground: #c8c0b7;
   --accent: #5A9690;
   --accent-foreground: #E0D9D9;
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: #456882;
-  --input: #234C6A;
+  --border: #35526a;
+  --input: #23445c;
   --ring: #5A9690;
   --chart-1: #2C3930;
   --chart-2: #3F4F44;
   --chart-3: #A27B5C;
   --chart-4: #DCD7C9;
   --chart-5: #2C3930;
-  --sidebar: #234C6A;
-  --sidebar-foreground: #D2C1B6;
+  --sidebar: #23445c;
+  --sidebar-foreground: #e2d8cf;
   --sidebar-primary: #5A9690;
   --sidebar-primary-foreground: #E0D9D9;
-  --sidebar-accent: #456882;
-  --sidebar-accent-foreground: #D2C1B6;
-  --sidebar-border: #456882;
+  --sidebar-accent: #2b4f6b;
+  --sidebar-accent-foreground: #e2d8cf;
+  --sidebar-border: #35526a;
   --sidebar-ring: #5A9690;
 }
 
@@ -228,8 +229,9 @@
   
   body.dark,
   .dark body {
-    background-color: #1B3C53 !important;
-    color: #D2C1B6 !important;
+    background-color: var(--dark-bg-primary) !important;
+    color: var(--dark-text-primary) !important;
+    color-scheme: dark;
   }
   
   /* Dark theme - Background palette overrides */
@@ -339,6 +341,7 @@
   .dark header[style*="background-color: #FFF9E5"] {
     background-color: var(--dark-surface) !important;
     border-color: var(--dark-border) !important;
+    box-shadow: 0 14px 30px rgba(7, 18, 28, 0.35);
   }
   
   /* Dark theme - Navigation menus */
@@ -384,6 +387,7 @@
   .dark article[style*="background-color: #FFF9E5"] {
     background-color: var(--dark-surface) !important;
     border-color: var(--dark-border) !important;
+    box-shadow: 0 18px 40px rgba(7, 18, 28, 0.34);
   }
   
   /* Dark theme - All divs with light backgrounds */
@@ -540,6 +544,10 @@
     color: var(--dark-text-muted) !important;
   }
 
+  .dark [class*="text-white"] {
+    color: var(--dark-form-light) !important;
+  }
+
   .dark [class*="text-[#4A9782]"] {
     color: var(--dark-accent) !important;
   }
@@ -569,6 +577,10 @@
     border-color: var(--dark-accent) !important;
   }
 
+  .dark [class*="border-white"] {
+    border-color: var(--dark-border) !important;
+  }
+
   .dark [class*="hover:bg-[#E7F2EF]"]:hover {
     background-color: var(--dark-accent-strong) !important;
   }
@@ -588,6 +600,26 @@
 
   .dark [class*="from-[#004030]"][class*="via-[#4A9782]"][class*="to-[#63A361]"] {
     background-image: linear-gradient(90deg, var(--dark-text-primary), var(--dark-accent), var(--dark-warning)) !important;
+  }
+
+  .dark .shadow-sm {
+    box-shadow: 0 6px 14px rgba(7, 18, 28, 0.35);
+  }
+
+  .dark .shadow-md {
+    box-shadow: 0 12px 26px rgba(7, 18, 28, 0.4);
+  }
+
+  .dark .shadow-lg {
+    box-shadow: 0 18px 36px rgba(7, 18, 28, 0.46);
+  }
+
+  .dark .shadow-xl {
+    box-shadow: 0 24px 50px rgba(7, 18, 28, 0.52);
+  }
+
+  .dark .shadow-2xl {
+    box-shadow: 0 32px 70px rgba(7, 18, 28, 0.56);
   }
 
   /* Dark theme - Inline rgb fallbacks (React inline styles) */
